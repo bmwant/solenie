@@ -9,7 +9,7 @@ https://www.kinopoisk.ru/film/447301/ord/rating/perpage/200/page/2/#list
 """
 
 
-class KinopoiskCrawler(object):
+class ReviewCrawler(object):
     def __init__(self, movie_url, *, fetcher=None, parser=None):
         self.movie_url = movie_url
         self.fetcher = fetcher
@@ -20,6 +20,7 @@ class KinopoiskCrawler(object):
             url = self._build_url(page_num)
             print('Requesting', url)
             page_html = await self.fetcher.get(url)
+            import pdb; pdb.set_trace()
             if self.parser.check(page_html):
                 yield page_html
             else:
@@ -34,12 +35,27 @@ class KinopoiskCrawler(object):
             self.parser.process_page(page, dry_run=True)
 
 
+class MovieCrawler(object):
+    def __init__(self, list_url):
+        self.list_url = list_url
+
+    async def get_next_page(self):
+        pass
+
+    def _build_next_page_url(self, page_num: int) -> str:
+        path = 'https://www.kinopoisk.ru/top/lists/1/filtr/all/sort/order/perpage/200/'
+        return urljoin(self.list_url, path)
+
+    async def process(self):
+        pass
+
+
 
 async def main():
     movie_url = 'https://www.kinopoisk.ru/film/447301/'
     f = Fetcher()
     p = Parser()
-    kc = KinopoiskCrawler(movie_url, fetcher=f, parser=p)
+    kc = ReviewCrawler(movie_url, fetcher=f, parser=p)
     await kc.process()
 
 

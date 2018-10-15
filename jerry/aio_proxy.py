@@ -10,6 +10,7 @@ url = 'https://www.kinopoisk.ru/film/939411/'
 
 proxies = (
     '138.68.165.154:8080',
+    '176.192.20.146:32231',
 )
 
 
@@ -45,14 +46,18 @@ async def fetch_parallel(session, r):
 
 async def main():
     connector = TCPConnector(limit=None)
+    url = 'https://www.kinopoisk.ru/film/447301/ord/rating/perpage/200/page/4/#list'
     async with ClientSession(connector=connector) as session:
         res = await fetch(
             url,
             session,
-            proxy='http://89.29.100.94:36976/',
+            proxy='http://176.192.20.146:32231/',
             timeout_sec=10,
         )
-        write_data(res)
+        from parser import Parser
+        p = Parser()
+        print(p.check(res))
+        # write_data(res)
         # await fetch_parallel(session, int(sys.argv[1]))
 
 
