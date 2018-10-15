@@ -15,6 +15,22 @@ class SentimentEnum(IntEnum):
     GOOD = 1
 
 
+
+class Parser(object):
+    def __init__(self):
+        pass
+
+    def check(self, html: str) -> bool:
+        soup = BeautifulSoup(html, 'html5lib')
+        review = soup.find('div', 'reviewItem')
+        if review is None:
+            return False
+        return True
+
+    def process_page(self, *args, **kwargs):
+        pass
+
+
 def prettify(string):
     nbsp_codepoint = name2codepoint['nbsp']
     nbsp_char = chr(nbsp_codepoint)
@@ -41,7 +57,7 @@ def get_sentiment(review_item):
     return SentimentEnum.NEUTRAL
 
 
-def process_page(html):
+def process_page(html, dry_run=False):
     soup = BeautifulSoup(html, 'html5lib')
     reviews = soup.find_all('div', 'reviewItem')
     for item in reviews:
@@ -53,7 +69,8 @@ def process_page(html):
         sentiment = get_sentiment(item)
         link = item.find('p', 'links').find('a')
         url = get_url(link)
-        insert_review(review_title, review_text, sentiment, url, dry_run=True)
+        insert_review(review_title, review_text, sentiment, url,
+                      dry_run=dry_run)
 
 
 def main():
