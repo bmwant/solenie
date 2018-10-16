@@ -1,5 +1,3 @@
-
-
 """
 * aiohttp.client_exceptions.ClientHttpProxyError: 500, message='Internal Server Error'
 * aiohttp.client_exceptions.ClientProxyConnectionError: Cannot connect to host 78.159.79.245:57107
@@ -33,15 +31,17 @@ import itertools
 from http import HTTPStatus
 from urllib.parse import urlparse
 
+import yaml
 import aiohttp
 
+import settings
 from buttworld.logger import get_logger
+from jerry.proxy import Proxy
 
 
 logger = get_logger(__name__)
 
 DEFAULT_CHECK_URL = 'http://checkip.amazonaws.com/'
-STORE_FILEPATH = 'proxies.yml'
 
 
 async def _check_response_patch(self, resp, proxy_url):
@@ -87,21 +87,5 @@ class ProxyPool(object):
         return await it.__anext__()
 
     def load_proxies(self):
-        return [
-            'http://116.206.61.234:8080/',
-            'http://104.248.171.204:3128/',
-            'http://78.159.79.245:57107/',
-        ]
-
-
-async def main():
-    # ProxyPool._check_response = _check_response_patch
-    pp = ProxyPool()
-    p = await pp.get_proxy()
-    print(p)
-
-
-if __name__ == '__main__':
-    import asyncio
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+        with open(settings.PROXIES_STORAGE_FILEPATH) as f:
+            return [Proxy(**data) for data in yaml.load(f)]
