@@ -1,3 +1,4 @@
+from urllib.parse import urljoin
 from html.entities import name2codepoint
 
 
@@ -8,7 +9,7 @@ class BaseParser(object):
     def check(self, html: str) -> bool:
         return False
 
-    def process_page(self, *args, **kwargs):
+    def process_page(self, html: str):
         pass
 
     @staticmethod
@@ -21,3 +22,6 @@ class BaseParser(object):
             return ' '.join(lines)
 
         return _prettify(string)
+
+    def _get_link(self, link_tag):
+        return urljoin(self.base_url, link_tag['href'])

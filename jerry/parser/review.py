@@ -1,5 +1,4 @@
 from enum import IntEnum
-from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
@@ -20,9 +19,10 @@ class ReviewParser(BaseParser):
             return False
         return True
 
-    def process_page(self, html):
+    def process_page(self, html) -> list:
         soup = BeautifulSoup(html, 'html5lib')
         reviews = soup.find_all('div', 'reviewItem')
+        result = []
         for item in reviews:
             review_div = item.find('div', 'brand_words')
             review_span = review_div.find('p').find('span')
@@ -32,12 +32,8 @@ class ReviewParser(BaseParser):
             sentiment = self._get_sentiment(item)
             link_tag = item.find('p', 'links').find('a')
             link = self._get_link(link_tag)
-            return {
-
-            }
-
-    def _get_link(self, link_tag):
-        return urljoin(self.base_url, link_tag['href'])
+            # todo: items
+        return result
 
     def _get_sentiment(self, review_item):
         response_div = review_item.find('div', 'response')

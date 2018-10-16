@@ -13,8 +13,8 @@ class BaseCrawler(object):
     async def get_next_page(self):
         for page_num in count(start=1):
             url = self._build_next_page_url(page_num)
+            self.logger.debug('Processing %s...', url)
             page_html = await self.fetcher.get(url)
-            import pdb; pdb.set_trace()
             if self.parser.check(page_html):
                 yield page_html
             else:
@@ -26,6 +26,8 @@ class BaseCrawler(object):
     def _build_next_page_url(self, page_num: int) -> str:
         pass
 
-    async def process(self):
+    async def process(self) -> list:
+        result = []
         async for page in self.get_next_page():
-            self.parser.process_page(page, dry_run=True)
+            result.extend(self.parser.process_page(page))
+        return result
