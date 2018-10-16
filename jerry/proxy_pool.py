@@ -29,3 +29,79 @@ Traceback (most recent call last):
     sock = transport.get_extra_info('socket')
 AttributeError: 'NoneType' object has no attribute 'get_extra_info'
 """
+import itertools
+from http import HTTPStatus
+from urllib.parse import urlparse
+
+import aiohttp
+
+from buttworld.logger import get_logger
+
+
+logger = get_logger(__name__)
+
+DEFAULT_CHECK_URL = 'http://checkip.amazonaws.com/'
+STORE_FILEPATH = 'proxies.yml'
+
+
+async def _check_response_patch(self, resp, proxy_url):
+    text = await resp.text()
+    result = proxy_url in text
+    if not result:
+        logger.debug('%s: %s', resp.status, text)
+    return result
+
+
+class ProxyPool(object):
+    def __init__(self, check_url: str=DEFAULT_CHECK_URL):
+        self.check_url = check_url
+        self._proxies = None
+
+    @property
+    def proxies(self):
+        if self._proxies is None:
+            self._proxies = self.load_proxies()
+        return self._proxies
+
+    async def __anext__(self):
+        for proxy_url in itertools.chain(self.proxies):
+            if await self._check_proxy(proxy_url):
+                yield proxy_url
+
+    async def _check_proxy(self, proxy_url):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.check_url, proxy=proxy_url) as resp:
+                return await self._check_response(resp, proxy_url)
+
+    async def _check_response(self, resp,  proxy_url) -> bool:
+        text = await resp.text()
+        netloc = urlparse(proxy_url).netloc
+        ip, colon, port = netloc.partition(':')
+        return resp.status == HTTPStatus.OK and ip in text
+
+    def __aiter__(self):
+        return self.__anext__()
+
+    async def get_proxy(self):
+        it = self.__aiter__()
+        return await it.__anext__()
+
+    def load_proxies(self):
+        return [
+            'http://116.206.61.234:8080/',
+            'http://104.248.171.204:3128/',
+            'http://78.159.79.245:57107/',
+        ]
+
+
+async def main():
+    # ProxyPool._check_response = _check_response_patch
+    pp = ProxyPool()
+    p = await pp.get_proxy()
+    print(p)
+
+
+if __name__ == '__main__':
+    import asyncio
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())

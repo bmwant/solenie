@@ -1,10 +1,10 @@
 import requests
 
-url = 'https://www.kinopoisk.ru/film/939411/'
+url = 'http://checkip.amazonaws.com/'
 
 proxies = {
-    'http': '188.235.60.170:51362',
-    'https': '188.235.60.170:51362',
+    'http': '116.206.61.234:8080',
+    'https': '116.206.61.234:8080',
 }
 
 r = requests.get(url, proxies=proxies)
