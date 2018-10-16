@@ -2,6 +2,7 @@ from urllib.parse import urljoin
 from html.entities import name2codepoint
 
 
+# todo: base abc
 class BaseParser(object):
     def __init__(self, base_url: str):
         self.base_url = base_url

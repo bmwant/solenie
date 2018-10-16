@@ -3,6 +3,7 @@ from itertools import count
 from buttworld.logger import get_logger
 
 
+# todo: base abc
 class BaseCrawler(object):
     def __init__(self, entry_url, *, fetcher=None, parser=None):
         self.entry_url = entry_url

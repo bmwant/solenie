@@ -13,14 +13,9 @@ class Review(object):
     link: str = attr.ib()
 
 
-def insert_review(title, text, sentiment, link, *, dry_run=False):
+def insert_review(review: Review, *, dry_run=False):
     if dry_run:
-        print(f'Inserting {title}({link}) {sentiment} review...')
+        print(f'Inserting {review}...')
         return
 
-    db.insert({
-        'title': title,
-        'text': text,
-        'sentiment': sentiment,
-        'link': link,
-    })
+    db.insert(attr.asdict(review))

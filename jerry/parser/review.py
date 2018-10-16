@@ -3,6 +3,7 @@ from enum import IntEnum
 from bs4 import BeautifulSoup
 
 from jerry.parser.base import BaseParser
+from store import Review
 
 
 class SentimentEnum(IntEnum):
@@ -32,7 +33,13 @@ class ReviewParser(BaseParser):
             sentiment = self._get_sentiment(item)
             link_tag = item.find('p', 'links').find('a')
             link = self._get_link(link_tag)
-            # todo: items
+            review = Review(
+                title=review_title,
+                text=review_text,
+                sentiment=sentiment,
+                link=link,
+            )
+            result.append(review)
         return result
 
     def _get_sentiment(self, review_item):

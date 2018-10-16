@@ -1,9 +1,15 @@
 import asyncio
+from itertools import chain
 
+from buttworld.logger import get_logger
 from buttworld.utils import get_base_url
 from jerry.crawler import MovieCrawler, ReviewCrawler
 from jerry.fetcher import Fetcher
 from jerry.parser import MovieParser, ReviewParser
+from store import insert_review
+
+
+logger = get_logger(__name__)
 
 
 async def main():
@@ -22,8 +28,11 @@ async def main():
         ReviewCrawler(entry_url=url, fetcher=rf, parser=rp)
         for url in movie_page_urls
     ]
-    reviews = await asyncio.gather(*tasks)
-    print(reviews)
+    reviews = list(chain.from_iterable(await asyncio.gather(*tasks)))
+    logger.debug('Inserting %s reviews...', len(reviews))
+
+    for r in reviews:
+        insert_review(r)
 
 
 if __name__ == '__main__':
