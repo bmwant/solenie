@@ -16,11 +16,10 @@ async def main():
     # Kinopoisk TOP 500 movies
     list_url = 'https://www.kinopoisk.ru/top/lists/1/filtr/all/sort/order/perpage/200/'
     base_url = get_base_url(list_url)
-    # mf = Fetcher()
-    # mp = MovieParser(base_url=base_url)
-    # mc = MovieCrawler(entry_url=list_url, fetcher=mf, parser=mp)
-    # movie_page_urls = await mc.process()
-    movie_page_urls = ['https://www.kinopoisk.ru/film/723/']
+    mf = Fetcher()
+    mp = MovieParser(base_url=base_url)
+    mc = MovieCrawler(entry_url=list_url, fetcher=mf, parser=mp)
+    movie_page_urls = await mc.process()
 
     rf = Fetcher()
     rp = ReviewParser(base_url=base_url)

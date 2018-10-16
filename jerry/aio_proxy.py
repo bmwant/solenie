@@ -54,16 +54,8 @@ async def main():
             proxy='http://176.192.20.146:32231/',
             timeout_sec=10,
         )
-        from parser import Parser
-        p = Parser()
-        print(p.check(res))
         # write_data(res)
         # await fetch_parallel(session, int(sys.argv[1]))
-
-
-def write_data(data):
-    with open('test.html', 'w') as f:
-        f.write(data)
 
 
 if __name__ == '__main__':
