@@ -1,15 +1,16 @@
+from abc import ABC, abstractmethod
 from urllib.parse import urljoin
 from html.entities import name2codepoint
 
 
-# todo: base abc
-class BaseParser(object):
+class BaseParser(ABC):
     def __init__(self, base_url: str):
         self.base_url = base_url
 
     def check(self, html: str) -> bool:
         return False
 
+    @abstractmethod
     def process_page(self, html: str):
         pass
 

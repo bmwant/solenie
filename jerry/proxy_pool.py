@@ -26,6 +26,16 @@ Traceback (most recent call last):
   File "/home/user/.virtualenvs/solenie/lib/python3.7/site-packages/aiohttp/tcp_helpers.py", line 32, in tcp_nodelay
     sock = transport.get_extra_info('socket')
 AttributeError: 'NoneType' object has no attribute 'get_extra_info'
+*     async with session.get(self.check_url, proxy=proxy_url) as resp:
+  File "/home/user/.virtualenvs/solenie/lib/python3.7/site-packages/aiohttp/client.py", line 855, in __aenter__
+    self._resp = await self._coro
+  File "/home/user/.virtualenvs/solenie/lib/python3.7/site-packages/aiohttp/client.py", line 391, in _request
+    await resp.start(conn)
+  File "/home/user/.virtualenvs/solenie/lib/python3.7/site-packages/aiohttp/client_reqrep.py", line 757, in start
+    message, payload = await self._protocol.read()
+  File "/home/user/.virtualenvs/solenie/lib/python3.7/site-packages/aiohttp/streams.py", line 543, in read
+    await self._waiter
+aiohttp.client_exceptions.ClientOSError: [Errno 104] Connection reset by peer
 """
 import itertools
 from http import HTTPStatus
@@ -56,6 +66,7 @@ class ProxyPool(object):
     def __init__(self, check_url: str=DEFAULT_CHECK_URL):
         self.check_url = check_url
         self._proxies = None
+        self._aiter = None
 
     @property
     def proxies(self):
@@ -64,9 +75,9 @@ class ProxyPool(object):
         return self._proxies
 
     async def __anext__(self):
-        for proxy_url in itertools.chain(self.proxies):
-            if await self._check_proxy(proxy_url):
-                yield proxy_url
+        for proxy in itertools.chain(self.proxies):
+            if await self._check_proxy(proxy.url):
+                yield proxy.url
 
     async def _check_proxy(self, proxy_url):
         async with aiohttp.ClientSession() as session:
@@ -79,8 +90,14 @@ class ProxyPool(object):
         ip, colon, port = netloc.partition(':')
         return resp.status == HTTPStatus.OK and ip in text
 
+    @property
+    def __aiter(self):
+        if self._aiter is None:
+            self._aiter = self.__anext__()
+        return self._aiter
+
     def __aiter__(self):
-        return self.__anext__()
+        return self.__aiter
 
     async def get_proxy(self):
         it = self.__aiter__()
@@ -88,4 +105,9 @@ class ProxyPool(object):
 
     def load_proxies(self):
         with open(settings.PROXIES_STORAGE_FILEPATH) as f:
-            return [Proxy(**data) for data in yaml.load(f)]
+            data = yaml.load(f)
+            logger.info('Loaded %s proxies', len(data))
+            return [Proxy(**d) for d in data]
+
+    def __len__(self):
+        return len(self.proxies)

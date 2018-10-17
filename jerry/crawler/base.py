@@ -1,10 +1,10 @@
+from abc import ABC, abstractmethod
 from itertools import count
 
 from buttworld.logger import get_logger
 
 
-# todo: base abc
-class BaseCrawler(object):
+class BaseCrawler(ABC):
     def __init__(self, entry_url, *, fetcher=None, parser=None):
         self.entry_url = entry_url
         self.fetcher = fetcher
@@ -24,6 +24,7 @@ class BaseCrawler(object):
     def __await__(self):
         return self.process()
 
+    @abstractmethod
     def _build_next_page_url(self, page_num: int) -> str:
         pass
 
