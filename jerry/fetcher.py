@@ -19,5 +19,6 @@ class Fetcher(object):
 
         async with timeout(timeout_sec):
             async with ClientSession() as session:
+                logger.debug('Requesting %s', url)
                 async with session.get(url, proxy=proxy) as response:
                     return await response.text()

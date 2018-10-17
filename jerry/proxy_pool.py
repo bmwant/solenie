@@ -37,12 +37,14 @@ AttributeError: 'NoneType' object has no attribute 'get_extra_info'
     await self._waiter
 aiohttp.client_exceptions.ClientOSError: [Errno 104] Connection reset by peer
 """
+import asyncio
 import itertools
 from http import HTTPStatus
 from urllib.parse import urlparse
 
 import yaml
 import aiohttp
+from aiohttp import client_exceptions
 
 import settings
 from buttworld.logger import get_logger
@@ -75,15 +77,26 @@ class ProxyPool(object):
         return self._proxies
 
     async def __anext__(self):
-        for proxy in itertools.chain(self.proxies):
+        for proxy in itertools.cycle(self.proxies):
             if await self._check_proxy(proxy.url):
                 yield proxy.url
+            # don't be so fast throwing another proxy
+            await asyncio.sleep(0.5)
 
     async def _check_proxy(self, proxy_url):
-        # todo: handle all the exceptions above
-        async with aiohttp.ClientSession() as session:
-            async with session.get(self.check_url, proxy=proxy_url) as resp:
-                return await self._check_response(resp, proxy_url)
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                        self.check_url, proxy=proxy_url) as resp:
+                    return await self._check_response(resp, proxy_url)
+        except (
+            client_exceptions.ClientOSError,
+            client_exceptions.ClientHttpProxyError,
+            client_exceptions.ServerDisconnectedError,
+            client_exceptions.ClientProxyConnectionError,
+        ) as e:
+            logger.error('Failed proxy check: %s', e)
+            return False
 
     async def _check_response(self, resp,  proxy_url) -> bool:
         text = await resp.text()

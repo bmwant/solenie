@@ -14,15 +14,18 @@ class BaseCrawler(ABC):
     async def get_next_page(self):
         for page_num in count(start=1):
             url = self._build_next_page_url(page_num)
-            self.logger.debug('Processing %s...', url)
-            page_html = await self.fetcher.get(url)
-            if self.parser.check(page_html):
-                yield page_html
-            else:
-                break
+            try:
+                page_html = await self.fetcher.get(url, timeout_sec=10)
+                if self.parser.check(page_html):
+                    yield page_html
+                else:
+                    break
+            except Exception as e:
+                self.logger.error('Damn: %s, %s', e, type(e))
+                return
 
     def __await__(self):
-        return self.process()
+        return self.process().__await__()
 
     @abstractmethod
     def _build_next_page_url(self, page_num: int) -> str:

@@ -41,3 +41,17 @@ async def test_iterating_yields_new_proxy(patch_pool):
             break
 
     assert len(proxies) == 2*counter
+
+
+@pytest.mark.run_loop
+async def test_does_not_raise_stop_iteration(patch_pool):
+    pool = ProxyPool()
+    proxies = set()
+
+    iterations = 2*len(pool)
+    for i in range(iterations):
+        next_proxy = await pool.get_proxy()
+        assert isinstance(next_proxy, str)
+        proxies.add(next_proxy)
+
+    assert len(proxies) == len(pool)
