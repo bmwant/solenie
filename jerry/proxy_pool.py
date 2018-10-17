@@ -80,6 +80,7 @@ class ProxyPool(object):
                 yield proxy.url
 
     async def _check_proxy(self, proxy_url):
+        # todo: handle all the exceptions above
         async with aiohttp.ClientSession() as session:
             async with session.get(self.check_url, proxy=proxy_url) as resp:
                 return await self._check_response(resp, proxy_url)
