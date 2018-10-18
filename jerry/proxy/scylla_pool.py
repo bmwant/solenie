@@ -19,7 +19,9 @@ class ScyllaProxyPool(BaseProxyPool):
         return True
 
     async def init(self):
-        type(self)._proxies = await self._load_proxies()
+        proxies = await self._load_proxies()
+        self.logger.info('Loaded %s proxies', len(proxies))
+        type(self)._proxies = proxies
 
     def load_proxies(self):
         if type(self)._proxies is None:

@@ -26,7 +26,7 @@ async def main():
     mf = Fetcher(proxy_pool=proxy_pool)
     mp = MovieParser(base_url=base_url)
     mc = MovieCrawler(entry_url=list_url, fetcher=mf, parser=mp)
-    # todo: add retries
+    # todo: add retries, retries please
     movie_page_urls = await mc.process()
 
     parser = ReviewParser(base_url=base_url)
