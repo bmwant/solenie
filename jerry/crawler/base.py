@@ -14,15 +14,11 @@ class BaseCrawler(ABC):
     async def get_next_page(self):
         for page_num in count(start=1):
             url = self._build_next_page_url(page_num)
-            try:
-                page_html = await self.fetcher.get(url, timeout_sec=10)
-                if self.parser.check(page_html):
-                    yield page_html
-                else:
-                    break
-            except Exception as e:
-                self.logger.error('Damn: %s, %s', e, type(e))
-                return
+            page_html = await self.fetcher.get(url)
+            if self.parser.check(page_html):
+                yield page_html
+            else:
+                break
 
     def __await__(self):
         return self.process().__await__()
@@ -34,5 +30,12 @@ class BaseCrawler(ABC):
     async def process(self) -> list:
         result = []
         async for page in self.get_next_page():
-            result.extend(self.parser.process_page(page))
+            data = self.parser.process_page(page)
+            if not data:
+                self.logger.error('No data when crawl %s', self.entry_url)
+            else:
+                result.extend(data)
         return result
+
+    def __str__(self):
+        return f'{self.__class__.__name__}[{self.entry_url}]'

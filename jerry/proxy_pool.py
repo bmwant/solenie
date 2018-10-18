@@ -1,44 +1,26 @@
 """
-* aiohttp.client_exceptions.ClientHttpProxyError: 500, message='Internal Server Error'
-* aiohttp.client_exceptions.ClientProxyConnectionError: Cannot connect to host 78.159.79.245:57107
-  ssl:None [Connect call failed ('78.159.79.245', 57107)]
-
-* <asyncio.sslproto.SSLProtocol object at 0x7f3afe19b4a8> stalled during handshake
+* Exception in callback SSLProtocol._process_write_backlog()
+handle: <Handle SSLProtocol._process_write_backlog()>
 Traceback (most recent call last):
-  File "grab_data.py", line 39, in <module>
-    loop.run_until_complete(main())
-  File "/usr/local/lib/python3.7/asyncio/base_events.py", line 566, in run_until_complete
-    return future.result()
-  File "grab_data.py", line 30, in main
-    reviews = list(chain.from_iterable(await asyncio.gather(*tasks)))
-  File "/usr/local/lib/python3.7/asyncio/tasks.py", line 570, in _wrap_awaitable
-    return (yield from awaitable.__await__())
-  File "/home/user/.pr/solenie/jerry/crawler/base.py", line 32, in process
-    async for page in self.get_next_page():
-  File "/home/user/.pr/solenie/jerry/crawler/base.py", line 18, in get_next_page
-    page_html = await self.fetcher.get(url)
-  File "/home/user/.pr/solenie/jerry/fetcher.py", line 12, in get
-    async with session.get(url, proxy=proxy) as response:
-  File "/home/user/.virtualenvs/solenie/lib/python3.7/site-packages/aiohttp/client.py", line 855, in __aenter__
-    self._resp = await self._coro
-  File "/home/user/.virtualenvs/solenie/lib/python3.7/site-packages/aiohttp/client.py", line 377, in _request
-    tcp_nodelay(conn.transport, True)
-  File "/home/user/.virtualenvs/solenie/lib/python3.7/site-packages/aiohttp/tcp_helpers.py", line 32, in tcp_nodelay
-    sock = transport.get_extra_info('socket')
-AttributeError: 'NoneType' object has no attribute 'get_extra_info'
-*     async with session.get(self.check_url, proxy=proxy_url) as resp:
-  File "/home/user/.virtualenvs/solenie/lib/python3.7/site-packages/aiohttp/client.py", line 855, in __aenter__
-    self._resp = await self._coro
-  File "/home/user/.virtualenvs/solenie/lib/python3.7/site-packages/aiohttp/client.py", line 391, in _request
-    await resp.start(conn)
-  File "/home/user/.virtualenvs/solenie/lib/python3.7/site-packages/aiohttp/client_reqrep.py", line 757, in start
-    message, payload = await self._protocol.read()
-  File "/home/user/.virtualenvs/solenie/lib/python3.7/site-packages/aiohttp/streams.py", line 543, in read
-    await self._waiter
-aiohttp.client_exceptions.ClientOSError: [Errno 104] Connection reset by peer
+  File "/usr/local/lib/python3.7/asyncio/sslproto.py", line 648, in _process_write_backlog
+    ssldata = self._sslpipe.do_handshake(
+AttributeError: 'NoneType' object has no attribute 'do_handshake'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.7/asyncio/events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "/usr/local/lib/python3.7/asyncio/sslproto.py", line 674, in _process_write_backlog
+    self._on_handshake_complete(exc)
+  File "/usr/local/lib/python3.7/asyncio/sslproto.py", line 594, in _on_handshake_complete
+    sslobj = self._sslpipe.ssl_object
+AttributeError: 'NoneType' object has no attribute 'ssl_object'
+*
 """
 import asyncio
 import itertools
+from random import shuffle
 from http import HTTPStatus
 from urllib.parse import urlparse
 
@@ -65,16 +47,23 @@ async def _check_response_patch(self, resp, proxy_url):
 
 
 class ProxyPool(object):
+
+    _proxies = None
+
     def __init__(self, check_url: str=DEFAULT_CHECK_URL):
         self.check_url = check_url
-        self._proxies = None
+        self._instance_proxies = None
         self._aiter = None
 
     @property
     def proxies(self):
-        if self._proxies is None:
-            self._proxies = self.load_proxies()
-        return self._proxies
+        if ProxyPool._proxies is None:
+            ProxyPool._proxies = self.load_proxies()
+
+        if self._instance_proxies is None:
+            self._instance_proxies = ProxyPool._proxies[:]
+            shuffle(self._instance_proxies)
+        return self._instance_proxies
 
     async def __anext__(self):
         for proxy in itertools.cycle(self.proxies):

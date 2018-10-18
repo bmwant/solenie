@@ -6,7 +6,6 @@ from jerry.proxy_pool import ProxyPool
 from tests.helpers import AsyncMock
 
 
-
 @pytest.fixture
 def patch_pool():
     with mock.patch('jerry.proxy_pool.ProxyPool._check_proxy',
@@ -55,3 +54,22 @@ async def test_does_not_raise_stop_iteration(patch_pool):
         proxies.add(next_proxy)
 
     assert len(proxies) == len(pool)
+
+
+def test_load_proxies_just_once():
+    proxies = [
+        'http://41.55.44.76:3128/',
+        'http://41.55.44.77:3128/',
+        'http://41.55.44.78:3128/',
+    ]
+    with mock.patch('jerry.proxy_pool.ProxyPool.load_proxies',
+                    return_value=proxies) as load_mock:
+        pool1 = ProxyPool()
+        pool2 = ProxyPool()
+        p1 = pool1.proxies
+        p2 = pool2.proxies
+        assert ProxyPool._proxies is not None
+        assert pool1._proxies == pool2._proxies
+        assert p1 != p2
+        assert load_mock.called
+        assert load_mock.call_count == 1
