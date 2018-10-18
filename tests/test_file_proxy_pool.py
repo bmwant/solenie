@@ -15,7 +15,14 @@ def patch_pool():
         yield
 
 
+@pytest.fixture
+def dont_waste_my_time():
+    with mock.patch('asyncio.sleep', AsyncMock):
+        yield
+
+
 @pytest.mark.run_loop
+@pytest.mark.usefixtures('dont_waste_my_time')
 async def test_get_proxy_return_new_proxy(patch_pool):
     pool = FileProxyPool()
 
@@ -25,8 +32,8 @@ async def test_get_proxy_return_new_proxy(patch_pool):
     assert p1 != p2
 
 
-# todo: make sure you do not want to sleep here
 @pytest.mark.run_loop
+@pytest.mark.usefixtures('dont_waste_my_time')
 async def test_iterating_yields_new_proxy(patch_pool):
     pool = FileProxyPool()
     proxies = set()
@@ -45,6 +52,7 @@ async def test_iterating_yields_new_proxy(patch_pool):
 
 
 @pytest.mark.run_loop
+@pytest.mark.usefixtures('dont_waste_my_time')
 async def test_does_not_raise_stop_iteration(patch_pool):
     pool = FileProxyPool()
     proxies = set()
