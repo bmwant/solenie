@@ -18,9 +18,6 @@ Traceback (most recent call last):
 AttributeError: 'NoneType' object has no attribute 'ssl_object'
 *
 """
-import asyncio
-import itertools
-from random import shuffle
 from http import HTTPStatus
 from urllib.parse import urlparse
 
@@ -29,49 +26,11 @@ import aiohttp
 from aiohttp import client_exceptions
 
 import settings
-from buttworld.logger import get_logger
 from jerry.proxy import Proxy
+from jerry.proxy import BaseProxyPool
 
 
-logger = get_logger(__name__)
-
-DEFAULT_CHECK_URL = 'http://checkip.amazonaws.com/'
-
-
-async def _check_response_patch(self, resp, proxy_url):
-    text = await resp.text()
-    result = proxy_url in text
-    if not result:
-        logger.debug('%s: %s', resp.status, text)
-    return result
-
-
-class ProxyPool(object):
-
-    _proxies = None
-
-    def __init__(self, check_url: str=DEFAULT_CHECK_URL):
-        self.check_url = check_url
-        self._instance_proxies = None
-        self._aiter = None
-
-    @property
-    def proxies(self):
-        if ProxyPool._proxies is None:
-            ProxyPool._proxies = self.load_proxies()
-
-        if self._instance_proxies is None:
-            self._instance_proxies = ProxyPool._proxies[:]
-            shuffle(self._instance_proxies)
-        return self._instance_proxies
-
-    async def __anext__(self):
-        for proxy in itertools.cycle(self.proxies):
-            if await self._check_proxy(proxy.url):
-                yield proxy.url
-            # don't be so fast throwing another proxy
-            await asyncio.sleep(0.5)
-
+class FileProxyPool(BaseProxyPool):
     async def _check_proxy(self, proxy_url):
         try:
             async with aiohttp.ClientSession() as session:
@@ -84,7 +43,7 @@ class ProxyPool(object):
             client_exceptions.ServerDisconnectedError,
             client_exceptions.ClientProxyConnectionError,
         ) as e:
-            logger.error('Failed proxy check: %s', e)
+            self.logger.error('Failed proxy check: %s', e)
             return False
 
     async def _check_response(self, resp,  proxy_url) -> bool:
@@ -93,24 +52,8 @@ class ProxyPool(object):
         ip, colon, port = netloc.partition(':')
         return resp.status == HTTPStatus.OK and ip in text
 
-    @property
-    def __aiter(self):
-        if self._aiter is None:
-            self._aiter = self.__anext__()
-        return self._aiter
-
-    def __aiter__(self):
-        return self.__aiter
-
-    async def get_proxy(self):
-        it = self.__aiter__()
-        return await it.__anext__()
-
     def load_proxies(self):
         with open(settings.PROXIES_STORAGE_FILEPATH) as f:
             data = yaml.load(f)
-            logger.info('Loaded %s proxies', len(data))
+            self.logger.info('Loaded %s proxies', len(data))
             return [Proxy(**d) for d in data]
-
-    def __len__(self):
-        return len(self.proxies)
