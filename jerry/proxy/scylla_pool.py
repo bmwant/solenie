@@ -1,4 +1,3 @@
-import asyncio
 from random import shuffle
 
 from aiohttp import ClientSession
@@ -20,11 +19,10 @@ class ScyllaProxyPool(BaseProxyPool):
         return True
 
     async def init(self):
-        proxies = await self._load_proxies()
-
+        type(self)._proxies = await self._load_proxies()
 
     def load_proxies(self):
-        if self._proxies is None:
+        if type(self)._proxies is None:
             self.logger.warning('You forgot to call init method!')
 
     def _build_proxies_from_response(self, data) -> list:
@@ -37,7 +35,6 @@ class ScyllaProxyPool(BaseProxyPool):
             url = f'http://{ip}:{port}/'
             result.append(Proxy(url=url))
 
-        shuffle(result)
         return result
 
     async def _load_proxies(self):
