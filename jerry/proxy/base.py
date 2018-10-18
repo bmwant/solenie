@@ -21,11 +21,12 @@ class BaseProxyPool(ABC):
 
     @property
     def proxies(self):
-        if BaseProxyPool._proxies is None:
-            BaseProxyPool._proxies = self.load_proxies()
+        class_ = self.__class__  # type(self)?
+        if class_._proxies is None:
+            class_._proxies = self.load_proxies()
 
         if self._instance_proxies is None:
-            self._instance_proxies = BaseProxyPool._proxies[:]
+            self._instance_proxies = class_._proxies[:]
             shuffle(self._instance_proxies)
         return self._instance_proxies
 
@@ -38,6 +39,10 @@ class BaseProxyPool(ABC):
 
     @abstractmethod
     async def _check_proxy(self, proxy_url: str) -> bool:
+        pass
+
+    @abstractmethod
+    async def init(self):
         pass
 
     @property

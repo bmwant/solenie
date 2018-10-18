@@ -1,37 +1,48 @@
 import asyncio
 from random import shuffle
-from http import HTTPStatus
-from urllib.parse import urlparse
 
 from aiohttp import ClientSession
 
 from jerry.proxy import Proxy, BaseProxyPool
 
 
+__all__ = ('ScyllaProxyPool',)
+
 SCYLLA_SERVICE_URL = 'http://localhost:8899/api/v1/proxies'
 
 
 class ScyllaProxyPool(BaseProxyPool):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, scylla_url=SCYLLA_SERVICE_URL, **kwargs):
+        self.scylla_url = scylla_url
         super().__init__(*args, **kwargs)
 
     async def _check_proxy(self, proxy_url):
         return True
 
-    def load_proxies(self):
-        return asyncio.run(self._load_proxies())
+    async def init(self):
+        proxies = await self._load_proxies()
 
-    def _build_proxies_from_response(self, data):
+
+    def load_proxies(self):
+        if self._proxies is None:
+            self.logger.warning('You forgot to call init method!')
+
+    def _build_proxies_from_response(self, data) -> list:
         result = []
         for item in data:
-            result.append(Proxy())
+            if item['country'] == 'UA':
+                continue
+            ip = item['ip']
+            port = item['port']
+            url = f'http://{ip}:{port}/'
+            result.append(Proxy(url=url))
 
         shuffle(result)
         return result
 
     async def _load_proxies(self):
-        scylla_url = 'https=true'
+        params = {'https': 'true'}
         async with ClientSession() as session:
-            async with session.get(scylla_url) as response:
+            async with session.get(self.scylla_url, params=params) as response:
                 data = await response.json()
                 return self._build_proxies_from_response(data['proxies'])

@@ -6,6 +6,7 @@ from jerry.crawler import MovieCrawler, ReviewCrawler
 from jerry.fetcher import Fetcher
 from jerry.parser import MovieParser, ReviewParser
 from jerry.proxy.file_pool import FileProxyPool
+from jerry.proxy.scylla_pool import ScyllaProxyPool
 from beth.task_manager import TaskManager
 from store import insert_review
 
@@ -20,7 +21,8 @@ async def main():
         'top/lists/1/filtr/all/sort/order/perpage/200/'
     )
     base_url = get_base_url(list_url)
-    proxy_pool = FileProxyPool()
+    proxy_pool = ScyllaProxyPool()
+    await proxy_pool.init()
     mf = Fetcher(proxy_pool=proxy_pool)
     mp = MovieParser(base_url=base_url)
     mc = MovieCrawler(entry_url=list_url, fetcher=mf, parser=mp)
@@ -30,8 +32,9 @@ async def main():
     parser = ReviewParser(base_url=base_url)
     tm = TaskManager(max_retires=20)
     tasks = []
-    for url in movie_page_urls[:2]:
+    for url in movie_page_urls:
         proxy_pool = FileProxyPool()
+        await proxy_pool.init()
         fetcher = Fetcher(proxy_pool=proxy_pool)
         fetcher.timeout = 20
         crawler = ReviewCrawler(entry_url=url, parser=parser, fetcher=fetcher)

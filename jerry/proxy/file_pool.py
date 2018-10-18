@@ -30,7 +30,13 @@ from jerry.proxy import Proxy
 from jerry.proxy import BaseProxyPool
 
 
+__all__ = ('FileProxyPool',)
+
+
 class FileProxyPool(BaseProxyPool):
+    async def init(self):
+        pass
+
     async def _check_proxy(self, proxy_url):
         try:
             async with aiohttp.ClientSession() as session:
