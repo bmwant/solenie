@@ -30,7 +30,7 @@ async def main():
     parser = ReviewParser(base_url=base_url)
     tm = TaskManager(max_retires=20)
     tasks = []
-    for url in movie_page_urls[:5]:
+    for url in movie_page_urls[:10]:
         proxy_pool = ProxyPool()
         fetcher = Fetcher(proxy_pool=proxy_pool)
         fetcher.timeout = 20
@@ -41,8 +41,9 @@ async def main():
     await tm.process()
     reviews = tm.results
     logger.debug('Inserting %s reviews...', len(reviews))
-    import pdb; pdb.set_trace()
-    print(reviews)
+
+    for r in reviews:
+        insert_review(r)
 
 
 if __name__ == '__main__':

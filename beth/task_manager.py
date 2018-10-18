@@ -15,22 +15,21 @@ class TaskManager(object):
 
     async def process(self):
         retries = 0
+        total_tasks = len(self.tasks)
         while self.tasks:
-            self.logger.info('Total tasks %s', len(self.tasks))
             tasks = self.tasks[:]
             failed = []
-            self.logger.info('Iteration %s', retries)
+
             results = await asyncio.gather(*tasks, return_exceptions=True)
 
-            self.logger.info('Gathered results %s', results)
             for task, res in zip(tasks, results):
                 if isinstance(res, Exception):
                     self.logger.error('Task failed: %s', res)
                     failed.append(task)
                 else:
-                    if not res:
-                        self.logger.error('Empty result %s', task)
-                    self.results.append(res)
+                    # todo: handle empty result
+                    # Extend list of results with partial result
+                    self.results.extend(res)
             del self.tasks
             self.tasks = failed
             retries += 1
@@ -42,7 +41,7 @@ class TaskManager(object):
                 return
 
         self.logger.info('Finished %s tasks. Retries: %s.',
-                         len(self.results), retries)
+                         total_tasks, retries)
 
 
 class Crawler(object):
@@ -63,8 +62,6 @@ class Crawler(object):
 
 
 async def main():
-    # Create a queue that we will use to store our "workload".
-    queue = asyncio.Queue()
     tm = TaskManager()
     c1 = Crawler(c=3)
     t1 = c1.task()
