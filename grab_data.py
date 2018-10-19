@@ -23,10 +23,9 @@ async def main():
     base_url = get_base_url(list_url)
     proxy_pool = ScyllaProxyPool()
     await proxy_pool.init()
-    mf = Fetcher(proxy_pool=proxy_pool)
+    mf = Fetcher(proxy_pool=proxy_pool, max_retries=3)
     mp = MovieParser(base_url=base_url)
     mc = MovieCrawler(entry_url=list_url, fetcher=mf, parser=mp)
-    # todo: add retries, retries please
     movie_page_urls = await mc.process()
 
     parser = ReviewParser(base_url=base_url)

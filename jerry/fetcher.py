@@ -2,15 +2,18 @@ import async_timeout
 from aiohttp import ClientSession
 
 from buttworld.logger import get_logger
+from beth.retrying import retry
 
 
 logger = get_logger(__name__)
 
 
 class Fetcher(object):
-    def __init__(self, proxy_pool=None, timeout_sec=None):
+    def __init__(self, proxy_pool=None, timeout_sec=None, max_retries=0):
         self.proxy_pool = proxy_pool
         self.timeout_sec = timeout_sec
+        if max_retries:
+            self.get = retry(max_retries)(self.get)
 
     @property
     def timeout(self):
