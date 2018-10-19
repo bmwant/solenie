@@ -13,6 +13,10 @@ DEFAULT_TIME_FORMAT = '%H:%M'
 DEFAULT_DATETIME_FORMAT = '{} {}'.format(DEFAULT_TIME_FORMAT,
                                          DEFAULT_DATE_FORMAT)
 
+# DATA
+DATA_DIR = PROJECT_ROOT / 'data'
+TOP_500_MOVIE_REVIEWS = DATA_DIR / 'top500moviesreviews.json'
+
 # DEVELOPING
 DEBUG = False
 
