@@ -25,7 +25,7 @@ def show_stats_for_text(text):
         logger.info('%s\t%s', word, count)
 
 
-def get_text_for_reviews(reviews):
+def get_text_for_reviews(reviews) -> str:
     text = ' '.join([r['text'] for r in reviews])
     return text
 
