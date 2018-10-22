@@ -44,18 +44,37 @@ def get_text_for_reviews(reviews):
     return text
 
 
-# todo: todo hotkey
-# todo: image on the whole canvas
-def generate_cloud_for_text(text, name='file'):
-    wordcloud = WordCloud(max_font_size=40).generate(text)
-    fig = plt.figure()
+def _pltshow(wordcloud, name=None):
+    fig = plt.figure(frameon=False)
+    fig.subplots_adjust(
+        left=0,
+        bottom=0,
+        right=1,
+        top=1,
+        wspace=0,
+        hspace=0,
+    )
     plt.imshow(wordcloud, interpolation='bilinear')
     plt.axis('off')
-    plt.show()
-    fig.savefig(f'{name}.png')  # , dpi=fig.dpi)
+    if name is None:
+        plt.show()
+    else:
+        fig.savefig(
+            f'{name}.png',
+            dpi='figure',
+            bbox_inches='tight',  # check
+            pad_inches=0,  # these
+        )
+
+
+def generate_cloud_for_text(text, name='file'):
+    wordcloud = WordCloud(max_font_size=40).generate(text)
+
+    # _pltshow(wordcloud, name)
     # The pil way (if you don't have matplotlib)
-    # image = wordcloud.to_image()
+    image = wordcloud.to_image()
     # image.show()
+    image.save(f'{name}.png')
 
 
 # todo: stopwords

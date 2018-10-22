@@ -1,6 +1,6 @@
 ## solenie
 
-![solenie](data/solenie.jpg)
+![solenie](data/images/solenie.jpg)
 
 What does solenie mean?
 
