@@ -2,6 +2,7 @@ from string import punctuation
 from itertools import filterfalse
 
 from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords
 
 
 EXTRA_PUNCTUATION = '«»—…'
@@ -12,9 +13,14 @@ def _is_punctuation(token):
     return token in _punctuation
 
 
+def _is_stopword(token, language='russian'):
+    return token in stopwords.words(language)
+
+
 def clean_tokens(tokens):
     lowercase = map(str.lower, tokens)
-    return filterfalse(_is_punctuation, lowercase)
+    punct_removed = filterfalse(_is_punctuation, lowercase)
+    return filterfalse(_is_stopword, punct_removed)
 
 
 def tokenize(text, clean=True):

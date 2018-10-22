@@ -72,7 +72,6 @@ def generate_cloud_for_text(text, name=None):
         image.save(f'{name}.png')
 
 
-# todo: stopwords
 # ~/nltk_data/tokenizers/punkt
 # https://stackoverflow.com/questions/21160310/training-data-format-for-nltk-punkt
 def main():
