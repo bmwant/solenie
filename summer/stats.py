@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from nltk.probability import FreqDist
-from nltk.tokenize import sent_tokenize, word_tokenize
+
 from tinydb import TinyDB, Query
 
 import settings
 from buttworld.logger import get_logger
 from jerry.parser.review import SentimentEnum
+from summer.tokenizer import tokenize
 
 
 db = TinyDB(settings.TOP_500_MOVIE_REVIEWS)
@@ -20,16 +21,8 @@ def get_reviews_by_sentiment(sentiment):
     return result
 
 
-def tokenize(text):
-    words = []
-    for sentence in sent_tokenize(text):
-        for word in word_tokenize(sentence):
-            words.append(word)
-    return words
-
-
 def show_stats_for_text(text):
-    words = [w.lower() for w in tokenize(text)]
+    words = tokenize(text, clean=True)
     fd = FreqDist(words)
     logger.info('Total words: %s', len(words))
     logger.info('Recurrent words: %s', fd.B())
@@ -67,18 +60,19 @@ def _pltshow(wordcloud, name=None):
         )
 
 
-def generate_cloud_for_text(text, name='file'):
+def generate_cloud_for_text(text, name=None):
     wordcloud = WordCloud(max_font_size=40).generate(text)
 
     # _pltshow(wordcloud, name)
     # The pil way (if you don't have matplotlib)
     image = wordcloud.to_image()
-    # image.show()
-    image.save(f'{name}.png')
+    if name is None:
+        image.show()
+    else:
+        image.save(f'{name}.png')
 
 
 # todo: stopwords
-# todo: punctuations, check simple example
 # ~/nltk_data/tokenizers/punkt
 # https://stackoverflow.com/questions/21160310/training-data-format-for-nltk-punkt
 def main():
@@ -90,7 +84,7 @@ def main():
     for sentiment in sentiments:
         reviews = get_reviews_by_sentiment(sentiment)
         text = get_text_for_reviews(reviews)
-        generate_cloud_for_text(text, name=sentiment.name.lower())
+        # generate_cloud_for_text(text, name=sentiment.name.lower())
 
 
 if __name__ == '__main__':
