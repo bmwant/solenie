@@ -6,6 +6,11 @@ from nltk.corpus import stopwords
 
 
 EXTRA_PUNCTUATION = '«»—…'
+TERMINATION_CHARS = '.»…!?)"\''
+
+
+def _is_sent_terminator(token):
+    return token in TERMINATION_CHARS
 
 
 def _is_punctuation(token):

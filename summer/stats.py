@@ -2,23 +2,17 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from nltk.probability import FreqDist
 
-from tinydb import TinyDB, Query
+from tinydb import TinyDB
 
 import settings
 from buttworld.logger import get_logger
 from jerry.parser.review import SentimentEnum
 from summer.tokenizer import tokenize
+from store import get_reviews_by_sentiment
 
 
 db = TinyDB(settings.TOP_500_MOVIE_REVIEWS)
 logger = get_logger(__name__)
-
-
-def get_reviews_by_sentiment(sentiment):
-    query = Query()
-    result = db.search(query.sentiment == sentiment)
-    logger.info('Loaded %s records for %s sentiment', len(result), sentiment)
-    return result
 
 
 def show_stats_for_text(text):
@@ -33,7 +27,6 @@ def show_stats_for_text(text):
 
 def get_text_for_reviews(reviews):
     text = ' '.join([r['text'] for r in reviews])
-    show_stats_for_text(text)
     return text
 
 
@@ -81,8 +74,9 @@ def main():
         SentimentEnum.BAD,
     )
     for sentiment in sentiments:
-        reviews = get_reviews_by_sentiment(sentiment)
+        reviews = get_reviews_by_sentiment(sentiment, db=db)
         text = get_text_for_reviews(reviews)
+        show_stats_for_text(text)
         # generate_cloud_for_text(text, name=sentiment.name.lower())
 
 
