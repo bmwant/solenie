@@ -45,6 +45,14 @@ def insert_review(
     db.insert(attr.asdict(review))
 
 
+def get_reviews(*, db: TinyDB=None) -> list:
+    db = db or _get_default_db()
+    query = Query()
+    result = db.search(query.text.exists())
+    logger.info('Loaded %s reviews', len(result))
+    return result
+
+
 def get_reviews_by_sentiment(sentiment, *, db: TinyDB=None):
     db = db or _get_default_db()
     logger.debug('Using %s database', db.name)

@@ -25,9 +25,8 @@ class SimpleMarkovGenerator(BaseReviewGenerator):
         self.word_dict_bad = defaultdict(list)
         super().__init__()
 
-    def initialize_sentiment(self, sentiment: SentimentEnum, text: str):
-        self.logger.info(
-            'Initializing words dictionaries for %s...', sentiment)
+    def initialize_model(self, sentiment: SentimentEnum, text: str):
+        self.logger.info('Initializing model for %s...', sentiment)
         text_chunks = text.split()
         suffix = sentiment.name.lower()
         setattr(self, f'_text_{suffix}', text_chunks)

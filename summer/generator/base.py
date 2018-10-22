@@ -8,7 +8,7 @@ class BaseReviewGenerator(ABC):
         self.logger = get_logger(self.__class__.__name__.lower())
 
     @abstractmethod
-    def initialize_sentiment(self, *args, **kwargs):
+    def initialize_model(self, *args, **kwargs):
         pass
 
     @abstractmethod
@@ -22,3 +22,6 @@ class BaseReviewGenerator(ABC):
     @abstractmethod
     def create_neutral_review(self, length: int):
         pass
+
+    def __str__(self):
+        return f'{self.__class__.__name__}'
