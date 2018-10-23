@@ -2,16 +2,15 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from nltk.probability import FreqDist
 
-from tinydb import TinyDB
 
 import settings
 from buttworld.logger import get_logger
 from jerry.parser.review import SentimentEnum
 from summer.tokenizer import tokenize
-from store import get_reviews_by_sentiment
+from store import DB, get_reviews_by_sentiment
 
 
-db = TinyDB(settings.TOP_500_MOVIE_REVIEWS)
+db = DB(settings.TOP_500_MOVIE_REVIEWS)
 logger = get_logger(__name__)
 
 

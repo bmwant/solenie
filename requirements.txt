@@ -18,3 +18,4 @@ matplotlib==3.0.0
 wordcloud==1.5.0
 nltk==3.3
 markovify==0.7.1
+spacy==2.0.16
