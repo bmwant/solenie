@@ -12,6 +12,7 @@ class DistributionPartitioner(object):
         self._test_data = None
         self.logger = get_logger(self.__class__.__name__.lower())
 
+    # todo (misha): write it in a good way please
     def partition(self):
         len_pos = len(list(filter(self.pred, self.data)))
         len_neg = len(self.data) - len_pos
@@ -45,8 +46,12 @@ class DistributionPartitioner(object):
 
     @property
     def training_data(self):
+        if self._training_data is None:
+            raise RuntimeError('You forgot to call `partition` method')
         return self._training_data
 
     @property
     def test_data(self):
+        if self._test_data is None:
+            raise RuntimeError('You forgot to call `partition` method')
         return self._test_data

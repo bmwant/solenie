@@ -2,11 +2,10 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from nltk.probability import FreqDist
 
-
 import settings
 from buttworld.logger import get_logger
 from jerry.parser.review import SentimentEnum
-from summer.tokenizer import tokenize
+from summer.tokenizer import tokenize, FILTER_ALL
 from store import DB, get_reviews_by_sentiment
 
 
@@ -15,13 +14,19 @@ logger = get_logger(__name__)
 
 
 def show_stats_for_text(text):
-    words = tokenize(text, clean=True)
+    words = tokenize(text, clean_filter=FILTER_ALL)
     fd = FreqDist(words)
     logger.info('Total words: %s', len(words))
     logger.info('Recurrent words: %s', fd.B())
     logger.info('Most common words')
     for word, count in fd.most_common(20):
         logger.info('%s\t%s', word, count)
+
+
+def get_most_common_words(text, n_words=20):
+    words = tokenize(text)
+    fd = FreqDist(words)
+    return [item[0] for item in fd.most_common(n_words)]
 
 
 def get_text_for_reviews(reviews) -> str:
