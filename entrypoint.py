@@ -1,5 +1,3 @@
-import random
-
 import settings
 from buttworld.logger import get_logger
 from jerry.parser.review import SentimentEnum
@@ -8,7 +6,7 @@ from summer.tokenizer import tokenize, F_LOWERCASE
 from summer.generator import SimpleMarkovGenerator, MarkovifyReviewGenerator
 from summer.partitioner import DistributionPartitioner
 from summer.classifier import NaiveBayesClassifier
-from summer.classifier.naive_bayes import get_features
+from summer.classifier.naive_bayes import get_feature_finder
 from store import DB, get_reviews, get_reviews_by_sentiment
 
 
@@ -60,30 +58,39 @@ def generate_markovify_reviews():
 
 def classify_naive_bayes():
     reviews = get_reviews(db=db)
+    text = get_text_for_reviews(reviews)
+    logger.debug('Getting features from the whole text...')
+    word_features = get_most_common_words(text, n_words=1000)
+    feature_finder = get_feature_finder(word_features)
+
     def pred(review):
         return review['sentiment'] == SentimentEnum.GOOD
 
-    partitioner = DistributionPartitioner(reviews, pred=pred, ratio=0.8)
+    partitioner = DistributionPartitioner(reviews, pred=pred, ratio=0.7)
     partitioner.partition()
-    # todo (misha): save classifier
     classifier = NaiveBayesClassifier(
         partitioner.training_data,
         partitioner.test_data,
+        feature_finder=feature_finder,
     )
     classifier.train()
-    print(classifier.accuracy)
+    print('Accuracy: {:.2f}'.format(classifier.accuracy*100))
     classifier.show_top_features()
+    classifier.save()
 
-    text = get_text_for_reviews(reviews)
-    word_features = get_most_common_words(text, n_words=30)
-    # todo (misha): reuse
-    find_features = get_features(word_features)
-    # todo (misha): classify all three sentiments
-    for _ in range(3):
-        review = random.choice(reviews)
-        featureset = find_features(
+    reviews = get_reviews_by_sentiment(SentimentEnum.BAD, db=db)
+    for review in reviews:
+        featureset = feature_finder(
             tokenize(review['text'], clean_filter=F_LOWERCASE))
-        print(classifier.classify(featureset))
+        original_sentiment = SentimentEnum(review['sentiment'])
+        guessed_sentiment = SentimentEnum(classifier.classify(featureset))
+        if original_sentiment == guessed_sentiment:
+            print(f'Original sentiment {original_sentiment.name}. '
+                  f'Sentiment guessed: {guessed_sentiment.name}')
+
+
+def load_trained_naive_bayes_classifier():
+    pass
 
 
 if __name__ == '__main__':

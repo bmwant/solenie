@@ -10,3 +10,9 @@ class BaseClassifier(ABC):
     @abstractmethod
     def classify(self, *args, **kwargs):
         pass
+
+    def save(self):
+        pass
+
+    def load(self):
+        pass

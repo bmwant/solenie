@@ -1,22 +1,25 @@
+import pickle
+from datetime import datetime
+
 import nltk
 
 from summer.classifier.base import BaseClassifier
-from summer.stats import get_text_for_reviews, get_most_common_words
 from summer.tokenizer import tokenize, F_LOWERCASE
 
 
 class NaiveBayesClassifier(BaseClassifier):
-    def __init__(self, training_data, test_data):
-        self.classifier = None
+    def __init__(self, training_data, test_data, *, feature_finder=None):
+        self._classifier = None
         self.training_data = training_data
         self.test_data = test_data
+        self.feature_finder = feature_finder
         super().__init__()
 
     def train(self):
         self.logger.debug('Labeling training data...')
-        data = get_labeled_review_data(self.training_data)
+        data = get_labeled_review_data(self.training_data, self.feature_finder)
         self.logger.debug('Training classifier...')
-        self.classifier = nltk.NaiveBayesClassifier.train(data)
+        self._classifier = nltk.NaiveBayesClassifier.train(data)
 
     def classify(self, featureset):
         return self.classifier.classify(featureset=featureset)
@@ -26,11 +29,27 @@ class NaiveBayesClassifier(BaseClassifier):
 
     @property
     def accuracy(self) -> float:
-        data = get_labeled_review_data(self.test_data)
+        data = get_labeled_review_data(self.test_data, self.feature_finder)
         return nltk.classify.accuracy(self.classifier, data)
 
+    @property
+    def classifier(self):
+        if self._classifier is None:
+            raise RuntimeError('Classifier has not been trained yet')
+        return self._classifier
 
-def get_features(word_features):
+    def save(self):
+        now = datetime.now()
+        name = self.__class__.__name__.lower()
+        day = now.strftime('%Y%m%d')
+        model_filename = '{}_{}.classifier'.format(name, day)
+        classifier = self.classifier
+        self.logger.info('Saving trained classifier to %s', model_filename)
+        with open(model_filename, 'wb') as f:
+            pickle.dump(classifier, f)
+
+
+def get_feature_finder(word_features):
     def find_features(review_words):
         features = {}
         for word in word_features:
@@ -40,13 +59,9 @@ def get_features(word_features):
     return find_features
 
 
-def get_labeled_review_data(reviews):
-    text = get_text_for_reviews(reviews)
-    word_features = get_most_common_words(text, n_words=30)
-    find_features = get_features(word_features)
+def get_labeled_review_data(reviews, feature_finder):
     return [
-        (find_features(tokenize(r['text'], clean_filter=F_LOWERCASE)),
+        (feature_finder(tokenize(r['text'], clean_filter=F_LOWERCASE)),
          r['sentiment'])
         for r in reviews
     ]
-

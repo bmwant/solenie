@@ -4,6 +4,10 @@ from itertools import filterfalse
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
 
+from buttworld.logger import get_logger
+
+
+logger = get_logger(__name__)
 
 EXTRA_PUNCTUATION = '«»—…'
 TERMINATION_CHARS = '.»…!?)"\''
