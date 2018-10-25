@@ -7,6 +7,7 @@ from summer.classifier.base import BaseClassifier
 from summer.tokenizer import tokenize, F_LOWERCASE
 
 
+# todo (misha): decouple train and test data from here
 class NaiveBayesClassifier(BaseClassifier):
     def __init__(self, training_data, test_data, *, feature_finder=None):
         self._classifier = None
@@ -48,15 +49,14 @@ class NaiveBayesClassifier(BaseClassifier):
         with open(model_filename, 'wb') as f:
             pickle.dump(classifier, f)
 
-
-def get_feature_finder(word_features):
-    def find_features(review_words):
-        features = {}
-        for word in word_features:
-            features[word] = word in review_words
-        return features
-
-    return find_features
+    @classmethod
+    def load(cls, filename):
+        with open(filename, 'rb') as f:
+            _classifier = pickle.load(f)
+        classifier = cls(None, None)
+        classifier.logger.debug('Loaded classifier from file %s.', filename)
+        classifier._classifier = _classifier
+        return classifier
 
 
 def get_labeled_review_data(reviews, feature_finder):

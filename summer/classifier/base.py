@@ -14,5 +14,6 @@ class BaseClassifier(ABC):
     def save(self):
         pass
 
-    def load(self):
+    @abstractmethod
+    def load(self, filename: str):
         pass

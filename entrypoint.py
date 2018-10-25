@@ -1,12 +1,12 @@
 import settings
 from buttworld.logger import get_logger
 from jerry.parser.review import SentimentEnum
-from summer.stats import get_text_for_reviews, get_most_common_words
+from summer.stats import get_text_for_reviews
 from summer.tokenizer import tokenize, F_LOWERCASE
 from summer.generator import SimpleMarkovGenerator, MarkovifyReviewGenerator
 from summer.partitioner import DistributionPartitioner
 from summer.classifier import NaiveBayesClassifier
-from summer.classifier.naive_bayes import get_feature_finder
+from summer.features import MostCommonWordsFinder
 from store import DB, get_reviews, get_reviews_by_sentiment
 
 
@@ -59,41 +59,52 @@ def generate_markovify_reviews():
 def classify_naive_bayes():
     reviews = get_reviews(db=db)
     text = get_text_for_reviews(reviews)
-    logger.debug('Getting features from the whole text...')
-    word_features = get_most_common_words(text, n_words=1000)
-    feature_finder = get_feature_finder(word_features)
+    logger.debug('Tokenizing text...')
+    words = tokenize(text)
+    feature_finder = MostCommonWordsFinder(n_words=500)
+    feature_finder.process(words)
+    feature_finder.save('top500reviews.featureset')
 
     def pred(review):
         return review['sentiment'] == SentimentEnum.GOOD
 
-    partitioner = DistributionPartitioner(reviews, pred=pred, ratio=0.7)
+    partitioner = DistributionPartitioner(reviews, pred=pred, ratio=0.85)
     partitioner.partition()
     classifier = NaiveBayesClassifier(
         partitioner.training_data,
         partitioner.test_data,
-        feature_finder=feature_finder,
+        feature_finder=feature_finder.find_features,
     )
     classifier.train()
     print('Accuracy: {:.2f}'.format(classifier.accuracy*100))
     classifier.show_top_features()
     classifier.save()
 
+
+def load_trained_naive_bayes_classifier():
+    feature_finder = MostCommonWordsFinder()
+    feature_finder.load('top500reviews.featureset')
+    classifier = NaiveBayesClassifier.load(
+        'naivebayesclassifier_20181025.classifier')
+
     reviews = get_reviews_by_sentiment(SentimentEnum.BAD, db=db)
+    correct = 0
+    wrong = 0
     for review in reviews:
-        featureset = feature_finder(
+        featureset = feature_finder.find_features(
             tokenize(review['text'], clean_filter=F_LOWERCASE))
         original_sentiment = SentimentEnum(review['sentiment'])
         guessed_sentiment = SentimentEnum(classifier.classify(featureset))
         if original_sentiment == guessed_sentiment:
-            print(f'Original sentiment {original_sentiment.name}. '
-                  f'Sentiment guessed: {guessed_sentiment.name}')
+            correct += 1
+        else:
+            wrong += 1
 
-
-def load_trained_naive_bayes_classifier():
-    pass
+    print('Bad correct: %s, wrong: %s' % (correct, wrong))
 
 
 if __name__ == '__main__':
     # generate_simple_markov_reviews()
     # generate_markovify_reviews()
-    classify_naive_bayes()
+    # classify_naive_bayes()
+    load_trained_naive_bayes_classifier()

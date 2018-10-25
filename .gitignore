@@ -128,3 +128,5 @@ pip-selfcheck.json
 
 ### Local
 settings_local.py
+*.classifier
+*.featureset
