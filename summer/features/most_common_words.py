@@ -29,7 +29,7 @@ class MostCommonWordsFinder(BaseFeatureFinder):
         feature_finder = cls(n_words=len(_features))
         feature_finder._features = _features
         feature_finder.logger.debug(
-            'Loaded featureset from file %s.', filename)
+            'Loaded featureset from file %s', filename)
         return feature_finder
 
     def find_features(self, words):
