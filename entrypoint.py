@@ -6,6 +6,7 @@ from summer.tokenizer import tokenize, F_LOWERCASE
 from summer.generator import SimpleMarkovGenerator, MarkovifyReviewGenerator
 from summer.partitioner import DistributionPartitioner
 from summer.classifier import NaiveBayesClassifier
+from summer.classifier.naive_bayes import get_labeled_review_data
 from summer.features import MostCommonWordsFinder
 from store import DB, get_reviews, get_reviews_by_sentiment
 
@@ -70,20 +71,26 @@ def classify_naive_bayes():
 
     partitioner = DistributionPartitioner(reviews, pred=pred, ratio=0.85)
     partitioner.partition()
-    classifier = NaiveBayesClassifier(
+    classifier = NaiveBayesClassifier()
+    logger.debug('Labeling training data...')
+    train_data = get_labeled_review_data(
         partitioner.training_data,
-        partitioner.test_data,
-        feature_finder=feature_finder.find_features,
+        feature_finder.find_features,
     )
-    classifier.train()
-    print('Accuracy: {:.2f}'.format(classifier.accuracy*100))
+    test_data = get_labeled_review_data(
+        partitioner.test_data,
+        feature_finder.find_features,
+    )
+    classifier.train(train_data)
+    accuracy = classifier.accuracy(test_data)
+    print('Accuracy: {:.2f}'.format(accuracy*100))
     classifier.show_top_features()
     classifier.save()
 
 
 def load_trained_naive_bayes_classifier():
-    feature_finder = MostCommonWordsFinder()
-    feature_finder.load('top500reviews.featureset')
+    feature_finder = MostCommonWordsFinder.load(
+        'top500reviews.featureset')
     classifier = NaiveBayesClassifier.load(
         'naivebayesclassifier_20181025.classifier')
 

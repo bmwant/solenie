@@ -7,18 +7,12 @@ from summer.classifier.base import BaseClassifier
 from summer.tokenizer import tokenize, F_LOWERCASE
 
 
-# todo (misha): decouple train and test data from here
 class NaiveBayesClassifier(BaseClassifier):
-    def __init__(self, training_data, test_data, *, feature_finder=None):
+    def __init__(self):
         self._classifier = None
-        self.training_data = training_data
-        self.test_data = test_data
-        self.feature_finder = feature_finder
         super().__init__()
 
-    def train(self):
-        self.logger.debug('Labeling training data...')
-        data = get_labeled_review_data(self.training_data, self.feature_finder)
+    def train(self, data):
         self.logger.debug('Training classifier...')
         self._classifier = nltk.NaiveBayesClassifier.train(data)
 
@@ -28,9 +22,7 @@ class NaiveBayesClassifier(BaseClassifier):
     def show_top_features(self, n_features=10):
         self.classifier.show_most_informative_features(n_features)
 
-    @property
-    def accuracy(self) -> float:
-        data = get_labeled_review_data(self.test_data, self.feature_finder)
+    def accuracy(self, data) -> float:
         return nltk.classify.accuracy(self.classifier, data)
 
     @property
@@ -53,7 +45,7 @@ class NaiveBayesClassifier(BaseClassifier):
     def load(cls, filename):
         with open(filename, 'rb') as f:
             _classifier = pickle.load(f)
-        classifier = cls(None, None)
+        classifier = cls()
         classifier.logger.debug('Loaded classifier from file %s.', filename)
         classifier._classifier = _classifier
         return classifier

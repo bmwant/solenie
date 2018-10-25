@@ -22,11 +22,15 @@ class MostCommonWordsFinder(BaseFeatureFinder):
         with open(filename, 'wb') as f:
             pickle.dump(features, f)
 
-    def load(self, filename):
-        self.logger.debug('Loading features from file %s...', filename)
+    @classmethod
+    def load(cls, filename):
         with open(filename, 'rb') as f:
-            self._features = pickle.load(f)
-        self.n_words = len(self._features)
+            _features = pickle.load(f)
+        feature_finder = cls(n_words=len(_features))
+        feature_finder._features = _features
+        feature_finder.logger.debug(
+            'Loaded featureset from file %s.', filename)
+        return feature_finder
 
     def find_features(self, words):
         features = {}
