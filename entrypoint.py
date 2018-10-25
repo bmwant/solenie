@@ -1,6 +1,6 @@
 import settings
 from buttworld.logger import get_logger
-from jerry.parser.review import SentimentEnum
+from froppyland.enums import SentimentEnum
 from summer.stats import get_text_for_reviews
 from summer.tokenizer import tokenize, F_LOWERCASE
 from summer.generator import SimpleMarkovGenerator, MarkovifyReviewGenerator

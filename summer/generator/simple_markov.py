@@ -2,7 +2,7 @@ from collections import defaultdict
 
 import numpy as np
 
-from jerry.parser.review import SentimentEnum
+from froppyland.enums import SentimentEnum
 from summer.tokenizer import _is_sent_terminator
 from summer.generator.base import BaseReviewGenerator
 

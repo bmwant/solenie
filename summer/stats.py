@@ -4,7 +4,7 @@ from nltk.probability import FreqDist
 
 import settings
 from buttworld.logger import get_logger
-from jerry.parser.review import SentimentEnum
+from froppyland.enums import SentimentEnum
 from summer.tokenizer import tokenize, FILTER_ALL
 from store import DB, get_reviews_by_sentiment
 

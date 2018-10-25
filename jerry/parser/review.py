@@ -1,15 +1,8 @@
-from enum import IntEnum
-
 from bs4 import BeautifulSoup
 
 from jerry.parser.base import BaseParser
+from froppyland.enums import SentimentEnum
 from store import Review
-
-
-class SentimentEnum(IntEnum):
-    BAD = -1
-    NEUTRAL = 0
-    GOOD = 1
 
 
 class ReviewParser(BaseParser):
