@@ -1,46 +1,46 @@
-from nltk.classify.scikitlearn import SklearnClassifier
-from sklearn.naive_bayes import MultinomialNB, BernoulliNB
+import pickle
+from datetime import datetime
 
+from summer.classifier.base import BaseClassifier
+
+from nltk.classify.scikitlearn import SklearnClassifier
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.svm import SVC, LinearSVC, NuSVC
 
 
+class ScikitClassifierWrapper(SklearnClassifier, BaseClassifier):
+    def __init__(self, *args, **kwargs):
+        SklearnClassifier.__init__(self, *args, **kwargs)
+        BaseClassifier.__init__(self)
+
+    def save(self):
+        now = datetime.now()
+        # todo (misha): I guess dumping self will be sufficient
+        data = {
+            'clf': self._clf,
+            'vectorizer': self._vectorizer,
+            'encoder': self._encoder,
+        }
+        day = now.strftime('%Y%m%d')
+        name = self._clf.__class__.__name__.lower()
+        model_filename = '{}_{}.classifier'.format(name, day)
+        self.logger.info('Saving trained classifier to %s', model_filename)
+        with open(model_filename, 'wb') as f:
+            pickle.dump(data, f)
+
+    @classmethod
+    def load(cls, filename):
+        with open(filename, 'rb') as f:
+            data = pickle.load(f)
+        classifier = cls(data['clf'])
+        classifier._vectorizer = data['vectorizer']
+        classifier._encoder = data['encoder']
+        classifier.logger.debug('Loaded classifier from file %s', filename)
+        return classifier
+
 
 def main():
-    import nltk
-    from summer.classifier.naive_bayes import get_labeled_review_data
-    from summer.partitioner import DistributionPartitioner
-    from summer.features import MostCommonWordsFinder
-    from froppyland.enums import SentimentEnum
-    from store import DB, get_reviews
-    import settings
 
-    db = DB(settings.TOP_500_MOVIE_REVIEWS)
-    reviews = get_reviews(db=db)
-    feature_finder = MostCommonWordsFinder.load('top500reviews.featureset')
-
-    def pred(review):
-        return review['sentiment'] == SentimentEnum.GOOD
-
-    partitioner = DistributionPartitioner(reviews, pred=pred, ratio=0.85)
-    partitioner.partition()
-
-    train_data = get_labeled_review_data(
-        partitioner.training_data,
-        feature_finder.find_features,
-    )
-    test_data = get_labeled_review_data(
-        partitioner.test_data,
-        feature_finder.find_features,
-    )
-
-    # Classifiers
-    # MNB_classifier = SklearnClassifier(MultinomialNB())
-    # MNB_classifier.train(train_data)
-    # print('MNB_classifier accuracy percent:',
-    #       nltk.classify.accuracy(MNB_classifier, test_data))
-    #
-    # BNB_classifier = SklearnClassifier(BernoulliNB())
     # BNB_classifier.train(train_data)
     # print("BernoulliNB accuracy percent:",
     #       nltk.classify.accuracy(BNB_classifier, test_data))
@@ -71,6 +71,7 @@ def main():
     # LinearSVC_classifier.train(train_data)
     # print("LinearSVC_classifier accuracy percent:",
     #       nltk.classify.accuracy(LinearSVC_classifier, test_data))
+    pass
 
 
 if __name__ == '__main__':

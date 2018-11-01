@@ -1,14 +1,19 @@
 import settings
 from buttworld.logger import get_logger
 from froppyland.enums import SentimentEnum
+from beth.comparator import ClassifierComparator
 from summer.stats import get_text_for_reviews
 from summer.tokenizer import tokenize, F_LOWERCASE
 from summer.generator import SimpleMarkovGenerator, MarkovifyReviewGenerator
 from summer.partitioner import DistributionPartitioner
 from summer.classifier import NaiveBayesClassifier
+from summer.classifier.others import ScikitClassifierWrapper
 from summer.classifier.naive_bayes import get_labeled_review_data
 from summer.features import MostCommonWordsFinder
 from store import DB, get_reviews, get_reviews_by_sentiment
+
+from nltk.classify.scikitlearn import SklearnClassifier
+from sklearn.naive_bayes import MultinomialNB, BernoulliNB
 
 
 logger = get_logger(__name__)
@@ -110,8 +115,25 @@ def load_trained_naive_bayes_classifier():
     print('Bad correct: %s, wrong: %s' % (correct, wrong))
 
 
+def compare_classifiers():
+    # GaussianNB
+    # ComplementNB
+    classifiers = (
+        ScikitClassifierWrapper(MultinomialNB()),
+        ScikitClassifierWrapper(BernoulliNB()),
+    )
+    c = ScikitClassifierWrapper.load('multinomialnb_20181101.classifier')
+    cc = ClassifierComparator(classifiers=[c])
+    # cc = ClassifierComparator(classifiers=classifiers)
+    cc.load_data()
+
+    # cc.train_classifiers()
+    cc.compare()
+
+
 if __name__ == '__main__':
     # generate_simple_markov_reviews()
     # generate_markovify_reviews()
     # classify_naive_bayes()
-    load_trained_naive_bayes_classifier()
+    # load_trained_naive_bayes_classifier()
+    compare_classifiers()

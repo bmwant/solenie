@@ -46,7 +46,7 @@ class NaiveBayesClassifier(BaseClassifier):
         with open(filename, 'rb') as f:
             _classifier = pickle.load(f)
         classifier = cls()
-        classifier.logger.debug('Loaded classifier from file %s.', filename)
+        classifier.logger.debug('Loaded classifier from file %s', filename)
         classifier._classifier = _classifier
         return classifier
 
