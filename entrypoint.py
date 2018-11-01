@@ -18,6 +18,16 @@ from sklearn.naive_bayes import (
     ComplementNB,
     MultinomialNB,
 )
+from sklearn.svm import SVC, LinearSVC, NuSVC, SVR, NuSVR
+from sklearn.linear_model import (
+    Perceptron,
+    SGDClassifier,
+    RidgeClassifier,
+    LogisticRegression,
+    LogisticRegressionCV,
+    OrthogonalMatchingPursuit,
+    PassiveAggressiveClassifier,
+)
 
 
 logger = get_logger(__name__)
@@ -119,7 +129,7 @@ def load_trained_naive_bayes_classifier():
     print('Bad correct: %s, wrong: %s' % (correct, wrong))
 
 
-def compare_classifiers():
+def compare_bayes_classifiers():
     # Bayes classifiers
     classifiers = (
         ScikitClassifierWrapper(MultinomialNB()),
@@ -136,9 +146,56 @@ def compare_classifiers():
     cc.compare()
 
 
+def compare_support_vector_classifiers():
+    classifiers = (
+        ScikitClassifierWrapper(SVC(gamma='scale')),
+        ScikitClassifierWrapper(NuSVC(nu=0.04, gamma='scale')),
+        # ScikitClassifierWrapper(SVR(gamma='scale')),
+        # ScikitClassifierWrapper(NuSVR(gamma='scale')),
+        ScikitClassifierWrapper(LinearSVC()),
+    )
+    cc = ClassifierComparator(classifiers=classifiers)
+    cc.load_data()
+
+    cc.train_classifiers()
+    cc.compare()
+
+
+def compare_linear_classifiers():
+    # No way
+    # Lars
+    # LassoLars
+    # Lasso
+    # ElasticNet
+    # HuberRegressor
+    # Hinge
+    # SGDRegressor
+    # Ridge
+    # RANSACRegressor
+    # TheilSenRegressor
+
+    classifiers = (
+        # ScikitClassifierWrapper(ElasticNetCV(cv=5, eps=0.01)),
+
+        ScikitClassifierWrapper(SGDClassifier(max_iter=1000, tol=0.01)),
+        ScikitClassifierWrapper(LogisticRegression()),
+        ScikitClassifierWrapper(RidgeClassifier()),
+        ScikitClassifierWrapper(LogisticRegressionCV()),
+        ScikitClassifierWrapper(OrthogonalMatchingPursuit()),
+        ScikitClassifierWrapper(PassiveAggressiveClassifier()),
+        ScikitClassifierWrapper(Perceptron(max_iter=1000, tol=0.01)),
+    )
+    cc = ClassifierComparator(classifiers=classifiers)
+    cc.load_data()
+
+    cc.train_classifiers(save_trained=False)
+    cc.compare()
+
+
 if __name__ == '__main__':
     # generate_simple_markov_reviews()
     # generate_markovify_reviews()
     # classify_naive_bayes()
     # load_trained_naive_bayes_classifier()
-    compare_classifiers()
+    # compare_support_vector_classifiers()
+    compare_linear_classifiers()

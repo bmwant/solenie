@@ -22,7 +22,10 @@ class ClassifierComparator(object):
     def train_classifiers(self, save_trained=True):
         for classifier in self.classifiers:
             self.logger.info('Training classifier %s', classifier)
-            classifier.train(self.train_data)
+            try:
+                classifier.train(self.train_data)
+            except Exception as e:
+                print(classifier.name, 'cannot be trained')
             if save_trained:
                 classifier.save()
 
@@ -52,8 +55,10 @@ class ClassifierComparator(object):
         header = ['Classifier', 'Accuracy']
         data.append(header)
         for classifier in self.classifiers:
-            accuracy = nltk.classify.accuracy(classifier, self.test_data)
-            data.append([classifier.name, '{:.4f}'.format(accuracy)])
-
+            try:
+                accuracy = nltk.classify.accuracy(classifier, self.test_data)
+                data.append([classifier.name, '{:.4f}'.format(accuracy)])
+            except Exception as e:
+                print(classifier.name, 'failed')
         tbl = SingleTable(data)
         print(tbl.table)
