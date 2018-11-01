@@ -72,13 +72,6 @@ def main():
     # print("LinearSVC_classifier accuracy percent:",
     #       nltk.classify.accuracy(LinearSVC_classifier, test_data))
 
-    # Nu-Support Vector Classification
-    classifier = NuSVC(nu=0.8, gamma='auto')
-    NuSVC_classifier = SklearnClassifier(classifier)
-    NuSVC_classifier.train(train_data)
-    print("NuSVC_classifier accuracy percent:",
-          nltk.classify.accuracy(NuSVC_classifier, test_data))
-
 
 if __name__ == '__main__':
     main()
