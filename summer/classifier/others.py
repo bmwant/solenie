@@ -22,7 +22,7 @@ class ScikitClassifierWrapper(SklearnClassifier, BaseClassifier):
             'encoder': self._encoder,
         }
         day = now.strftime('%Y%m%d')
-        name = self._clf.__class__.__name__.lower()
+        name = self.name.lower()
         model_filename = '{}_{}.classifier'.format(name, day)
         self.logger.info('Saving trained classifier to %s', model_filename)
         with open(model_filename, 'wb') as f:
@@ -37,6 +37,10 @@ class ScikitClassifierWrapper(SklearnClassifier, BaseClassifier):
         classifier._encoder = data['encoder']
         classifier.logger.debug('Loaded classifier from file %s', filename)
         return classifier
+
+    @property
+    def name(self):
+        return self._clf.__class__.__name__
 
 
 def main():

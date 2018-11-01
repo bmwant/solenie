@@ -1,6 +1,7 @@
 from typing import Iterable
 
 import nltk
+from terminaltables.other_tables import SingleTable
 
 import settings
 from store import DB, get_reviews
@@ -47,9 +48,12 @@ class ClassifierComparator(object):
         )
 
     def compare(self):
+        data = []
+        header = ['Classifier', 'Accuracy']
+        data.append(header)
         for classifier in self.classifiers:
-            self.logger.info(
-                '%s accuracy is: %s',
-                classifier,
-                nltk.classify.accuracy(classifier, self.test_data)
-            )
+            accuracy = nltk.classify.accuracy(classifier, self.test_data)
+            data.append([classifier.name, '{:.4f}'.format(accuracy)])
+
+        tbl = SingleTable(data)
+        print(tbl.table)

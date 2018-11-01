@@ -17,3 +17,7 @@ class BaseClassifier(ABC):
     @abstractmethod
     def load(self, filename: str):
         pass
+
+    @property
+    def name(self):
+        return self.__class__.__name__

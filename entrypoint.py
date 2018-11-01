@@ -12,8 +12,12 @@ from summer.classifier.naive_bayes import get_labeled_review_data
 from summer.features import MostCommonWordsFinder
 from store import DB, get_reviews, get_reviews_by_sentiment
 
-from nltk.classify.scikitlearn import SklearnClassifier
-from sklearn.naive_bayes import MultinomialNB, BernoulliNB
+from sklearn.naive_bayes import (
+    GaussianNB,
+    BernoulliNB,
+    ComplementNB,
+    MultinomialNB,
+)
 
 
 logger = get_logger(__name__)
@@ -116,18 +120,19 @@ def load_trained_naive_bayes_classifier():
 
 
 def compare_classifiers():
-    # GaussianNB
-    # ComplementNB
+    # Bayes classifiers
     classifiers = (
         ScikitClassifierWrapper(MultinomialNB()),
         ScikitClassifierWrapper(BernoulliNB()),
+        # ScikitClassifierWrapper(GaussianNB()),
+        ScikitClassifierWrapper(ComplementNB()),
     )
-    c = ScikitClassifierWrapper.load('multinomialnb_20181101.classifier')
-    cc = ClassifierComparator(classifiers=[c])
-    # cc = ClassifierComparator(classifiers=classifiers)
+    # c = ScikitClassifierWrapper.load('multinomialnb_20181101.classifier')
+    # cc = ClassifierComparator(classifiers=[c])
+    cc = ClassifierComparator(classifiers=classifiers)
     cc.load_data()
 
-    # cc.train_classifiers()
+    cc.train_classifiers()
     cc.compare()
 
 
