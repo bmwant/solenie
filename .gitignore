@@ -130,3 +130,4 @@ pip-selfcheck.json
 settings_local.py
 *.classifier
 *.featureset
+*d.txt
