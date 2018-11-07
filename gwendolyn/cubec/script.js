@@ -8,6 +8,7 @@ function main() {
   const canvas = document.querySelector("#glCanvas");
   // Initialize the GL context
   const gl = canvas.getContext("webgl");
+  const texture = loadTexture(gl, 'cubetexture.png');
 
   // Only continue if WebGL is available and working
   if (gl === null) {
@@ -22,23 +23,25 @@ function main() {
 
   const vsSource = `
     attribute vec4 aVertexPosition;
-    attribute vec4 aVertexColor;
+    attribute vec2 aTextureCoord;
     
     uniform mat4 uModelViewMatrix;
     uniform mat4 uProjectionMatrix;
     
-    varying lowp vec4 vColor;
+    varying highp vec2 vTextureCoord;
     
     void main() {
       gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
-      vColor = aVertexColor;
+      vTextureCoord = aTextureCoord;
     }
   `;
   const fsSource = `
-    varying lowp vec4 vColor;
+    varying highp vec2 vTextureCoord;
+    
+    uniform sampler2D uSampler;
     
     void main(void) {
-      gl_FragColor = vColor;
+      gl_FragColor = texture2D(uSampler, vTextureCoord);
     }
   `;
   const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
@@ -47,10 +50,12 @@ function main() {
     attribLocations: {
       vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
       vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
+      textureCoord: gl.getAttribLocation(shaderProgram, 'aTextureCoord'),
     },
     uniformLocations: {
       projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
       modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+      uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
     },
   };
   const buffers = initBuffers(gl);
@@ -61,7 +66,7 @@ function main() {
     const deltaTime = now - then;
     then = now;
 
-    drawScene(gl, programInfo, buffers, deltaTime);
+    drawScene(gl, programInfo, buffers, texture, deltaTime);
     requestAnimationFrame(render);
   }
   requestAnimationFrame(render);
@@ -102,31 +107,48 @@ function loadShader(gl, type, source) {
 }
 
 function initBuffers(gl) {
-  const colorsOneFace = [
-    1.0, 1.0, 1.0, 1.0,  // white
-    1.0, 0.0, 0.0, 1.0,  // red
-    0.0, 1.0, 0.0, 1.0,  // green
-    0.0, 0.0, 1.0, 1.0,  // blue
+  const textureCoordBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
+
+  const textureCoordinates = [
+    0.0,  0.0,
+    1.0,  0.0,
+    1.0,  1.0,
+    0.0,  1.0,
+
+    // Back
+    0.0,  0.0,
+    1.0,  0.0,
+    1.0,  1.0,
+    0.0,  1.0,
+
+    // Top
+    0.0,  0.0,
+    1.0,  0.0,
+    1.0,  1.0,
+    0.0,  1.0,
+
+    // Bottom
+    0.0,  0.0,
+    1.0,  0.0,
+    1.0,  1.0,
+    0.0,  1.0,
+
+    // Right
+    0.0,  0.0,
+    1.0,  0.0,
+    1.0,  1.0,
+    0.0,  1.0,
+
+    // Left
+    0.0,  0.0,
+    1.0,  0.0,
+    1.0,  1.0,
+    0.0,  1.0,
   ];
 
-  const faceColors = [
-    [1.0, 1.0, 1.0, 1.0],  // front: white
-    [1.0, 0.0, 0.0, 1.0],  // back: red
-    [0.0, 1.0, 0.0, 1.0],  // top: green
-    [0.0, 0.0, 1.0, 1.0],  // bottom: blue
-    [1.0, 1.0, 0.0, 1.0],  // right: yellow
-    [1.0, 0.0, 1.0, 1.0],  // left: purple
-  ];
-
-  var colors = [];
-  for (var j = 0; j < faceColors.length; ++j) {
-    const c = faceColors[j];
-
-    colors = colors.concat(c, c, c, c);
-  }
-  const colorBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),
+    gl.STATIC_DRAW);
 
   const indexBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
@@ -189,15 +211,18 @@ function initBuffers(gl) {
     new Float32Array(positions),
     gl.STATIC_DRAW);
 
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
+    new Uint16Array(indices), gl.STATIC_DRAW);
+
   return {
     position: positionBuffer,
-    color: colorBuffer,
+    textureCoord: textureCoordBuffer,
     indices: indexBuffer,
   }
 }
 
 
-function drawScene(gl, programInfo, buffers, deltaTime) {
+function drawScene(gl, programInfo, buffers, texture, deltaTime) {
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
   gl.clearDepth(1.0);
   gl.enable(gl.DEPTH_TEST);
@@ -254,24 +279,20 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
   }
 
   {
-    const numComponents = 4;
+    const num = 2;
     const type = gl.FLOAT;
     const normalize = false;
     const stride = 0;
     const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
-    gl.vertexAttribPointer(
-      programInfo.attribLocations.vertexColor,
-      numComponents,
-      type,
-      normalize,
-      stride,
-      offset
-    );
-    gl.enableVertexAttribArray(
-      programInfo.attribLocations.vertexColor
-    );
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.textureCoord);
+    gl.vertexAttribPointer(programInfo.attribLocations.textureCoord, num, type,
+      normalize, stride, offset);
+    gl.enableVertexAttribArray(programInfo.attribLocations.textureCoord);
   }
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
+
   {
     const numComponents = 3;
     const type = gl.FLOAT;
