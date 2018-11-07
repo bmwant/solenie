@@ -133,22 +133,25 @@ class Game(object):
             if pos == self.end and min_score < self._min_score:
                 self._min_score = min_score
 
-            # try to move forward
-            new_pos = pos.forward()
-            new_state = state.move_forward()
-            new_value = min_score + new_state.value
-            current_value = self.map.get(new_pos, self._min_score)
-            # Continue path only if it is cheaper
-            if new_value <= current_value:
-                self.map[new_pos] = new_value
-                self.queue.put((new_pos, new_state))
+            # moving in positive directions first
+            for direction in ('forward', 'right', 'backward', 'left'):
+                new_pos = getattr(pos, direction)()
+                move_method = f'move_{direction}'
+                new_state = getattr(state, move_method)()
+                new_value = min_score + new_state.value
+                current_value = self.map.get(new_pos, self._min_score)
+                # Continue path only if it is cheaper
+                if new_value <= current_value:
+                    self.map[new_pos] = new_value
+                    self.queue.put((new_pos, new_state))
 
         print(self.map)
-        print(self._min_score)
         return self._min_score
 
     def get_path(self):
-        pass
+        if self._min_score == float('inf') or not self.map:
+            raise RuntimeError('No solution! '
+                               'Have you solved the game already?')
 
 
 def main():
@@ -161,10 +164,9 @@ def main():
         right=4,
     )
     start = Position(2, 2)
-    end = Position(2, 4)
+    end = Position(3, 3)
     game = Game(initial_state=cube, start=start, end=end)
-    game.solve()
-    print('done')
+    print(game.solve())
 
 
 if __name__ == '__main__':
