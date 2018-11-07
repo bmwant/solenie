@@ -115,6 +115,14 @@ class Position(object):
 
 
 class Game(object):
+
+    REVERSED_DIRECTIONS_ABBR = {
+        'backward': 'F',
+        'left': 'R',
+        'forward': 'B',
+        'right': 'L',
+    }
+
     def __init__(self, initial_state: Cube, start: Position, end: Position):
         self.initial_state = initial_state
         self.start = start
@@ -145,13 +153,33 @@ class Game(object):
                     self.map[new_pos] = new_value
                     self.queue.put((new_pos, new_state))
 
-        print(self.map)
         return self._min_score
+
+    def _get_min_direction(self, pos):
+        min_score = float('inf')
+        min_direction = None
+        for direction in ('backward', 'left', 'forward', 'right'):
+            new_pos = getattr(pos, direction)()
+            if self.map.get(new_pos, min_score) < min_score:
+                min_score = self.map[new_pos]
+                min_direction = direction
+
+        return min_direction
 
     def get_path(self):
         if self._min_score == float('inf') or not self.map:
             raise RuntimeError('No solution! '
                                'Have you solved the game already?')
+        pos = self.end
+        path = [f'{self.end}[{self._min_score}] DONE!']
+        while pos != self.start:
+            min_direction = self._get_min_direction(pos)
+            pos = getattr(pos, min_direction)()
+            move = self.REVERSED_DIRECTIONS_ABBR[min_direction]
+            score = self.map[pos]
+            path.append(f'{pos}[{score}] -> {move}')
+
+        return reversed(path)
 
 
 def main():
@@ -164,9 +192,10 @@ def main():
         right=4,
     )
     start = Position(2, 2)
-    end = Position(3, 3)
+    end = Position(2, 20)
     game = Game(initial_state=cube, start=start, end=end)
     print(game.solve())
+    print('\n'.join(game.get_path()))
 
 
 if __name__ == '__main__':
