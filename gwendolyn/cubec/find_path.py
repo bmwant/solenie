@@ -67,16 +67,17 @@ class Cube(object):
         )
 
     def __str__(self):
+        space = ' '
         return (
-            ' {}\n'
-            ' {}\n'
-            '{}{}{}\n'
-            ' {}\n'
+            '{:^3}{:^3}\n'
+            '{:^3}{:^3}\n'
+            '{:^3}{:^3}{:^3}\n'
+            '{:^3}{:^3}\n'
         ).format(
-            self.top,
-            self.back,
+            space, self.top,
+            space, self.back,
             self.left, self.bottom, self.right,
-            self.front,
+            space, self.front,
         )
 
 
@@ -191,8 +192,9 @@ def main():
         left=3,
         right=4,
     )
+
     start = Position(2, 2)
-    end = Position(2, 20)
+    end = Position(5, 5)
     game = Game(initial_state=cube, start=start, end=end)
     print(game.solve())
     print('\n'.join(game.get_path()))
