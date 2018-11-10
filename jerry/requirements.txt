@@ -1,0 +1,2 @@
+docutils==0.14
+epydoc==3.0.1
