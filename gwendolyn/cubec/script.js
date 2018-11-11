@@ -8,7 +8,9 @@ function main() {
   const canvas = document.querySelector("#glCanvas");
   // Initialize the GL context
   const gl = canvas.getContext("webgl");
-  const texture = loadTexture(gl, 'cubetexture.png');
+  const texture = initTexture(gl);
+  const video = setupVideo('Firefox.mp4');
+
 
   // Only continue if WebGL is available and working
   if (gl === null) {
@@ -81,6 +83,10 @@ function main() {
     now *= 0.001;
     const deltaTime = now - then;
     then = now;
+
+    if (copyVideo) {
+      updateTexture(gl, texture, video);
+    }
 
     drawScene(gl, programInfo, buffers, texture, deltaTime);
     requestAnimationFrame(render);
