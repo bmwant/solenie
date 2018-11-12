@@ -4,11 +4,21 @@
   <meta charset="UTF-8">
   <title>Try three.js app</title>
   <style>
-    body {margin: 0}
+    body, html {margin: 0; height: 100%; width: 100%}
     canvas {width: 100%; height: 100%}
+    #info {
+      position: absolute;
+      top: 10px;
+      width: 100%;
+      text-align: center;
+      z-index: 100;
+      display:block;
+      color: white;
+    }
   </style>
 </head>
 <body>
+  <div id="info">Description</div>
   <script src="node_modules/three/build/three.js"></script>
   <script>
     var scene = new THREE.Scene();
@@ -21,9 +31,10 @@
     var geometry = new THREE.BoxGeometry(1, 1, 1);
     var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
     var cube = new THREE.Mesh(geometry, material);
+    cube.position.set(0.5, 0.5, 0.5);
     scene.add(cube);
     // camera.position.z = 5;
-    camera.position.set(0, 0, 30);
+    camera.position.set(0, -5, 5);
     camera.lookAt(0, 0, 0);
 
     material = new THREE.LineBasicMaterial({color: 0x0000ff});
@@ -35,10 +46,38 @@
 
     scene.add(line);
 
+    var size = 100;
+    var divisions = 100;
+
+    var gridHelper = new THREE.GridHelper( size, divisions, 0x00ff01 );
+    gridHelper.geometry.rotateX( Math.PI / 2 );
+    scene.add( gridHelper );
+
+
+    var ySpeed = 1,
+      xSpeed = 1;
+    document.addEventListener("keydown", onDocumentKeyDown, false);
+    function onDocumentKeyDown(event) {
+      // console.log(event);
+      var keyCode = event.which;
+      var key = event.key;
+      if (key == 'ArrowUp') { //
+        cube.position.y += ySpeed;
+      } else if (key == 'ArrowDown') {
+        cube.position.y -= ySpeed;
+      } else if (key == 'ArrowLeft') {
+        cube.position.x -= xSpeed;
+      } else if (key == 'ArrowRight') {
+        cube.position.x += xSpeed;
+      } else if (keyCode == 32) {
+        cube.position.set(0.5, 0.5, 0.5);
+      }
+    }
+
     function animate() {
       requestAnimationFrame(animate);
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01;
+      // cube.rotation.x += 0.01;
+      // cube.rotation.y += 0.01;
       renderer.render(scene, camera);
     }
     animate();
