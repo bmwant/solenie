@@ -4,7 +4,8 @@
   "description": "",
   "main": "script.js",
   "dependencies": {
-    "gl-matrix": "^2.8.1"
+    "gl-matrix": "^2.8.1",
+    "three": "^0.98.0"
   },
   "devDependencies": {},
   "scripts": {
