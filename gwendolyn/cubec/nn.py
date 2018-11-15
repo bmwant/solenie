@@ -1,3 +1,4 @@
+# https://towardsdatascience.com/how-to-build-your-own-neural-network-from-scratch-in-python-68998a08e4f6
 import numpy as np
 import pandas as pd
 
@@ -24,7 +25,7 @@ class NeuralNetwork(object):
     def _feed_forward(self):
         self.layer1 = sigmoid(np.dot(self.input, self.weights1))
         self.output = sigmoid(np.dot(self.layer1, self.weights2))
-    
+
     def _back_prop(self):
         # this is a hardcoded function based on our loss function which is
         # sum of squares
