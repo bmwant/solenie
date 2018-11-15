@@ -24,21 +24,23 @@ class NeuralNetwork(object):
     def _feed_forward(self):
         self.layer1 = sigmoid(np.dot(self.input, self.weights1))
         self.output = sigmoid(np.dot(self.layer1, self.weights2))
-
+    
     def _back_prop(self):
-        diff = self.y - self.output
-        out_deriv = sigmoid_derivative(self.output)
-        d_weights2 = np.dot(
-            self.layer1.T,
-            2 * diff * out_deriv
-        )
+        # this is a hardcoded function based on our loss function which is
+        # sum of squares
+        loss_derivative_value = 2 * (self.y - self.output)
 
-        product = np.dot(2*diff*out_deriv, self.weights2.T) * \
-                  sigmoid_derivative(self.layer1)
-        d_weights1 = np.dot(
-            self.input.T,
-            product
-        )
+        # this is hardcoded function based on our activation function which
+        # is sigmoid
+        sigmoid_derivative_value = sigmoid_derivative(self.output)
+
+        loss_1 = loss_derivative_value * sigmoid_derivative_value
+        d_weights2 = np.dot(self.layer1.T, loss_1)
+
+        loss_2 = np.dot(loss_1, self.weights2.T) * \
+                 sigmoid_derivative(self.layer1)
+        d_weights1 = np.dot(self.input.T, loss_2)
+
         self.weights1 += d_weights1
         self.weights2 += d_weights2
 
