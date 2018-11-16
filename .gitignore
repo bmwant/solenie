@@ -209,3 +209,5 @@ typings/
 
 # FuseBox cache
 .fusebox/
+
+gwendolyn/other/data/animals
