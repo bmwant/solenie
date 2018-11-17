@@ -34,6 +34,7 @@ def parse_args():
 
 
 def load_images(dataset):
+    print('Loading images...')
     data = []
     labels = []
     image_paths = sorted(list(paths.list_images(dataset)))
@@ -60,6 +61,12 @@ def create_model(num_classes):
     model.add(Dense(num_classes, activation='softmax'))
 
     return model
+
+
+def save_model(model, model_path, lb, lb_path):
+    model.save(model_path)
+    with open(lb_path, 'wb') as f:
+        f.write(pickle.dumps(lb))
 
 
 def main():
