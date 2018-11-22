@@ -211,3 +211,8 @@ typings/
 .fusebox/
 
 gwendolyn/other/data/animals
+*.pkl
+log/
+*.data-*
+*.index
+*.meta
