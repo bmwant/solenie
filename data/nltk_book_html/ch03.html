@@ -494,10 +494,11 @@ Yahoo Python API and xref to discussion of this in chap-data_.] -->
 <td>1:97</td>
 </tr>
 </tbody>
-<p class="caption">Google Hits for Collocations: The number of hits for collocations
+<p class="caption"><span class="caption-label">Table 3.1</span>: <p>Google Hits for Collocations: The number of hits for collocations
 involving the words <span class="example">absolutely</span> or <span class="example">definitely</span>, followed
 by one of <span class="example">adore</span>, <span class="example">love</span>, <span class="example">like</span>, or <span class="example">prefer</span>.
 (Liberman, in <em>LanguageLog</em>, 2005).</p>
+</p>
 </table>
 <p>Unfortunately, search engines have some significant shortcomings.
 First, the allowable range of search patterns is severely restricted.
@@ -1281,8 +1282,9 @@ we haven't seen yet, is shown in <a class="reference internal" href="#tab-string
 <td>replace instances of <tt class="doctest"><span class="pre">t</span></tt> with <tt class="doctest"><span class="pre">u</span></tt> inside <tt class="doctest"><span class="pre">s</span></tt></td>
 </tr>
 </tbody>
-<p class="caption">Useful String Methods: operations on strings in addition to the string tests
+<p class="caption"><span class="caption-label">Table 3.2</span>: <p>Useful String Methods: operations on strings in addition to the string tests
 shown in <a href="#id22"><span class="problematic" id="id23">tab-word-tests_</span></a>; all methods produce a new string or list</p>
+</p>
 </table>
 </div>
 <div class="section" id="the-difference-between-lists-and-strings">
@@ -1749,7 +1751,7 @@ in a text using <tt class="doctest"><span class="pre">sum(1 for w in text if re.
 <h3>Ranges and Closures</h3>
 <span class="target" id="fig-t9"></span><div class="figure" id="fig-t9">
 <img alt="../images/T9.png" src="../images/T9.png" />
-<p class="caption">T9: Text on 9 Keys</p>
+<p class="caption"><span class="caption-label">Figure 3.1</span>: T9: Text on 9 Keys</p>
 </div>
 <p>The <a name="t9_index_term" /><span class="termdef">T9</span> system is used for entering text on mobile phones (see <a class="reference internal" href="#fig-t9">3.1</a>).  Two or more words that
 are entered with the same sequence of keystrokes are known as <a name="textonyms_index_term" /><span class="termdef">textonyms</span>.
@@ -1920,7 +1922,8 @@ you omit the parentheses from the last expression above, and search for
 <td>Parentheses that indicate the scope of the operators</td>
 </tr>
 </tbody>
-<p class="caption">Basic Regular Expression Meta-Characters, Including Wildcards, Ranges and Closures</p>
+<p class="caption"><span class="caption-label">Table 3.3</span>: <p>Basic Regular Expression Meta-Characters, Including Wildcards, Ranges and Closures</p>
+</p>
 </table>
 <p>To the Python interpreter, a regular expression is just like any other string.
 If the string contains a backslash followed by particular characters, it will
@@ -2434,7 +2437,7 @@ ere is much danger , for beyond the cave lies the Gorge of Eternal Peril , which
 h it and lived ! Bones of full fifty men lie strewn about its lair . So , brave k
 not stop our fight ' til each one of you lies dead , and the Holy Grail returns t</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Indexing a Text Using a Stemmer</td></tr></p>
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_stemmer_indexing.py" type="text/x-python"><span class="caption-label">Example 3.2 (code_stemmer_indexing.py)</span></a>: <span class="caption-label">Figure 3.2</span>: Indexing a Text Using a Stemmer</td></tr></p>
 </table></div>
 </div>
 <div class="section" id="lemmatization">
@@ -2651,7 +2654,8 @@ seen in this section, in addition to some other useful symbols.</p>
 <td>The newline character</td>
 </tr>
 </tbody>
-<p class="caption">Regular Expression Symbols</p>
+<p class="caption"><span class="caption-label">Table 3.4</span>: <p>Regular Expression Symbols</p>
+</p>
 </table>
 </div>
 <div class="section" id="nltk-s-regular-expression-tokenizer">
@@ -2861,7 +2865,7 @@ get back to the original segmented text from the above representation.</p>
 ['do', 'you', 'see', 'the', 'kitty', 'see', 'the', 'doggy', 'do', 'you',
 'like', 'the', 'kitty', 'like', 'the', 'doggy']</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Reconstruct Segmented Text from String Representation:
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_segment.py" type="text/x-python"><span class="caption-label">Example 3.3 (code_segment.py)</span></a>: <span class="caption-label">Figure 3.3</span>: Reconstruct Segmented Text from String Representation:
 <tt class="doctest"><span class="pre">seg1</span></tt> and <tt class="doctest"><span class="pre">seg2</span></tt> represent the initial and final
 segmentations of some hypothetical child-directed speech;
 the <tt class="doctest"><span class="pre">segment()</span></tt> function can use them to reproduce the
@@ -2879,7 +2883,7 @@ reconstruct the source text from the lexicon.  We illustrate this in
 <a class="reference internal" href="#fig-brent">3.4</a>.</p>
 <span class="target" id="fig-brent"></span><div class="figure" id="fig-brent">
 <img alt="../images/brent.png" src="../images/brent.png" />
-<p class="caption">Calculation of Objective Function: Given a hypothetical segmentation
+<p class="caption"><span class="caption-label">Figure 3.4</span>: Calculation of Objective Function: Given a hypothetical segmentation
 of the source text (on the left), derive a lexicon and a derivation
 table that permit the source text to be reconstructed, then total
 up the number of characters used by each lexical item (including a boundary
@@ -2920,7 +2924,7 @@ the segmentation; smaller values of the score indicate a better segmentation.</p
 >>> evaluate(text, seg1)
 64</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Computing the Cost of Storing the Lexicon and Reconstructing the Source Text</td></tr></p>
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_evaluate.py" type="text/x-python"><span class="caption-label">Example 3.5 (code_evaluate.py)</span></a>: <span class="caption-label">Figure 3.5</span>: Computing the Cost of Storing the Lexicon and Reconstructing the Source Text</td></tr></p>
 </table></div>
 <p>The final step is to search for the pattern of zeros and ones that minimizes this objective
 function, shown in <a class="reference internal" href="#code-anneal">3.6</a>.  Notice that the best segmentation includes &quot;words&quot; like
@@ -2974,7 +2978,7 @@ def anneal(text, segs, iterations, cooling_rate):
 43 ['doyou', 'see', 'thekitty', 'see', 'thedoggy', 'doyou', 'like', 'thekitty', 'like', 'thedoggy']
 '0000100100000001001000000010000100010000000100010000000'</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Non-Deterministic Search Using Simulated Annealing: begin searching
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_anneal.py" type="text/x-python"><span class="caption-label">Example 3.6 (code_anneal.py)</span></a>: <span class="caption-label">Figure 3.6</span>: Non-Deterministic Search Using Simulated Annealing: begin searching
 with phrase segmentations only; randomly perturb the zeros and ones
 proportional to the &quot;temperature&quot;; with each iteration the temperature
 is lowered and the perturbation of boundaries is reduced. As this
@@ -3313,7 +3317,7 @@ science_fiction      16     49      4     12      8     16
 romance              74    193     11     51     45     43
 humor                16     30      8      8      9     13</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Frequency of Modals in Different Sections of the Brown Corpus</td></tr></p>
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_modal_tabulate.py" type="text/x-python"><span class="caption-label">Example 3.7 (code_modal_tabulate.py)</span></a>: <span class="caption-label">Figure 3.7</span>: Frequency of Modals in Different Sections of the Brown Corpus</td></tr></p>
 </table></div>
 <p>Recall from the listing in <a class="reference internal" href="#code-stemmer-indexing">3.2</a> that we used a format string
 <tt class="doctest"><span class="pre">'{:{width}}'</span></tt> and bound a value to the <tt class="doctest"><span class="pre">width</span></tt> parameter in

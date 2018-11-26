@@ -476,7 +476,7 @@ features["count(%s)" % letter] = name.lower().count(letter) -->
 <td class="pysrc">>>> gender_features2('John') 
 {'count(j)': 1, 'has(d)': False, 'count(b)': 0, ...}</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">A Feature Extractor that Overfits Gender Features.
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_gender_features_overfitting.py" type="text/x-python"><span class="caption-label">Example 1.1 (code_gender_features_overfitting.py)</span></a>: <span class="caption-label">Figure 1.1</span>: A Feature Extractor that Overfits Gender Features.
 The feature sets returned by this feature extractor contain a
 large number of specific features, leading to overfitting for
 the relatively small Names Corpus.</td></tr></p>
@@ -724,7 +724,7 @@ def document_features(document): # [_document-classify-extractor]
 <td class="pysrc">>>> print(document_features(movie_reviews.words('pos/cv957_8737.txt'))) 
 {'contains(waste)': False, 'contains(lot)': False, ...}</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">A feature extractor for document classification, whose
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_document_classify_fd.py" type="text/x-python"><span class="caption-label">Example 1.2 (code_document_classify_fd.py)</span></a>: <span class="caption-label">Figure 1.2</span>: A feature extractor for document classification, whose
 features indicate whether or not individual words are present
 in a given document.</td></tr></p>
 </table></div>
@@ -769,7 +769,7 @@ Most Informative Features
          contains(damon) = True              pos : neg    =      5.9 : 1.0
         contains(wasted) = True              neg : pos    =      5.8 : 1.0</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Training and testing a classifier for document classification.</td></tr></p>
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_document_classify_use.py" type="text/x-python"><span class="caption-label">Example 1.3 (code_document_classify_use.py)</span></a>: <span class="caption-label">Figure 1.3</span>: Training and testing a classifier for document classification.</td></tr></p>
 </table></div>
 <p>Apparently in this corpus, a review that mentions &quot;Seagal&quot; is almost 8
 times more likely to be negative than positive, while a review that
@@ -1013,7 +1013,7 @@ classifier.</p>
 >>> nltk.classify.accuracy(classifier, test_set)
 0.78915962207856782</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">A part-of-speech classifier whose feature detector
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_suffix_pos_tag.py" type="text/x-python"><span class="caption-label">Example 1.4 (code_suffix_pos_tag.py)</span></a>: <span class="caption-label">Figure 1.4</span>: A part-of-speech classifier whose feature detector
 examines the context in which a word appears in order to
 determine which part of speech tag should be assigned.  In
 particular, the identity of the previous word is included as a
@@ -1125,7 +1125,7 @@ class ConsecutivePosTagger(nltk.TaggerI): # [_consec-pos-tagger]
 >>> print(tagger.evaluate(test_sents))
 0.79796012981</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Part of Speech Tagging with a Consecutive Classifier</td></tr></p>
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_consecutive_pos_tagger.py" type="text/x-python"><span class="caption-label">Example 1.5 (code_consecutive_pos_tagger.py)</span></a>: <span class="caption-label">Figure 1.5</span>: Part of Speech Tagging with a Consecutive Classifier</td></tr></p>
 </table></div>
 </div>
 <div class="section" id="other-methods-for-sequence-classification">
@@ -1266,7 +1266,7 @@ in <a class="reference internal" href="#code-classification-based-segmenter">2.1
         sents.append(words[start:])
     return sents</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Classification Based Sentence Segmenter</td></tr></p>
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_classification_based_segmenter.py" type="text/x-python"><span class="caption-label">Example 2.1 (code_classification_based_segmenter.py)</span></a>: <span class="caption-label">Figure 2.1</span>: Classification Based Sentence Segmenter</td></tr></p>
 </table></div>
 </div>
 <div class="section" id="identifying-dialogue-act-types">
@@ -1415,7 +1415,7 @@ filtered out as &quot;stopwords&quot;.</p>
     features['ne_hyp_extra'] = len(extractor.hyp_extra('ne'))
     return features</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">&quot;Recognizing Text Entailment&quot; Feature Extractor.  The
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_rte_features.py" type="text/x-python"><span class="caption-label">Example 2.2 (code_rte_features.py)</span></a>: <span class="caption-label">Figure 2.2</span>: &quot;Recognizing Text Entailment&quot; Feature Extractor.  The
 <tt class="doctest"><span class="pre">RTEFeatureExtractor</span></tt> class builds a bag
 of words for both the text and the hypothesis after throwing
 away some stopwords, then calculates overlap and difference.</td></tr></p>
@@ -1907,7 +1907,7 @@ def entropy(labels):
 >>> print(entropy(['female', 'female', 'female', 'female'])) 
 0.0</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Calculating the Entropy of a List of Labels</td></tr></p>
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_entropy.py" type="text/x-python"><span class="caption-label">Example 4.1 (code_entropy.py)</span></a>: <span class="caption-label">Figure 4.1</span>: Calculating the Entropy of a List of Labels</td></tr></p>
 </table></div>
 <!-- The doctest: +SKIP in the last example is because doctest prints
 -0.0 on some systems rather than 0.0, which can be confusing;
@@ -2405,7 +2405,7 @@ ten senses, such as:</p>
 <td>0%</td>
 </tr>
 </tbody>
-<p class="caption"></p>
+<p class="caption"><span class="caption-label">Table 6.1</span></p>
 </table>
 <p>Although any of these distributions <em>might</em> be correct, we are likely
 to choose distribution <cite>(i)</cite>, because without any more information,
@@ -2492,7 +2492,7 @@ new piece of information, such as:</p>
 <td>0%</td>
 </tr>
 </tbody>
-<p class="caption"></p>
+<p class="caption"><span class="caption-label">Table 6.2</span></p>
 </table>
 <p>But again, we will likely choose the distribution that makes the
 fewest unwarranted assumptions &#8212; in this case, distribution <cite>(v)</cite>.</p>
@@ -2560,7 +2560,7 @@ distribution looks appropriate:</p>
 <td>4.46%</td>
 </tr>
 </tbody>
-<p class="caption"></p>
+<p class="caption"><span class="caption-label">Table 6.3</span></p>
 </table>
 <p>In particular, the distribution is consistent with what we know: if we
 add up the probabilities in column A, we get 55%; if we add up the

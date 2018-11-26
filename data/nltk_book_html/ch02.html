@@ -535,7 +535,8 @@ have been categorized by genre, such as <em>news</em>, <em>editorial</em>, and s
 <td>Thurber: <em>The Future, If Any, of Comedy</em></td>
 </tr>
 </tbody>
-<p class="caption">Example Document for Each Section of the Brown Corpus</p>
+<p class="caption"><span class="caption-label">Table 1.1</span>: <p>Example Document for Each Section of the Brown Corpus</p>
+</p>
 </table>
 <p>We can access the corpus as a list of words, or a list of sentences (where each sentence
 is itself just a list of words).  We can optionally specify particular categories or files to read:</p>
@@ -957,8 +958,9 @@ please consult the Corpus HOWTO at <tt class="doctest"><span class="pre">http://
 <td>145k synonym sets</td>
 </tr>
 </tbody>
-<p class="caption">Some of the Corpora and Corpus Samples Distributed with NLTK: For information about downloading
+<p class="caption"><span class="caption-label">Table 1.2</span>: <p>Some of the Corpora and Corpus Samples Distributed with NLTK: For information about downloading
 and using them, please consult the NLTK website.</p>
+</p>
 </table>
 </div>
 <div class="section" id="corpora-in-other-languages">
@@ -1014,7 +1016,7 @@ Note that <tt class="doctest"><span class="pre">True</span></tt> and <tt class="
 </table></div>
 <span class="target" id="fig-word-len-dist"></span><div class="figure" id="fig-word-len-dist">
 <img alt="../images/word-len-dist.png" src="../images/word-len-dist.png" />
-<p class="caption">Cumulative Word Length Distributions:
+<p class="caption"><span class="caption-label">Figure 1.1</span>: Cumulative Word Length Distributions:
 Six translations of the Universal Declaration of Human Rights are processed;
 this graph shows that words having 5 or fewer letters account for about
 80% of Ibibio text, 60% of German text, and 25% of Inuktitut text.</p>
@@ -1125,8 +1127,9 @@ invalid literal for int() with base 10: '120:140:140'.</p>
 <td>the contents of the README file of the corpus</td>
 </tr>
 </tbody>
-<p class="caption">Basic Corpus Functionality defined in NLTK: more documentation can be found using
+<p class="caption"><span class="caption-label">Table 1.3</span>: <p>Basic Corpus Functionality defined in NLTK: more documentation can be found using
 <tt class="doctest"><span class="pre">help(nltk.corpus.reader)</span></tt> and by reading the online Corpus HOWTO at <tt class="doctest"><span class="pre">http://nltk.org/howto</span></tt>.</p>
+</p>
 </table>
 <p>NLTK's corpus readers support efficient access to a variety of corpora, and can
 be used to work with new corpora.  <a class="reference internal" href="#tab-corpus">1.3</a> lists functionality
@@ -1515,7 +1518,7 @@ FreqDist({'creature': 7, 'thing': 4, 'substance': 2, ',': 1, '.': 1, 'soul': 1})
 >>> generate_model(cfd, 'living')
 living creature that he said , and the land of the land of the land</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Generating Random Text: this program obtains all bigrams
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_random_text.py" type="text/x-python"><span class="caption-label">Example 2.1 (code_random_text.py)</span></a>: <span class="caption-label">Figure 2.1</span>: Generating Random Text: this program obtains all bigrams
 from the text of the book of Genesis, then constructs a
 conditional frequency distribution to record which
 words are most likely to follow a given word; e.g., after
@@ -1564,8 +1567,9 @@ Their commonly-used methods are summarized in <a class="reference internal" href
 <td>test if samples in <tt class="doctest"><span class="pre">cfdist1</span></tt> occur less frequently than in <tt class="doctest"><span class="pre">cfdist2</span></tt></td>
 </tr>
 </tbody>
-<p class="caption">NLTK's Conditional Frequency Distributions: commonly-used methods and idioms for defining,
+<p class="caption"><span class="caption-label">Table 2.1</span>: <p>NLTK's Conditional Frequency Distributions: commonly-used methods and idioms for defining,
 accessing, and visualizing a conditional frequency distribution of counters.</p>
+</p>
 </table>
 </div>
 </div>
@@ -1725,7 +1729,7 @@ correct.  (We'll discuss functions at greater length in <a href="#id43"><span cl
 >>> plural('woman')
 'women'</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">A Python Function: this function tries to work out the
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_plural.py" type="text/x-python"><span class="caption-label">Example 3.1 (code_plural.py)</span></a>: <span class="caption-label">Figure 3.1</span>: A Python Function: this function tries to work out the
 plural form of any English noun; the keyword <tt class="doctest"><span class="pre">def</span></tt> (define)
 is followed by the function name, then a parameter inside
 parentheses, and a colon; the body of the function is the
@@ -1799,7 +1803,7 @@ along with additional information such as the part of speech and the sense
 definition.  Two distinct words having the same spelling are called <a name="homonyms_index_term" /><span class="termdef">homonyms</span>.</p>
 <span class="target" id="fig-lexicon"></span><div class="figure" id="fig-lexicon">
 <img alt="../images/lexicon.png" src="../images/lexicon.png" />
-<p class="caption">Lexicon Terminology: lexical entries for two lemmas
+<p class="caption"><span class="caption-label">Figure 4.1</span>: Lexicon Terminology: lexical entries for two lemmas
 having the same spelling (homonyms), providing part of speech
 and gloss information.</p>
 </div>
@@ -1837,7 +1841,7 @@ words in a text corpus, as shown in <a class="reference internal" href="#code-un
 'acros', 'actualy', 'adams', 'adds', 'adduser', 'adjusts', 'adoted', 'adreniline',
 'ads', 'adults', 'afe', 'affairs', 'affari', 'affects', 'afk', 'agaibn', 'ages', ...]</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Filtering a Text: this program computes the vocabulary of a text,
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_unusual.py" type="text/x-python"><span class="caption-label">Example 4.2 (code_unusual.py)</span></a>: <span class="caption-label">Figure 4.2</span>: Filtering a Text: this program computes the vocabulary of a text,
 then removes all items that occur in an existing wordlist,
 leaving just the uncommon or mis-spelt words.</td></tr></p>
 </table></div>
@@ -1974,7 +1978,7 @@ of <tt class="doctest"><span class="pre">name</span></tt>.</p>
 </table></div>
 <span class="target" id="fig-cfd-gender"></span><div class="figure" id="fig-cfd-gender">
 <img alt="../images/cfd-gender.png" src="../images/cfd-gender.png" />
-<p class="caption">Conditional Frequency Distribution: this plot shows the number of female and male names
+<p class="caption"><span class="caption-label">Figure 4.3</span>: Conditional Frequency Distribution: this plot shows the number of female and male names
 ending with each letter of the alphabet; most names ending with <span class="example">a</span>, <span class="example">e</span> or <span class="example">i</span>
 are female; names ending in <span class="example">h</span> and <span class="example">l</span> are equally likely to be male or female;
 names ending in <span class="example">k</span>, <span class="example">o</span>, <span class="example">r</span>, <span class="example">s</span>, and <span class="example">t</span> are likely to be male.</p>

@@ -239,7 +239,7 @@ way, using <tt class="doctest"><span class="pre">help(nltk.corpus.timit)</span><
 Each file name has internal structure as shown in <a class="reference internal" href="#fig-timit">1.1</a>.</p>
 <span class="target" id="fig-timit"></span><div class="figure" id="fig-timit">
 <img alt="../images/timit.png" src="../images/timit.png" />
-<p class="caption">Structure of a TIMIT Identifier: Each recording is labeled using a string made
+<p class="caption"><span class="caption-label">Figure 1.1</span>: Structure of a TIMIT Identifier: Each recording is labeled using a string made
 up of the speaker's dialect region, gender, speaker identifier, sentence type,
 and sentence identifier.</p>
 </div>
@@ -323,7 +323,7 @@ simple as tokenization &#8212; are subject to later revision, thus it is importa
 retain the source material in a form that is as close to the original as possible.</p>
 <span class="target" id="fig-timit-structure"></span><div class="figure" id="fig-timit-structure">
 <img alt="../images/timit-structure.png" src="../images/timit-structure.png" />
-<p class="caption">Structure of the Published TIMIT Corpus: The CD-ROM contains doc, train, and test directories
+<p class="caption"><span class="caption-label">Figure 1.2</span>: Structure of the Published TIMIT Corpus: The CD-ROM contains doc, train, and test directories
 at the top level; the train and test directories both have 8 sub-directories, one per
 dialect region; each of these contains further subdirectories, one per speaker;
 the contents of the directory for female speaker <tt class="doctest"><span class="pre">aks0</span></tt> are listed, showing
@@ -351,7 +351,7 @@ from both fields.</p>
 <h2>1.3&nbsp;&nbsp;&nbsp;Fundamental Data Types</h2>
 <span class="target" id="fig-datatypes"></span><div class="figure" id="fig-datatypes">
 <img alt="../images/datatypes.png" src="../images/datatypes.png" />
-<p class="caption">Basic Linguistic Data Types &#8212; Lexicons and Texts: amid their diversity,
+<p class="caption"><span class="caption-label">Figure 1.3</span>: Basic Linguistic Data Types &#8212; Lexicons and Texts: amid their diversity,
 lexicons have a record structure, while annotated texts have a temporal organization.</p>
 </div>
 <p>Despite its complexity, the TIMIT corpus only contains two fundamental data types,
@@ -564,7 +564,7 @@ in <a class="reference internal" href="#fig-evolution">2.1</a>.  At a later date
 of information from different versions, the task will probably be extremely onerous.</p>
 <span class="target" id="fig-evolution"></span><div class="figure" id="fig-evolution">
 <img alt="../images/evolution.png" src="../images/evolution.png" />
-<p class="caption">Evolution of a Corpus over Time: After a corpus is published, research
+<p class="caption"><span class="caption-label">Figure 2.1</span>: Evolution of a Corpus over Time: After a corpus is published, research
 groups will use it independently, selecting and enriching different pieces;
 later research that seeks to integrate separate annotations confronts
 the difficult challenge of aligning the annotations.</p>
@@ -733,7 +733,7 @@ def lexical_data(html_file, encoding="utf-8"):
 >>> writer = csv.writer(open("dict1.csv", "w", encoding="utf-8"))
 >>> writer.writerows(lexical_data("dict.htm", encoding="windows-1252"))</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Converting HTML Created by Microsoft Word into Comma-Separated Values</td></tr></p>
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_html2csv.py" type="text/x-python"><span class="caption-label">Example 3.1 (code_html2csv.py)</span></a>: <span class="caption-label">Figure 3.1</span>: Converting HTML Created by Microsoft Word into Comma-Separated Values</td></tr></p>
 </table></div>
 <dl class="docutils">
 <dt>with gzip.open(fn+&quot;.gz&quot;,&quot;wb&quot;) as f_out:</dt>
@@ -953,7 +953,7 @@ approach, founded on the premise that the work of parsing a corpus format
 should only be done once (per programming language).</p>
 <span class="target" id="fig-three-layer-arch"></span><div class="figure" id="fig-three-layer-arch">
 <img alt="../images/three-layer-arch.png" src="../images/three-layer-arch.png" />
-<p class="caption">A Common Format vs A Common Interface</p>
+<p class="caption"><span class="caption-label">Figure 3.2</span>: A Common Format vs A Common Interface</p>
 </div>
 <p>Instead of focussing on a common format, we believe it is more promising to
 develop a common interface (cf. <tt class="doctest"><span class="pre">nltk.corpus</span></tt>).  Consider the
@@ -1637,7 +1637,7 @@ def add_cv_field(entry):
 \xe Peter went to look at the house that the wind destroyed.
 \cv CVVCVCV</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Adding a new <tt class="doctest"><span class="pre">cv</span></tt> field to a lexical entry</td></tr></p>
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_add_cv_field.py" type="text/x-python"><span class="caption-label">Example 5.1 (code_add_cv_field.py)</span></a>: <span class="caption-label">Figure 5.1</span>: Adding a new <tt class="doctest"><span class="pre">cv</span></tt> field to a lexical entry</td></tr></p>
 </table></div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -1734,7 +1734,7 @@ def validate_lexicon(grammar, lexicon, ignored_tags):
 - lx:rt:ps:ge:tkp:dt:ex:xp:xe
 - lx:ps:ge:ge:tkp:dt:ex:xp:xe:ex:xp:xe</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Validating Toolbox Entries Using a Context Free Grammar</td></tr></p>
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_toolbox_validation.py" type="text/x-python"><span class="caption-label">Example 5.2 (code_toolbox_validation.py)</span></a>: <span class="caption-label">Figure 5.2</span>: Validating Toolbox Entries Using a Context Free Grammar</td></tr></p>
 </table></div>
 <p>Another approach would be to use a chunk parser (<a href="#id39"><span class="problematic" id="id40">chap-chunk_</span></a>),
 since these are much more effective at identifying partial
@@ -1770,12 +1770,12 @@ A sample of the output from this program is shown in <a class="reference interna
 >>> with open("iu_mien_samp.xml", "wb") as output:
 ...     tree.write(output)</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Chunking a Toolbox Lexicon: A chunk grammar describing the structure of
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_chunk_toolbox.py" type="text/x-python"><span class="caption-label">Example 5.3 (code_chunk_toolbox.py)</span></a>: <span class="caption-label">Figure 5.3</span>: Chunking a Toolbox Lexicon: A chunk grammar describing the structure of
 entries for a lexicon for <span class="emphasis">Iu Mien</span>, a language of China.</td></tr></p>
 </table></div>
 <span class="target" id="fig-iu-mien"></span><div class="figure" id="fig-iu-mien">
 <img alt="../images/iu-mien.png" src="../images/iu-mien.png" />
-<p class="caption">XML Representation of a Lexical Entry, Resulting from Chunk Parsing a Toolbox Record</p>
+<p class="caption"><span class="caption-label">Figure 5.4</span>: XML Representation of a Lexical Entry, Resulting from Chunk Parsing a Toolbox Record</p>
 </div>
 </div>
 </div>

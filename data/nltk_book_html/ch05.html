@@ -473,7 +473,7 @@ For example, <a class="reference internal" href="#fig-tag-indian">2.1</a> shows 
 <tt class="doctest"><span class="pre">nltk.corpus.indian</span></tt>.</p>
 <span class="target" id="fig-tag-indian"></span><div class="figure" id="fig-tag-indian">
 <img alt="../images/tag-indian.png" src="../images/tag-indian.png" />
-<p class="caption">POS-Tagged Data from Four Indian Languages: Bangla, Hindi, Marathi, and Telugu</p>
+<p class="caption"><span class="caption-label">Figure 2.1</span>: POS-Tagged Data from Four Indian Languages: Bangla, Hindi, Marathi, and Telugu</p>
 </div>
 <!-- &#2311;&#2352;&#2366;&#2325;_NNP &#2325;&#2375;_PREP &#2357;&#2367;&#2342;&#2375;&#2358;_NNC &#2350;&#2306;&#2340;&#2381;&#2352;&#2368;_NN &#2344;&#2375;_PREP &#2309;&#2350;&#2352;&#2368;&#2325;&#2366;_NNP &#2325;&#2375;_PREP &#2313;&#2360;_PRP &#2346;&#2381;&#2352;&#2360;&#2381;&#2340;&#2366;&#2357;_NN &#2325;&#2366;_PREP &#2350;&#2332;&#2366;&#2325;_NVB &#2313;&#2337;&#2364;&#2366;&#2351;&#2366;_VFM &#2361;&#2376;_VAUX ... -->
 <p>If the corpus is also segmented into sentences, it will have
@@ -549,7 +549,8 @@ To help us get started, we will be looking at a simplified tagset
 <td><span class="example">ersatz, esprit, dunno, gr8, univeristy</span></td>
 </tr>
 </tbody>
-<p class="caption">Universal Part-of-Speech Tagset</p>
+<p class="caption"><span class="caption-label">Table 2.1</span>: <p>Universal Part-of-Speech Tagset</p>
+</p>
 </table>
 <p>Let's see which of these tags are the most common in the news
 category of the Brown corpus:</p>
@@ -617,7 +618,8 @@ verb, as shown in <a class="reference internal" href="#tab-syntax-nouns">2.2</a>
 <td>Mary's intelligence <em>impressed</em> her teachers</td>
 </tr>
 </tbody>
-<p class="caption">Syntactic Patterns involving some Nouns</p>
+<p class="caption"><span class="caption-label">Table 2.2</span>: <p>Syntactic Patterns involving some Nouns</p>
+</p>
 </table>
 <p>The simplified noun tags are <tt class="doctest"><span class="pre">N</span></tt> for common nouns like <span class="example">book</span>,
 and <tt class="doctest"><span class="pre">NP</span></tt> for proper nouns like <span class="example">Scotland</span>.</p>
@@ -672,7 +674,8 @@ involving the referents of one or more noun phrases.</p>
 <td>John ate the pizza <em>with gusto</em></td>
 </tr>
 </tbody>
-<p class="caption">Syntactic Patterns involving some Verbs</p>
+<p class="caption"><span class="caption-label">Table 2.3</span>: <p>Syntactic Patterns involving some Verbs</p>
+</p>
 </table>
 <p>What are the most common verbs in news text?  Let's sort all the verbs by frequency:</p>
 <div class="doctest">
@@ -824,7 +827,7 @@ NNS-HL [('comments', 1), ('Offenses', 1), ('Sacrifices', 1), ('funds', 1), ('Res
 NNS-TL [('States', 38), ('Nations', 11), ('Masters', 10), ('Rules', 9), ('Communists', 9)]
 NNS-TL-HL [('Nations', 1)]</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Program to Find the Most Frequent Noun Tags</td></tr></p>
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_findtags.py" type="text/x-python"><span class="caption-label">Example 2.2 (code_findtags.py)</span></a>: <span class="caption-label">Figure 2.2</span>: Program to Find the Most Frequent Noun Tags</td></tr></p>
 </table></div>
 <p>When we come to constructing part-of-speech taggers later in this chapter,
 we will use the unsimplified tags.</p>
@@ -896,7 +899,7 @@ allowed to place
 expected to become
 ...</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Searching for Three-Word Phrases Using POS Tags</td></tr></p>
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_three_word_phrase.py" type="text/x-python"><span class="caption-label">Example 2.3 (code_three_word_phrase.py)</span></a>: <span class="caption-label">Figure 2.3</span>: Searching for Three-Word Phrases Using POS Tags</td></tr></p>
 </table></div>
 <p>Finally, let's look for words that are highly ambiguous as to their part of speech tag.
 Understanding why such words are tagged as they are in each context can help us clarify
@@ -991,7 +994,7 @@ familiar to anyone who has used a dictionary.  Some more examples are shown in
 <a class="reference internal" href="#fig-maps02">3.1</a>.</p>
 <span class="target" id="fig-maps02"></span><div class="figure" id="fig-maps02">
 <img alt="../images/maps02.png" src="../images/maps02.png" />
-<p class="caption">Dictionary Look-up: we access the entry of a dictionary using a key
+<p class="caption"><span class="caption-label">Figure 3.1</span>: Dictionary Look-up: we access the entry of a dictionary using a key
 such as someone's name, a web domain, or an English word;
 other names for dictionary are map, hashmap, hash, and associative array.</p>
 </div>
@@ -1038,7 +1041,8 @@ of linguistic objects, along with what they map.</p>
 <td>Morphological analysis (list of component morphemes)</td>
 </tr>
 </tbody>
-<p class="caption">Linguistic Objects as Mappings from Keys to Values</p>
+<p class="caption"><span class="caption-label">Table 3.1</span>: <p>Linguistic Objects as Mappings from Keys to Values</p>
+</p>
 </table>
 <p>Most often, we are mapping from a &quot;word&quot; to some structured object.
 For example, a document index maps from a word (which we can represent
@@ -1404,7 +1408,7 @@ we increment its count using the <tt class="doctest"><span class="pre">+=</span>
 >>> [t for t, c in sorted(counts.items(), key=itemgetter(1), reverse=True)]
 ['NOUN', 'VERB', 'ADP', '.', 'DET', 'ADJ', 'ADV', 'CONJ', 'PRON', 'PRT', 'NUM', 'X']</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Incrementally Updating a Dictionary, and Sorting by Value</td></tr></p>
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_dictionary.py" type="text/x-python"><span class="caption-label">Example 3.2 (code_dictionary.py)</span></a>: <span class="caption-label">Figure 3.2</span>: Incrementally Updating a Dictionary, and Sorting by Value</td></tr></p>
 </table></div>
 <p>The listing in <a class="reference internal" href="#code-dictionary">3.2</a> illustrates an important idiom for
 sorting a dictionary by its values, to show words in decreasing
@@ -1656,8 +1660,9 @@ more simply using NLTK's support for indexing as follows:</p>
 <td>a dictionary whose default value is zero</td>
 </tr>
 </tbody>
-<p class="caption">Python's Dictionary Methods: A summary of commonly-used methods and idioms
+<p class="caption"><span class="caption-label">Table 3.2</span>: <p>Python's Dictionary Methods: A summary of commonly-used methods and idioms
 involving dictionaries.</p>
+</p>
 </table>
 </div>
 </div>
@@ -1898,7 +1903,7 @@ def display():
         >&nbsp;</td>
 <td class="pysrc">>>> display()                                  </td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Lookup Tagger Performance with Varying Model Size</td></tr></p>
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_baseline_tagger.py" type="text/x-python"><span class="caption-label">Example 4.1 (code_baseline_tagger.py)</span></a>: <span class="caption-label">Figure 4.1</span>: Lookup Tagger Performance with Varying Model Size</td></tr></p>
 </table></div>
 <div class="system-message" id="fig-tag-lookup">
 <p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 1284)</p>
@@ -2039,7 +2044,7 @@ to the current word.  An n-gram tagger
 picks the tag that is most likely in the given context.</p>
 <span class="target" id="fig-tag-context"></span><div class="figure" id="fig-tag-context">
 <img alt="../images/tag-context.png" src="../images/tag-context.png" />
-<p class="caption">Tagger Context</p>
+<p class="caption"><span class="caption-label">Figure 5.1</span>: Tagger Context</p>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -2424,7 +2429,8 @@ applying the rules to fix the errors.</p>
 <td>NN</td>
 </tr>
 </tbody>
-<p class="caption">Steps in Brill Tagging</p>
+<p class="caption"><span class="caption-label">Table 6.1</span>: <p>Steps in Brill Tagging</p>
+</p>
 </table>
 <p>In this table we see two rules.  All such rules are generated from a
 template of the following form: &quot;replace <em>T</em><sub>1</sub> with
@@ -2488,7 +2494,7 @@ ter/IN the/DT race/NN ,/, |    Fortune/IN->NNP     | 500/CD executives/NNS dro
 s/NNS drooled/VBD like/IN |  schoolboys/NNP->NNS   | over/IN the/DT cars/NNS a
 olboys/NNS over/IN the/DT |      cars/NN->NNS      | and/CC drivers/NNS ./.</td>
 </tr></table></td></tr>
-<tr><td class="caption"><p class="caption">Brill Tagger Demonstration: the tagger has a collection of
+<tr><td class="caption"><p class="caption"><a class="reference external" href="pylisting/code_brill_demo.py" type="text/x-python"><span class="caption-label">Example 6.1 (code_brill_demo.py)</span></a>: <span class="caption-label">Figure 6.1</span>: Brill Tagger Demonstration: the tagger has a collection of
 templates of the form <tt class="doctest"><span class="pre">X -> Y if the preceding word is Z</span></tt>;
 the variables in these templates are instantiated to particular
 words and tags to create &quot;rules&quot;; the score for a rule is the
@@ -2645,7 +2651,8 @@ as summarized in <a class="reference internal" href="#tab-morphosyntax">7.1</a>.
 <td>VBD</td>
 </tr>
 </tbody>
-<p class="caption">Some morphosyntactic distinctions in the Brown tagset</p>
+<p class="caption"><span class="caption-label">Table 7.1</span>: <p>Some morphosyntactic distinctions in the Brown tagset</p>
+</p>
 </table>
 <p>In addition to this set of verb tags, the various forms of the verb <span class="example">to be</span>
 have special tags:

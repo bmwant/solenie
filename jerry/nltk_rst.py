@@ -2513,6 +2513,8 @@ def main():
 
 
 def process_file_to_html(in_filepath, out_filepath):
+    global OUTPUT_FORMAT
+    OUTPUT_FORMAT = 'html'
     writer = CustomizedHTMLWriter()
     settings = { 'warning_stream': WarningStream(), }
     docutils.core.publish_file(

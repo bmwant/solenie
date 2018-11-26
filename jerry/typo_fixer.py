@@ -32,5 +32,5 @@ if __name__ == '__main__':
     # 08
     # 09
     # 10
-    _convert_file(Path('/home/user/.pr/nltk_book/book/ch04.rst'))
-    # convert_to_html()
+    # _convert_file(Path('/home/user/.pr/nltk_book/book/ch04.rst'))
+    convert_to_html()
