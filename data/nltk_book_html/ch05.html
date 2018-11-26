@@ -1,0 +1,3099 @@
+<?xml version="1.0" encoding="ascii" ?>
+
+<script language="javascript" type="text/javascript">
+
+function astext(node)
+{
+    return node.innerHTML.replace(/(<([^>]+)>)/ig,"")
+                         .replace(/&gt;/ig, ">")
+                         .replace(/&lt;/ig, "<")
+                         .replace(/&quot;/ig, '"')
+                         .replace(/&amp;/ig, "&");
+}
+
+function copy_notify(node, bar_color, data)
+{
+    // The outer box: relative + inline positioning.
+    var box1 = document.createElement("div");
+    box1.style.position = "relative";
+    box1.style.display = "inline";
+    box1.style.top = "2em";
+    box1.style.left = "1em";
+  
+    // A shadow for fun
+    var shadow = document.createElement("div");
+    shadow.style.position = "absolute";
+    shadow.style.left = "-1.3em";
+    shadow.style.top = "-1.3em";
+    shadow.style.background = "#404040";
+    
+    // The inner box: absolute positioning.
+    var box2 = document.createElement("div");
+    box2.style.position = "relative";
+    box2.style.border = "1px solid #a0a0a0";
+    box2.style.left = "-.2em";
+    box2.style.top = "-.2em";
+    box2.style.background = "white";
+    box2.style.padding = ".3em .4em .3em .4em";
+    box2.style.fontStyle = "normal";
+    box2.style.background = "#f0e0e0";
+
+    node.insertBefore(box1, node.childNodes.item(0));
+    box1.appendChild(shadow);
+    shadow.appendChild(box2);
+    box2.innerHTML="Copied&nbsp;to&nbsp;the&nbsp;clipboard: " +
+                   "<pre class='copy-notify'>"+
+                   data+"</pre>";
+    setTimeout(function() { node.removeChild(box1); }, 1000);
+
+    var elt = node.parentNode.firstChild;
+    elt.style.background = "#ffc0c0";
+    setTimeout(function() { elt.style.background = bar_color; }, 200);
+}
+
+function copy_codeblock_to_clipboard(node)
+{
+    var data = astext(node)+"\n";
+    if (copy_text_to_clipboard(data)) {
+        copy_notify(node, "#40a060", data);
+    }
+}
+
+function copy_doctest_to_clipboard(node)
+{
+    var s = astext(node)+"\n   ";
+    var data = "";
+
+    var start = 0;
+    var end = s.indexOf("\n");
+    while (end >= 0) {
+        if (s.substring(start, start+4) == ">>> ") {
+            data += s.substring(start+4, end+1);
+        }
+        else if (s.substring(start, start+4) == "... ") {
+            data += s.substring(start+4, end+1);
+        }
+        /*
+        else if (end-start > 1) {
+            data += "# " + s.substring(start, end+1);
+        }*/
+        // Grab the next line.
+        start = end+1;
+        end = s.indexOf("\n", start);
+    }
+    
+    if (copy_text_to_clipboard(data)) {
+        copy_notify(node, "#4060a0", data);
+    }
+}
+    
+function copy_text_to_clipboard(data)
+{
+    if (window.clipboardData) {
+        window.clipboardData.setData("Text", data);
+        return true;
+     }
+    else if (window.netscape) {
+        // w/ default firefox settings, permission will be denied for this:
+        netscape.security.PrivilegeManager
+                      .enablePrivilege("UniversalXPConnect");
+    
+        var clip = Components.classes["@mozilla.org/widget/clipboard;1"]
+                      .createInstance(Components.interfaces.nsIClipboard);
+        if (!clip) return;
+    
+        var trans = Components.classes["@mozilla.org/widget/transferable;1"]
+                       .createInstance(Components.interfaces.nsITransferable);
+        if (!trans) return;
+    
+        trans.addDataFlavor("text/unicode");
+    
+        var str = new Object();
+        var len = new Object();
+    
+        var str = Components.classes["@mozilla.org/supports-string;1"]
+                     .createInstance(Components.interfaces.nsISupportsString);
+        var datacopy=data;
+        str.data=datacopy;
+        trans.setTransferData("text/unicode",str,datacopy.length*2);
+        var clipid=Components.interfaces.nsIClipboard;
+    
+        if (!clip) return false;
+    
+        clip.setData(trans,null,clipid.kGlobalClipboard);
+        return true;
+    }
+    return false;
+}
+//-->
+</script>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ascii" />
+<meta name="generator" content="Docutils 0.14: http://docutils.sourceforge.net/" />
+<title>5. Categorizing and Tagging Words</title>
+<--- Cannot embed stylesheet '../nltkdoc.css': No such file or directory. --->
+</head>
+<body>
+<div class="document" id="categorizing-and-tagging-words">
+<span id="chap-tag"></span>
+<h1 class="title">5. Categorizing and Tagging Words</h1>
+
+<!-- -*- mode: rst -*- -->
+<!-- -*- mode: rst -*- -->
+<!-- CAP abbreviations (map to small caps in LaTeX) -->
+<!-- Other candidates for global consistency -->
+<!-- PTB removed since it must be indexed -->
+<!-- WN removed since it must be indexed -->
+<!-- misc & punctuation -->
+<!-- cdots was unicode U+22EF but not working -->
+<!-- exercise meta-tags -->
+<!-- Unicode tests -->
+<!-- phonetic -->
+<!-- misc -->
+<!-- used in Unicode section -->
+<!-- arrows -->
+<!-- unification stuff -->
+<!-- Math & Logic -->
+<!-- sets -->
+<!-- Greek -->
+<!-- Chinese -->
+<!-- URLs -->
+<!-- Python example - a snippet of code in running text -->
+<!-- PlaceHolder example -  something that should be replaced by actual code -->
+<!-- Linguistic eXample - cited form in running text -->
+<!-- Emphasized (more declarative than just using *) -->
+<!-- Grammatical Category - e.g. NP and verb as technical terms
+.. role:: gc
+   :class: category -->
+<!-- Math expression - e.g. especially for variables -->
+<!-- Textual Math expression - for words 'inside' a math environment -->
+<!-- Feature (or attribute) -->
+<!-- Raw LaTeX -->
+<!-- Raw HTML -->
+<!-- Feature-value -->
+<!-- Lexemes -->
+<!-- Replacements that rely on previous definitions :-) -->
+<!-- standard global imports
+
+>>> import nltk, re, pprint
+>>> from nltk import word_tokenize -->
+<!-- TODO: exercise on cascaded tagging -->
+<!-- TODO: motivate trigram tagging by showing some cases where bigram tagging doesn't work -->
+<!-- TODO: xref to unicode section in prog chapter -->
+<!-- TODO: * outstanding problems:
+- what are we doing with ConditionalFreqDist?
+- nltk.tag contains all of math library
+- nltk.corpus.brown.tagged_sents() is too verbose? -->
+<!-- TODO: type conversions: ``str()``, ``int()``, ``list()``. -->
+<!-- TODO: tagging for language analysis: find all pairs of nouns which occur in the same sentence -->
+<!-- TODO: possibly add section on exploring tagged corpora -->
+<!-- TODO: add back in short section on Brill and HMM tagging -->
+<!-- TODO: how to tag unknown words -->
+<!-- TODO: how POS tagging disambiguates the word "like" and this can be
+useful for sentiment detection -->
+<!-- TODO: classification of unknown words using string patterns. -->
+<p>Back in elementary school you learnt the difference between nouns, verbs,
+adjectives, and adverbs.  These &quot;word classes&quot; are not just
+the idle invention of grammarians, but are useful categories for many
+language processing tasks.  As we will see, they arise from simple analysis
+of the distribution of words in text.  The goal of this chapter is to
+answer the following questions:</p>
+<ol class="arabic simple">
+<li>What are lexical categories and how are they used in natural language processing?</li>
+<li>What is a good Python data structure for storing words and their categories?</li>
+<li>How can we automatically tag each word of a text with its word class?</li>
+</ol>
+<p>Along the way, we'll cover some fundamental techniques in NLP, including
+sequence labeling, n-gram models, backoff, and evaluation.  These techniques
+are useful in many areas, and tagging gives us a simple context in which
+to present them.  We will also see how tagging is the second step in the typical
+NLP pipeline, following tokenization.</p>
+<p>The process of classifying words into their <a name="parts_of_speech_index_term" /><span class="termdef">parts of speech</span> and
+labeling them accordingly is known as <a name="part_of_speech_tagging_index_term" /><span class="termdef">part-of-speech tagging</span>,
+<a name="pos_tagging_index_term" /><span class="termdef">POS-tagging</span>, or simply <a name="tagging_index_term" /><span class="termdef">tagging</span>.  Parts of speech
+are also known as <a name="word_classes_index_term" /><span class="termdef">word classes</span> or <a name="lexical_categories_index_term" /><span class="termdef">lexical categories</span>.
+The collection of tags
+used for a particular task is known as a <a name="tagset_index_term" /><span class="termdef">tagset</span>.  Our emphasis
+in this chapter is on exploiting tags, and tagging text automatically.</p>
+<div class="section" id="using-a-tagger">
+<span id="sec-using-a-tagger"></span><h1>1&nbsp;&nbsp;&nbsp;Using a Tagger</h1>
+<p>A part-of-speech tagger, or <a name="pos_tagger_index_term" /><span class="termdef">POS-tagger</span>, processes a sequence of words, and attaches a
+part of speech tag to each word (don't forget to <tt class="doctest"><span class="pre">import nltk</span></tt>):</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> text = word_tokenize("And now for something completely different")
+>>> nltk.pos_tag(text)
+[('And', 'CC'), ('now', 'RB'), ('for', 'IN'), ('something', 'NN'),
+('completely', 'RB'), ('different', 'JJ')]</td>
+</tr></table></td></tr>
+</table></div>
+<p>Here we see that <span class="example">and</span> is <tt class="doctest"><span class="pre">CC</span></tt>, a coordinating conjunction;
+<span class="example">now</span> and <span class="example">completely</span> are <tt class="doctest"><span class="pre">RB</span></tt>, or adverbs;
+<span class="example">for</span> is <tt class="doctest"><span class="pre">IN</span></tt>, a preposition;
+<span class="example">something</span> is <tt class="doctest"><span class="pre">NN</span></tt>, a noun; and
+<span class="example">different</span> is <tt class="doctest"><span class="pre">JJ</span></tt>, an adjective.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">NLTK provides documentation for each tag, which can be queried using
+the tag, e.g. <tt class="doctest"><span class="pre">nltk.help.upenn_tagset('RB')</span></tt>, or a regular
+expression, e.g. <tt class="doctest"><span class="pre">nltk.help.upenn_tagset('NN.*')</span></tt>.
+Some corpora have README files with tagset documentation,
+see <tt class="doctest"><span class="pre">nltk.corpus.???.readme()</span></tt>, substituting in the name
+of the corpus.</p>
+</div>
+<p>Let's look at another example, this time including some homonyms:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> text = word_tokenize("They refuse to permit us to obtain the refuse permit")
+>>> nltk.pos_tag(text)
+[('They', 'PRP'), ('refuse', 'VBP'), ('to', 'TO'), ('permit', 'VB'), ('us', 'PRP'),
+('to', 'TO'), ('obtain', 'VB'), ('the', 'DT'), ('refuse', 'NN'), ('permit', 'NN')]</td>
+</tr></table></td></tr>
+</table></div>
+<p>Notice that <span class="example">refuse</span> and <span class="example">permit</span> both appear as a
+present tense verb (<tt class="doctest"><span class="pre">VBP</span></tt>) and a noun (<tt class="doctest"><span class="pre">NN</span></tt>).
+E.g. <span class="example">refUSE</span> is a verb meaning &quot;deny,&quot; while <span class="example">REFuse</span> is
+a noun meaning &quot;trash&quot; (i.e. they are not homophones).
+Thus, we need to know which word is being used in order to pronounce
+the text correctly.  (For this reason,
+text-to-speech systems usually perform POS-tagging.)</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><strong>Your Turn:</strong>
+Many words, like <span class="example">ski</span> and <span class="example">race</span>, can be used as nouns
+or verbs with no difference in pronunciation.  Can you think of
+others?  Hint: think of a commonplace object and try to put
+the word <span class="example">to</span> before it to see if it can also be a verb, or
+think of an action and try to put <span class="example">the</span> before it to see if
+it can also be a noun.  Now make up a sentence with both uses
+of this word, and run the POS-tagger on this sentence.</p>
+</div>
+<p>Lexical categories like &quot;noun&quot; and part-of-speech tags like <tt class="doctest"><span class="pre">NN</span></tt> seem to have
+their uses, but the details will be obscure to many readers.  You might wonder what
+justification there is for introducing this extra level of information.
+Many of these categories arise from superficial analysis the distribution
+of words in text.  Consider the following analysis involving
+<span class="example">woman</span> (a noun), <span class="example">bought</span> (a verb),
+<span class="example">over</span> (a preposition), and <span class="example">the</span> (a determiner).
+The <tt class="doctest"><span class="pre">text.similar()</span></tt> method takes a word <span class="math">w</span>, finds all contexts
+<span class="math">w</span><sub>1</sub><span class="math">w</span> <span class="math">w</span><sub>2</sub>,
+then finds all words <span class="math">w'</span> that appear in the same context,
+i.e. <span class="math">w</span><sub>1</sub><span class="math">w'</span><span class="math">w</span><sub>2</sub>.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> text = nltk.Text(word.lower() for word in nltk.corpus.brown.words())
+>>> text.similar('woman')
+Building word-context index...
+man day time year car moment world family house boy child country job
+state girl place war way case question
+>>> text.similar('bought')
+made done put said found had seen given left heard been brought got
+set was called felt in that told
+>>> text.similar('over')
+in on to of and for with from at by that into as up out down through
+about all is
+>>> text.similar('the')
+a his this their its her an that our any all one these my in your no
+some other and</td>
+</tr></table></td></tr>
+</table></div>
+<p>Observe that searching for <span class="example">woman</span> finds nouns;
+searching for <span class="example">bought</span> mostly finds verbs;
+searching for <span class="example">over</span> generally finds prepositions;
+searching for <span class="example">the</span> finds several determiners.
+A tagger can correctly identify the tags on these words
+in the context of a sentence, e.g. <span class="example">The woman bought over $150,000
+worth of clothes</span>.</p>
+<p>A tagger can also model our knowledge of unknown words,
+e.g. we can guess that <span class="example">scrobbling</span> is probably a verb,
+with the root <span class="example">scrobble</span>,
+and likely to occur in contexts like <span class="example">he was scrobbling</span>.</p>
+</div>
+<div class="section" id="tagged-corpora">
+<span id="sec-tagged-corpora"></span><h1>2&nbsp;&nbsp;&nbsp;Tagged Corpora</h1>
+<div class="section" id="representing-tagged-tokens">
+<h2>2.1&nbsp;&nbsp;&nbsp;Representing Tagged Tokens</h2>
+<p>By convention in NLTK, a tagged token is represented using a
+tuple consisting of the token and the tag.
+We can create one of these special tuples from the standard string
+representation of a tagged token, using the function <tt class="doctest"><span class="pre">str2tuple()</span></tt>:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> tagged_token = nltk.tag.str2tuple('fly/NN')
+>>> tagged_token
+('fly', 'NN')
+>>> tagged_token[0]
+'fly'
+>>> tagged_token[1]
+'NN'</td>
+</tr></table></td></tr>
+</table></div>
+<p>We can construct a list of tagged tokens directly from a string.  The first
+step is to tokenize the string
+to access the individual <tt class="doctest"><span class="pre">word/tag</span></tt> strings, and then to convert
+each of these into a tuple (using <tt class="doctest"><span class="pre">str2tuple()</span></tt>).</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> sent = '''
+... The/AT grand/JJ jury/NN commented/VBD on/IN a/AT number/NN of/IN
+... other/AP topics/NNS ,/, AMONG/IN them/PPO the/AT Atlanta/NP and/CC
+... Fulton/NP-tl County/NN-tl purchasing/VBG departments/NNS which/WDT it/PPS
+... said/VBD ``/`` ARE/BER well/QL operated/VBN and/CC follow/VB generally/RB
+... accepted/VBN practices/NNS which/WDT inure/VB to/IN the/AT best/JJT
+... interest/NN of/IN both/ABX governments/NNS ''/'' ./.
+... '''
+>>> [nltk.tag.str2tuple(t) for t in sent.split()]
+[('The', 'AT'), ('grand', 'JJ'), ('jury', 'NN'), ('commented', 'VBD'),
+('on', 'IN'), ('a', 'AT'), ('number', 'NN'), ... ('.', '.')]</td>
+</tr></table></td></tr>
+</table></div>
+</div>
+<div class="section" id="reading-tagged-corpora">
+<h2>2.2&nbsp;&nbsp;&nbsp;Reading Tagged Corpora</h2>
+<p>Several of the corpora included with NLTK have been <a name="tagged_index_term" /><span class="termdef">tagged</span> for
+their part-of-speech. Here's an example of what you might see if you
+opened a file from the Brown Corpus with a text editor:</p>
+<blockquote>
+The/at Fulton/np-tl County/nn-tl Grand/jj-tl Jury/nn-tl
+said/vbd Friday/nr an/at investigation/nn of/in Atlanta's/np$
+recent/jj primary/nn election/nn produced/vbd <tt class="doctest"><span class="pre">/</span></tt> no/at
+evidence/nn ''/'' that/cs any/dti irregularities/nns took/vbd
+place/nn ./.</blockquote>
+<p>Other corpora use a variety of formats for storing part-of-speech tags.
+NLTK's corpus readers provide a uniform interface so that you
+don't have to be concerned with the different file formats.
+In contrast with the file fragment shown above,
+the corpus reader for the Brown Corpus represents the data as shown below.
+Note that part-of-speech tags have been converted to uppercase, since this has
+become standard practice since the Brown Corpus was published.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> nltk.corpus.brown.tagged_words()
+[('The', 'AT'), ('Fulton', 'NP-TL'), ...]
+>>> nltk.corpus.brown.tagged_words(tagset='universal')
+[('The', 'DET'), ('Fulton', 'NOUN'), ...]</td>
+</tr></table></td></tr>
+</table></div>
+<p>Whenever a corpus contains tagged text, the NLTK corpus interface
+will have a <tt class="doctest"><span class="pre">tagged_words()</span></tt> method.
+Here are some more examples, again using the output format
+illustrated for the Brown Corpus:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> print(nltk.corpus.nps_chat.tagged_words())
+[('now', 'RB'), ('im', 'PRP'), ('left', 'VBD'), ...]
+>>> nltk.corpus.conll2000.tagged_words()
+[('Confidence', 'NN'), ('in', 'IN'), ('the', 'DT'), ...]
+>>> nltk.corpus.treebank.tagged_words()
+[('Pierre', 'NNP'), ('Vinken', 'NNP'), (',', ','), ...]</td>
+</tr></table></td></tr>
+</table></div>
+<p>Not all corpora employ the same set of tags; see the
+tagset help functionality and the <tt class="doctest"><span class="pre">readme()</span></tt> methods
+mentioned above for documentation.
+Initially we want to avoid the complications of these tagsets,
+so we use a built-in mapping to the &quot;Universal Tagset&quot;:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> nltk.corpus.brown.tagged_words(tagset='universal')
+[('The', 'DET'), ('Fulton', 'NOUN'), ...]
+>>> nltk.corpus.treebank.tagged_words(tagset='universal')
+[('Pierre', 'NOUN'), ('Vinken', 'NOUN'), (',', '.'), ...]</td>
+</tr></table></td></tr>
+</table></div>
+<p>Tagged corpora for several other languages are distributed with NLTK,
+including Chinese, Hindi, Portuguese, Spanish, Dutch and Catalan.
+These usually contain non-ASCII text,
+and Python always displays this in hexadecimal when printing a larger structure
+such as a list.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> nltk.corpus.sinica_treebank.tagged_words()
+[('&#228;', 'Neu'), ('&#229;&#230;', 'Nad'), ('&#229;&#231;', 'Nba'), ...]
+>>> nltk.corpus.indian.tagged_words()
+[('&#2478;&#2489;&#2495;&#2487;&#2503;&#2480;', 'NN'), ('&#2488;&#2472;&#2509;&#2468;&#2494;&#2472;', 'NN'), (':', 'SYM'), ...]
+>>> nltk.corpus.mac_morpho.tagged_words()
+[('Jersei', 'N'), ('atinge', 'V'), ('m\xe9dia', 'N'), ...]
+>>> nltk.corpus.conll2002.tagged_words()
+[('Sao', 'NC'), ('Paulo', 'VMI'), ('(', 'Fpa'), ...]
+>>> nltk.corpus.cess_cat.tagged_words()
+[('El', 'da0ms0'), ('Tribunal_Suprem', 'np0000o'), ...]</td>
+</tr></table></td></tr>
+</table></div>
+<p>If your environment is set up correctly, with appropriate editors and fonts,
+you should be able to display individual strings in a human-readable way.
+For example, <a class="reference internal" href="#fig-tag-indian">2.1</a> shows data accessed using
+<tt class="doctest"><span class="pre">nltk.corpus.indian</span></tt>.</p>
+<span class="target" id="fig-tag-indian"></span><div class="figure" id="fig-tag-indian">
+<img alt="../images/tag-indian.png" src="../images/tag-indian.png" />
+<p class="caption">POS-Tagged Data from Four Indian Languages: Bangla, Hindi, Marathi, and Telugu</p>
+</div>
+<!-- &#2311;&#2352;&#2366;&#2325;_NNP &#2325;&#2375;_PREP &#2357;&#2367;&#2342;&#2375;&#2358;_NNC &#2350;&#2306;&#2340;&#2381;&#2352;&#2368;_NN &#2344;&#2375;_PREP &#2309;&#2350;&#2352;&#2368;&#2325;&#2366;_NNP &#2325;&#2375;_PREP &#2313;&#2360;_PRP &#2346;&#2381;&#2352;&#2360;&#2381;&#2340;&#2366;&#2357;_NN &#2325;&#2366;_PREP &#2350;&#2332;&#2366;&#2325;_NVB &#2313;&#2337;&#2364;&#2366;&#2351;&#2366;_VFM &#2361;&#2376;_VAUX ... -->
+<p>If the corpus is also segmented into sentences, it will have
+a <tt class="doctest"><span class="pre">tagged_sents()</span></tt> method that divides up the tagged words into
+sentences rather than presenting them as one big list.
+This will be useful when we come to developing automatic taggers,
+as they are trained and tested on lists of sentences, not words.</p>
+</div>
+<div class="section" id="a-universal-part-of-speech-tagset">
+<h2>2.3&nbsp;&nbsp;&nbsp;A Universal Part-of-Speech Tagset</h2>
+<p>Tagged corpora use many different conventions for tagging words.
+To help us get started, we will be looking at a simplified tagset
+(shown in <a class="reference internal" href="#tab-universal-tagset">2.1</a>).</p>
+<span class="target" id="tab-universal-tagset"></span><table border="1" class="docutils" id="tab-universal-tagset">
+<colgroup>
+<col width="11%" />
+<col width="27%" />
+<col width="62%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Tag</th>
+<th class="head">Meaning</th>
+<th class="head">English Examples</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="doctest"><span class="pre">ADJ</span></tt></td>
+<td>adjective</td>
+<td><span class="example">new, good, high, special, big, local</span></td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">ADP</span></tt></td>
+<td>adposition</td>
+<td><span class="example">on, of, at, with, by, into, under</span></td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">ADV</span></tt></td>
+<td>adverb</td>
+<td><span class="example">really, already, still, early, now</span></td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">CONJ</span></tt></td>
+<td>conjunction</td>
+<td><span class="example">and, or, but, if, while, although</span></td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">DET</span></tt></td>
+<td>determiner, article</td>
+<td><span class="example">the, a, some, most, every, no, which</span></td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">NOUN</span></tt></td>
+<td>noun</td>
+<td><span class="example">year, home, costs, time, Africa</span></td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">NUM</span></tt></td>
+<td>numeral</td>
+<td><span class="example">twenty-four, fourth, 1991, 14:24</span></td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">PRT</span></tt></td>
+<td>particle</td>
+<td><span class="example">at, on, out, over per, that, up, with</span></td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">PRON</span></tt></td>
+<td>pronoun</td>
+<td><span class="example">he, their, her, its, my, I, us</span></td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">VERB</span></tt></td>
+<td>verb</td>
+<td><span class="example">is, say, told, given, playing, would</span></td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">.</span></tt></td>
+<td>punctuation marks</td>
+<td><span class="example">. , ; !</span></td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">X</span></tt></td>
+<td>other</td>
+<td><span class="example">ersatz, esprit, dunno, gr8, univeristy</span></td>
+</tr>
+</tbody>
+<p class="caption">Universal Part-of-Speech Tagset</p>
+</table>
+<p>Let's see which of these tags are the most common in the news
+category of the Brown corpus:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> from nltk.corpus import brown
+>>> brown_news_tagged = brown.tagged_words(categories='news', tagset='universal')
+>>> tag_fd = nltk.FreqDist(tag for (word, tag) in brown_news_tagged)
+>>> tag_fd.most_common()
+[('NOUN', 30640), ('VERB', 14399), ('ADP', 12355), ('.', 11928), ('DET', 11389),
+ ('ADJ', 6706), ('ADV', 3349), ('CONJ', 2717), ('PRON', 2535), ('PRT', 2264),
+ ('NUM', 2166), ('X', 106)]</td>
+</tr></table></td></tr>
+</table></div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><strong>Your Turn:</strong>
+Plot the above frequency distribution using <tt class="doctest"><span class="pre">tag_fd.plot(cumulative=True)</span></tt>.
+What percentage of words are tagged using the first five tags of the above list?</p>
+</div>
+<p>We can use these tags to do powerful searches using a graphical
+POS-concordance tool <tt class="doctest"><span class="pre">nltk.app.concordance()</span></tt>.  Use it
+to search for any combination of words and POS tags, e.g.
+<tt class="doctest"><span class="pre">N N N N</span></tt>, <tt class="doctest"><span class="pre">hit/VD</span></tt>, <tt class="doctest"><span class="pre">hit/VN</span></tt>, or <tt class="doctest"><span class="pre">the ADJ man</span></tt>.</p>
+<!-- Screenshot -->
+</div>
+<div class="section" id="nouns">
+<h2>2.4&nbsp;&nbsp;&nbsp;Nouns</h2>
+<p>Nouns generally refer to people, places, things, or concepts, e.g.:
+<span class="example">woman, Scotland, book, intelligence</span>.  Nouns can appear after
+determiners and adjectives, and can be the subject or object of the
+verb, as shown in <a class="reference internal" href="#tab-syntax-nouns">2.2</a>.</p>
+<span class="target" id="tab-syntax-nouns"></span><table border="1" class="docutils" id="tab-syntax-nouns">
+<colgroup>
+<col width="11%" />
+<col width="42%" />
+<col width="47%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Word</th>
+<th class="head">After a determiner</th>
+<th class="head">Subject of the verb</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>woman</td>
+<td><em>the</em> woman who I saw yesterday ...</td>
+<td>the woman <em>sat</em> down</td>
+</tr>
+<tr><td>Scotland</td>
+<td><em>the</em> Scotland I remember as a child ...</td>
+<td>Scotland <em>has</em> five million people</td>
+</tr>
+<tr><td>book</td>
+<td><em>the</em> book I bought yesterday ...</td>
+<td>this book <em>recounts</em> the colonization of Australia</td>
+</tr>
+<tr><td>intelligence</td>
+<td><em>the</em> intelligence displayed by the child ...</td>
+<td>Mary's intelligence <em>impressed</em> her teachers</td>
+</tr>
+</tbody>
+<p class="caption">Syntactic Patterns involving some Nouns</p>
+</table>
+<p>The simplified noun tags are <tt class="doctest"><span class="pre">N</span></tt> for common nouns like <span class="example">book</span>,
+and <tt class="doctest"><span class="pre">NP</span></tt> for proper nouns like <span class="example">Scotland</span>.</p>
+<p>Let's inspect some tagged text to see what parts of speech occur before a noun,
+with the most frequent ones first. To begin with, we construct a list
+of bigrams whose members are themselves word-tag pairs such as
+<tt class="doctest"><span class="pre">(('The', 'DET'), ('Fulton', 'NP'))</span></tt> and  <tt class="doctest"><span class="pre">(('Fulton', 'NP'), ('County', 'N'))</span></tt>.
+Then we construct a <tt class="doctest"><span class="pre">FreqDist</span></tt> from the tag parts of the bigrams.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> word_tag_pairs = nltk.bigrams(brown_news_tagged)
+>>> noun_preceders = [a[1] for (a, b) in word_tag_pairs if b[1] == 'NOUN']
+>>> fdist = nltk.FreqDist(noun_preceders)
+>>> [tag for (tag, _) in fdist.most_common()]
+['NOUN', 'DET', 'ADJ', 'ADP', '.', 'VERB', 'CONJ', 'NUM', 'ADV', 'PRT', 'PRON', 'X']</td>
+</tr></table></td></tr>
+</table></div>
+<p>This confirms our assertion that nouns occur after determiners and
+adjectives, including numeral adjectives (tagged as <tt class="doctest"><span class="pre">NUM</span></tt>).</p>
+<!-- TO-DO say something about some of the other contexts? -->
+</div>
+<div class="section" id="verbs">
+<h2>2.5&nbsp;&nbsp;&nbsp;Verbs</h2>
+<p>Verbs are words that describe events and actions, e.g. <span class="example">fall</span>,
+<span class="example">eat</span> in <a class="reference internal" href="#tab-syntax-verbs">2.3</a>.
+In the context of a sentence, verbs typically express a relation
+involving the referents of one or more noun phrases.</p>
+<span class="target" id="tab-syntax-verbs"></span><table border="1" class="docutils" id="tab-syntax-verbs">
+<colgroup>
+<col width="7%" />
+<col width="22%" />
+<col width="70%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Word</th>
+<th class="head">Simple</th>
+<th class="head">With modifiers and adjuncts (italicized)</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>fall</td>
+<td>Rome fell</td>
+<td>Dot com stocks <em>suddenly</em> fell <em>like a stone</em></td>
+</tr>
+<tr><td>eat</td>
+<td>Mice eat cheese</td>
+<td>John ate the pizza <em>with gusto</em></td>
+</tr>
+</tbody>
+<p class="caption">Syntactic Patterns involving some Verbs</p>
+</table>
+<p>What are the most common verbs in news text?  Let's sort all the verbs by frequency:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> wsj = nltk.corpus.treebank.tagged_words(tagset='universal')
+>>> word_tag_fd = nltk.FreqDist(wsj)
+>>> [wt[0] for (wt, _) in word_tag_fd.most_common() if wt[1] == 'VERB']
+['is', 'said', 'are', 'was', 'be', 'has', 'have', 'will', 'says', 'would',
+ 'were', 'had', 'been', 'could', "'s", 'can', 'do', 'say', 'make', 'may',
+ 'did', 'rose', 'made', 'does', 'expected', 'buy', 'take', 'get', 'might',
+ 'sell', 'added', 'sold', 'help', 'including', 'should', 'reported', ...]</td>
+</tr></table></td></tr>
+</table></div>
+<p>Note that the items being counted in the frequency distribution are word-tag pairs.
+Since words and tags are paired, we can treat the word as a condition and the tag
+as an event, and initialize a conditional frequency distribution with a list of
+condition-event pairs.  This lets us see a frequency-ordered list of tags given a word:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> cfd1 = nltk.ConditionalFreqDist(wsj)
+>>> cfd1['yield'].most_common()
+[('VERB', 28), ('NOUN', 20)]
+>>> cfd1['cut'].most_common()
+[('VERB', 25), ('NOUN', 3)]</td>
+</tr></table></td></tr>
+</table></div>
+<p>We can reverse the order of the pairs, so that the tags are the conditions, and the
+words are the events.  Now we can see likely words for a given tag. We
+will do this for the WSJ tagset rather than the universal tagset:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> wsj = nltk.corpus.treebank.tagged_words()
+>>> cfd2 = nltk.ConditionalFreqDist((tag, word) for (word, tag) in wsj)
+>>> list(cfd2['VBN'])
+['been', 'expected', 'made', 'compared', 'based', 'priced', 'used', 'sold',
+'named', 'designed', 'held', 'fined', 'taken', 'paid', 'traded', 'said', ...]</td>
+</tr></table></td></tr>
+</table></div>
+<p>To clarify the distinction between <tt class="doctest"><span class="pre">VBD</span></tt> (past tense) and <tt class="doctest"><span class="pre">VBN</span></tt>
+(past participle), let's find words which can be both <tt class="doctest"><span class="pre">VBD</span></tt> and
+<tt class="doctest"><span class="pre">VBN</span></tt>, and see some surrounding text:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> [w for w in cfd1.conditions() if 'VBD' in cfd1[w] and 'VBN' in cfd1[w]]
+['Asked', 'accelerated', 'accepted', 'accused', 'acquired', 'added', 'adopted', ...]
+>>> idx1 = wsj.index(('kicked', 'VBD'))
+>>> wsj[idx1-4:idx1+1]
+[('While', 'IN'), ('program', 'NN'), ('trades', 'NNS'), ('swiftly', 'RB'),
+ ('kicked', 'VBD')]
+>>> idx2 = wsj.index(('kicked', 'VBN'))
+>>> wsj[idx2-4:idx2+1]
+[('head', 'NN'), ('of', 'IN'), ('state', 'NN'), ('has', 'VBZ'), ('kicked', 'VBN')]</td>
+</tr></table></td></tr>
+</table></div>
+<p>In this case, we see that the past participle of <span class="example">kicked</span> is preceded by a form of
+the auxiliary verb <span class="example">have</span>. Is this generally true?</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><strong>Your Turn:</strong>
+Given the list of past participles produced by
+<tt class="doctest"><span class="pre">list(cfd2['VN'])</span></tt>, try to collect a list of all the word-tag
+pairs that immediately precede items in that list.</p>
+</div>
+</div>
+<div class="section" id="adjectives-and-adverbs">
+<h2>2.6&nbsp;&nbsp;&nbsp;Adjectives and Adverbs</h2>
+<p>Two other important word classes are <a name="adjectives_index_term" /><span class="termdef">adjectives</span> and <a name="adverbs_index_term" /><span class="termdef">adverbs</span>.
+Adjectives describe nouns, and can be used as modifiers
+(e.g. <span class="example">large</span> in <span class="example">the large pizza</span>), or in predicates (e.g. <span class="example">the
+pizza is large</span>).  English adjectives can have internal structure
+(e.g.  <span class="example">fall+ing</span> in <span class="example">the falling
+stocks</span>).  Adverbs modify verbs to specify the time, manner, place or
+direction of the event described by the verb (e.g. <span class="example">quickly</span> in
+<span class="example">the stocks fell quickly</span>).  Adverbs may also modify adjectives
+(e.g. <span class="example">really</span> in <span class="example">Mary's teacher was really nice</span>).</p>
+<p>English has several categories of closed class words in addition to
+prepositions, such as <a name="articles_index_term" /><span class="termdef">articles</span> (also often called <a name="determiners_index_term" /><span class="termdef">determiners</span>)
+(e.g., <span class="example">the</span>, <span class="example">a</span>), <a name="modals_index_term" /><span class="termdef">modals</span> (e.g., <span class="example">should</span>,
+<span class="example">may</span>), and <a name="personal_pronouns_index_term" /><span class="termdef">personal pronouns</span> (e.g., <span class="example">she</span>, <span class="example">they</span>).
+Each dictionary and grammar classifies these words differently.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><strong>Your Turn:</strong>
+If you are uncertain about some of these parts of speech, study them using
+<tt class="doctest"><span class="pre">nltk.app.concordance()</span></tt>, or watch some of the <em>Schoolhouse Rock!</em>
+grammar videos available at YouTube, or consult the Further Reading
+section at the end of this chapter.</p>
+</div>
+</div>
+<div class="section" id="unsimplified-tags">
+<h2>2.7&nbsp;&nbsp;&nbsp;Unsimplified Tags</h2>
+<p>Let's find the most frequent nouns of each noun part-of-speech type.
+The program in <a class="reference internal" href="#code-findtags">2.2</a> finds all tags starting with <tt class="doctest"><span class="pre">NN</span></tt>,
+and provides a few example words for each one.  You will see that
+there are many variants of <tt class="doctest"><span class="pre">NN</span></tt>; the most important contain <tt class="doctest"><span class="pre">$</span></tt>
+for possessive nouns, <tt class="doctest"><span class="pre">S</span></tt> for plural nouns (since plural nouns
+typically end in <span class="example">s</span>) and <tt class="doctest"><span class="pre">P</span></tt> for proper nouns.  In addition,
+most of the tags have suffix modifiers: <tt class="doctest"><span class="pre">-NC</span></tt> for citations, <tt class="doctest"><span class="pre">-HL</span></tt>
+for words in headlines and <tt class="doctest"><span class="pre">-TL</span></tt> for titles (a feature of Brown tabs).</p>
+<span class="target" id="code-findtags"></span><div class="pylisting">
+<table border="0" cellpadding="0" cellspacing="0" class="pylisting" width="95%">
+<tr><td class="codeblock">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_codeblock_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">def findtags(tag_prefix, tagged_text):
+    cfd = nltk.ConditionalFreqDist((tag, word) for (word, tag) in tagged_text
+                                  if tag.startswith(tag_prefix))
+    return dict((tag, cfd[tag].most_common(5)) for tag in cfd.conditions())
+
+>>> tagdict = findtags('NN', nltk.corpus.brown.tagged_words(categories='news'))
+>>> for tag in sorted(tagdict):
+...     print(tag, tagdict[tag])
+...
+NN [('year', 137), ('time', 97), ('state', 88), ('week', 85), ('man', 72)]
+NN$ [("year's", 13), ("world's", 8), ("state's", 7), ("nation's", 6), ("company's", 6)]
+NN$-HL [("Golf's", 1), ("Navy's", 1)]
+NN$-TL [("President's", 11), ("Army's", 3), ("Gallery's", 3), ("University's", 3), ("League's", 3)]
+NN-HL [('sp.', 2), ('problem', 2), ('Question', 2), ('business', 2), ('Salary', 2)]
+NN-NC [('eva', 1), ('aya', 1), ('ova', 1)]
+NN-TL [('President', 88), ('House', 68), ('State', 59), ('University', 42), ('City', 41)]
+NN-TL-HL [('Fort', 2), ('Dr.', 1), ('Oak', 1), ('Street', 1), ('Basin', 1)]
+NNS [('years', 101), ('members', 69), ('people', 52), ('sales', 51), ('men', 46)]
+NNS$ [("children's", 7), ("women's", 5), ("janitors'", 3), ("men's", 3), ("taxpayers'", 2)]
+NNS$-HL [("Dealers'", 1), ("Idols'", 1)]
+NNS$-TL [("Women's", 4), ("States'", 3), ("Giants'", 2), ("Bros.'", 1), ("Writers'", 1)]
+NNS-HL [('comments', 1), ('Offenses', 1), ('Sacrifices', 1), ('funds', 1), ('Results', 1)]
+NNS-TL [('States', 38), ('Nations', 11), ('Masters', 10), ('Rules', 9), ('Communists', 9)]
+NNS-TL-HL [('Nations', 1)]</td>
+</tr></table></td></tr>
+<tr><td class="caption"><p class="caption">Program to Find the Most Frequent Noun Tags</td></tr></p>
+</table></div>
+<p>When we come to constructing part-of-speech taggers later in this chapter,
+we will use the unsimplified tags.</p>
+</div>
+<div class="section" id="exploring-tagged-corpora">
+<h2>2.8&nbsp;&nbsp;&nbsp;Exploring Tagged Corpora</h2>
+<p>Let's briefly return to the kinds of exploration of corpora we saw in previous chapters,
+this time exploiting POS tags.</p>
+<p>Suppose we're studying the word <span class="example">often</span> and want to see how it is used
+in text.  We could ask to see the words that follow <span class="example">often</span></p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> brown_learned_text = brown.words(categories='learned')
+>>> sorted(set(b for (a, b) in nltk.bigrams(brown_learned_text) if a == 'often'))
+[',', '.', 'accomplished', 'analytically', 'appear', 'apt', 'associated', 'assuming',
+'became', 'become', 'been', 'began', 'call', 'called', 'carefully', 'chose', ...]</td>
+</tr></table></td></tr>
+</table></div>
+<p>However, it's probably more instructive use the <tt class="doctest"><span class="pre">tagged_words()</span></tt>
+method to look at the part-of-speech tag of the following words:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> brown_lrnd_tagged = brown.tagged_words(categories='learned', tagset='universal')
+>>> tags = [b[1] for (a, b) in nltk.bigrams(brown_lrnd_tagged) if a[0] == 'often']
+>>> fd = nltk.FreqDist(tags)
+>>> fd.tabulate()
+ PRT  ADV  ADP    . VERB  ADJ
+   2    8    7    4   37    6</td>
+</tr></table></td></tr>
+</table></div>
+<p>Notice that the most high-frequency parts of speech following <span class="example">often</span> are verbs.
+Nouns never appear in this position (in this particular corpus).</p>
+<p>Next, let's look at some larger context, and find words involving
+particular sequences of tags and words (in this case <tt class="doctest"><span class="pre">"<Verb> to <Verb>"</span></tt>).
+In code-three-word-phrase we consider each three-word window in the sentence <a class="reference internal" href="#three-word"><span id="ref-three-word"><img src="callouts/callout1.gif" alt="[1]" class="callout" /></span></a>,
+and check if they meet our criterion <a class="reference internal" href="#verb-to-verb"><span id="ref-verb-to-verb"><img src="callouts/callout2.gif" alt="[2]" class="callout" /></span></a>.  If the tags
+match, we print the corresponding words <a class="reference internal" href="#print-words"><span id="ref-print-words"><img src="callouts/callout3.gif" alt="[3]" class="callout" /></span></a>.</p>
+<span class="target" id="code-three-word-phrase"></span><div class="pylisting">
+<table border="0" cellpadding="0" cellspacing="0" class="pylisting" width="95%">
+<tr><td class="codeblock">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_codeblock_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">from nltk.corpus import brown
+def process(sentence):
+    for (w1,t1), (w2,t2), (w3,t3) in nltk.trigrams(sentence): # [_three-word]
+        if (t1.startswith('V') and t2 == 'TO' and t3.startswith('V')): # [_verb-to-verb]
+            print(w1, w2, w3) # [_print-words]
+
+>>> for tagged_sent in brown.tagged_sents():
+...     process(tagged_sent)
+...
+combined to achieve
+continue to place
+serve to protect
+wanted to wait
+allowed to place
+expected to become
+...</td>
+</tr></table></td></tr>
+<tr><td class="caption"><p class="caption">Searching for Three-Word Phrases Using POS Tags</td></tr></p>
+</table></div>
+<p>Finally, let's look for words that are highly ambiguous as to their part of speech tag.
+Understanding why such words are tagged as they are in each context can help us clarify
+the distinctions between the tags.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> brown_news_tagged = brown.tagged_words(categories='news', tagset='universal')
+>>> data = nltk.ConditionalFreqDist((word.lower(), tag)
+...                                 for (word, tag) in brown_news_tagged)
+>>> for word in sorted(data.conditions()):
+...     if len(data[word]) > 3:
+...         tags = [tag for (tag, _) in data[word].most_common()]
+...         print(word, ' '.join(tags))
+...
+best ADJ ADV NP V
+better ADJ ADV V DET
+close ADV ADJ V N
+cut V N VN VD
+even ADV DET ADJ V
+grant NP N V -
+hit V VD VN N
+lay ADJ V NP VD
+left VD ADJ N VN
+like CNJ V ADJ P -
+near P ADV ADJ DET
+open ADJ V N ADV
+past N ADJ DET P
+present ADJ ADV V N
+read V VN VD NP
+right ADJ N DET ADV
+second NUM ADV DET N
+set VN V VD N -
+that CNJ V WH DET</td>
+</tr></table></td></tr>
+</table></div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><strong>Your Turn:</strong>
+Open the POS concordance tool <tt class="doctest"><span class="pre">nltk.app.concordance()</span></tt> and load the complete
+Brown Corpus (simplified tagset).  Now pick some of the above words and see how the tag
+of the word correlates with the context of the word.
+E.g. search for <tt class="doctest"><span class="pre">near</span></tt> to see all forms mixed together, <tt class="doctest"><span class="pre">near/ADJ</span></tt> to see it used
+as an adjective, <tt class="doctest"><span class="pre">near N</span></tt> to see just those cases where a noun follows, and so forth.
+For a larger set of examples, modify the supplied code so that it lists words having
+three distinct tags.</p>
+</div>
+</div>
+</div>
+<div class="section" id="mapping-words-to-properties-using-python-dictionaries">
+<span id="sec-dictionaries"></span><h1>3&nbsp;&nbsp;&nbsp;Mapping Words to Properties Using Python Dictionaries</h1>
+<p>As we have seen, a tagged word of the form <tt class="doctest"><span class="pre">(word, tag)</span></tt> is
+an association between a word and a part-of-speech tag.
+Once we start doing part-of-speech tagging, we will be creating
+programs that assign a tag to a word, the tag which is most
+likely in a given context.  We can think of this process as
+<a name="mapping_index_term" /><span class="termdef">mapping</span> from words to tags.  The most natural way to
+store mappings in Python uses the so-called <a name="dictionary_index_term" /><span class="termdef">dictionary</span> data type
+(also known as an <a name="associative_array_index_term" /><span class="termdef">associative array</span> or <a name="hash_array_index_term" /><span class="termdef">hash array</span>
+in other programming languages).
+In this section we look at dictionaries and see how they can
+represent a variety of language information, including
+parts of speech.</p>
+<div class="section" id="indexing-lists-vs-dictionaries">
+<h2>3.1&nbsp;&nbsp;&nbsp;Indexing Lists vs Dictionaries</h2>
+<p>A text, as we have seen, is treated in Python as a list of words.
+An important property of lists is that we can &quot;look up&quot; a particular
+item by giving its index, e.g. <tt class="doctest"><span class="pre">text1[100]</span></tt>.  Notice how we specify
+a number, and get back a word.  We can think of a list as a simple
+kind of table, as shown in <a class="reference internal" href="#fig-maps01">fig-maps01</a>.</p>
+<div class="system-message" id="fig-maps01">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 630)</p>
+<p>Error in &quot;figure&quot; directive:
+invalid option value: (option: &quot;scale&quot;; value: '20:90:20')
+invalid literal for int() with base 10: '20:90:20'.</p>
+<pre class="literal-block">
+.. figure:: ../images/maps01.png
+   :scale: 20:90:20
+
+   List Look-up: we access the contents of a Python list with the help of an integer index.
+
+</pre>
+</div>
+<p>Contrast this situation with frequency distributions (<a href="#id6"><span class="problematic" id="id7">sec-computing-with-language-simple-statistics_</span></a>),
+where we specify a word, and get back a number, e.g. <tt class="doctest"><span class="pre">fdist['monstrous']</span></tt>, which
+tells us the number of times a given word has occurred in a text.  Look-up using words is
+familiar to anyone who has used a dictionary.  Some more examples are shown in
+<a class="reference internal" href="#fig-maps02">3.1</a>.</p>
+<span class="target" id="fig-maps02"></span><div class="figure" id="fig-maps02">
+<img alt="../images/maps02.png" src="../images/maps02.png" />
+<p class="caption">Dictionary Look-up: we access the entry of a dictionary using a key
+such as someone's name, a web domain, or an English word;
+other names for dictionary are map, hashmap, hash, and associative array.</p>
+</div>
+<p>In the case of a phonebook, we look up an entry using a <span class="emphasis">name</span>,
+and get back a number.  When we type a domain name in a web browser,
+the computer looks this up to get back an IP address.  A word
+frequency table allows us to look up a word and find its frequency in
+a text collection.  In all these cases, we are mapping from names to
+numbers, rather than the other way around as with a list.
+In general, we would like to be able to map between
+arbitrary types of information.  <a class="reference internal" href="#tab-linguistic-objects">3.1</a> lists a variety
+of linguistic objects, along with what they map.</p>
+<span class="target" id="tab-linguistic-objects"></span><table border="1" class="docutils" id="tab-linguistic-objects">
+<colgroup>
+<col width="26%" />
+<col width="14%" />
+<col width="60%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Linguistic Object</th>
+<th class="head">Maps From</th>
+<th class="head">Maps To</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>Document Index</td>
+<td>Word</td>
+<td>List of pages (where word is found)</td>
+</tr>
+<tr><td>Thesaurus</td>
+<td>Word sense</td>
+<td>List of synonyms</td>
+</tr>
+<tr><td>Dictionary</td>
+<td>Headword</td>
+<td>Entry (part-of-speech, sense definitions, etymology)</td>
+</tr>
+<tr><td>Comparative Wordlist</td>
+<td>Gloss term</td>
+<td>Cognates (list of words, one per language)</td>
+</tr>
+<tr><td>Morph Analyzer</td>
+<td>Surface form</td>
+<td>Morphological analysis (list of component morphemes)</td>
+</tr>
+</tbody>
+<p class="caption">Linguistic Objects as Mappings from Keys to Values</p>
+</table>
+<p>Most often, we are mapping from a &quot;word&quot; to some structured object.
+For example, a document index maps from a word (which we can represent
+as a string), to a list of pages (represented as a list of integers).
+In this section, we will see how to represent such mappings in Python.</p>
+</div>
+<div class="section" id="dictionaries-in-python">
+<h2>3.2&nbsp;&nbsp;&nbsp;Dictionaries in Python</h2>
+<p>Python provides a <a name="dictionary_index_term_2" /><span class="termdef">dictionary</span> data type that can be used for
+mapping between arbitrary types.  It is like a conventional dictionary,
+in that it gives you an efficient way to look things up.  However,
+as we see from <a class="reference internal" href="#tab-linguistic-objects">3.1</a>, it has a much wider range of uses.</p>
+<p>To illustrate, we define <tt class="doctest"><span class="pre">pos</span></tt> to be an empty dictionary and then add four
+entries to it, specifying the part-of-speech of some words.  We add
+entries to a dictionary using the familiar square bracket notation:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> pos = {}
+>>> pos
+{}
+>>> pos['colorless'] = 'ADJ' # [_pos-colorless]
+>>> pos
+{'colorless': 'ADJ'}
+>>> pos['ideas'] = 'N'
+>>> pos['sleep'] = 'V'
+>>> pos['furiously'] = 'ADV'
+>>> pos # [_pos-inspect]
+{'furiously': 'ADV', 'ideas': 'N', 'colorless': 'ADJ', 'sleep': 'V'}</td>
+</tr></table></td></tr>
+</table></div>
+<p>So, for example, <a class="reference internal" href="#pos-colorless"><span id="ref-pos-colorless"><img src="callouts/callout1.gif" alt="[1]" class="callout" /></span></a> says that
+the part-of-speech of <span class="example">colorless</span> is adjective, or more
+specifically, that the <a name="key_index_term" /><span class="termdef">key</span> <tt class="doctest"><span class="pre">'colorless'</span></tt>
+is assigned the <a name="value_index_term" /><span class="termdef">value</span> <tt class="doctest"><span class="pre">'ADJ'</span></tt>  in dictionary <tt class="doctest"><span class="pre">pos</span></tt>.
+When we inspect the value of <tt class="doctest"><span class="pre">pos</span></tt> <a class="reference internal" href="#pos-inspect"><span id="ref-pos-inspect"><img src="callouts/callout2.gif" alt="[2]" class="callout" /></span></a> we see
+a set of key-value pairs.  Once we have populated the dictionary
+in this way, we can employ the keys to retrieve values:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> pos['ideas']
+'N'
+>>> pos['colorless']
+'ADJ'</td>
+</tr></table></td></tr>
+</table></div>
+<p>Of course, we might accidentally use a key that hasn't been assigned a value.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> pos['green']
+Traceback (most recent call last):
+  File "<stdin>", line 1, in ?
+KeyError: 'green'</td>
+</tr></table></td></tr>
+</table></div>
+<p>This raises an important question.  Unlike lists and strings, where we
+can use <tt class="doctest"><span class="pre">len()</span></tt> to work out which integers will be legal indexes,
+how do we work out the legal keys for a dictionary?  If the dictionary
+is not too big, we can simply inspect its contents by evaluating the
+variable <tt class="doctest"><span class="pre">pos</span></tt>.  As we saw above (line <a class="reference internal" href="#pos-inspect"><img src="callouts/callout2.gif" alt="[2]" class="callout" /></a>), this gives
+us the key-value pairs.  Notice that they are not in the same order they
+were originally entered; this is because dictionaries are not sequences
+but mappings (cf. <a class="reference internal" href="#fig-maps02">3.1</a>), and the keys are not inherently
+ordered.</p>
+<p>Alternatively, to just find the keys, we can convert the
+dictionary to a list <a class="reference internal" href="#dict-to-list"><span id="ref-dict-to-list"><img src="callouts/callout1.gif" alt="[1]" class="callout" /></span></a> &#8212; or use
+the dictionary in a context where a list is expected,
+as the parameter of <tt class="doctest"><span class="pre">sorted()</span></tt> <a class="reference internal" href="#dict-sorted"><span id="ref-dict-sorted"><img src="callouts/callout2.gif" alt="[2]" class="callout" /></span></a>,
+or in a <tt class="doctest"><span class="pre">for</span></tt> loop <a class="reference internal" href="#dict-for-loop"><span id="ref-dict-for-loop"><img src="callouts/callout3.gif" alt="[3]" class="callout" /></span></a>.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> list(pos) # [_dict-to-list]
+['ideas', 'furiously', 'colorless', 'sleep']
+>>> sorted(pos) # [_dict-sorted]
+['colorless', 'furiously', 'ideas', 'sleep']
+>>> [w for w in pos if w.endswith('s')] # [_dict-for-loop]
+['colorless', 'ideas']</td>
+</tr></table></td></tr>
+</table></div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When you type <tt class="doctest"><span class="pre">list(pos)</span></tt> you might see a different order
+to the one shown above.  If you want to see the keys in order, just sort them.</p>
+</div>
+<p>As well as iterating over all keys
+in the dictionary with a <tt class="doctest"><span class="pre">for</span></tt> loop, we can use the <tt class="doctest"><span class="pre">for</span></tt> loop
+as we did for printing lists:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> for word in sorted(pos):
+...     print(word + ":", pos[word])
+...
+colorless: ADJ
+furiously: ADV
+sleep: V
+ideas: N</td>
+</tr></table></td></tr>
+</table></div>
+<p>Finally, the dictionary methods <tt class="doctest"><span class="pre">keys()</span></tt>, <tt class="doctest"><span class="pre">values()</span></tt> and
+<tt class="doctest"><span class="pre">items()</span></tt> allow us to access the keys, values, and key-value pairs as separate lists.
+We can even sort tuples <a class="reference internal" href="#sort-tuples"><span id="ref-sort-tuples"><img src="callouts/callout1.gif" alt="[1]" class="callout" /></span></a>, which orders them according to their first element
+(and if the first elements are the same, it uses their second elements).</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> list(pos.keys())
+['colorless', 'furiously', 'sleep', 'ideas']
+>>> list(pos.values())
+['ADJ', 'ADV', 'V', 'N']
+>>> list(pos.items())
+[('colorless', 'ADJ'), ('furiously', 'ADV'), ('sleep', 'V'), ('ideas', 'N')]
+>>> for key, val in sorted(pos.items()): # [_sort-tuples]
+...     print(key + ":", val)
+...
+colorless: ADJ
+furiously: ADV
+ideas: N
+sleep: V</td>
+</tr></table></td></tr>
+</table></div>
+<p>We want to be sure that when we look something up in a dictionary, we
+only get one value for each key. Now
+suppose we try to use a dictionary to store the fact that the
+word <span class="example">sleep</span> can be used as both a verb and a noun:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> pos['sleep'] = 'V'
+>>> pos['sleep']
+'V'
+>>> pos['sleep'] = 'N'
+>>> pos['sleep']
+'N'</td>
+</tr></table></td></tr>
+</table></div>
+<p>Initially, <tt class="doctest"><span class="pre">pos['sleep']</span></tt> is given the value <tt class="doctest"><span class="pre">'V'</span></tt>. But this is
+immediately overwritten with the new value <tt class="doctest"><span class="pre">'N'</span></tt>.
+In other words, there can only be one entry in the dictionary for <tt class="doctest"><span class="pre">'sleep'</span></tt>.
+However, there is a way of storing multiple values in
+that entry: we use a list value,
+e.g. <tt class="doctest"><span class="pre">pos['sleep'] = ['N', 'V']</span></tt>.  In fact, this is what we
+saw in <a href="#id8"><span class="problematic" id="id9">sec-lexical-resources_</span></a> for the CMU Pronouncing Dictionary,
+which stores multiple pronunciations for a single word.</p>
+</div>
+<div class="section" id="defining-dictionaries">
+<h2>3.3&nbsp;&nbsp;&nbsp;Defining Dictionaries</h2>
+<p>We can use the same key-value pair format to create a dictionary.  There's
+a couple of ways to do this, and we will normally use the first:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> pos = {'colorless': 'ADJ', 'ideas': 'N', 'sleep': 'V', 'furiously': 'ADV'}
+>>> pos = dict(colorless='ADJ', ideas='N', sleep='V', furiously='ADV')</td>
+</tr></table></td></tr>
+</table></div>
+<p>Note that dictionary keys must be immutable types, such as strings and tuples.
+If we try to define a dictionary using a mutable key, we get a <tt class="doctest"><span class="pre">TypeError</span></tt>:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> pos = {['ideas', 'blogs', 'adventures']: 'N'}
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: list objects are unhashable</td>
+</tr></table></td></tr>
+</table></div>
+</div>
+<div class="section" id="default-dictionaries">
+<h2>3.4&nbsp;&nbsp;&nbsp;Default Dictionaries</h2>
+<p>If we try to access a key that is not in a dictionary, we get an error.
+However, its often useful if a dictionary can automatically create
+an entry for this new key and give it a default value, such as zero or
+the empty list.  For this reason, a special kind of dictionary
+called a <tt class="doctest"><span class="pre">defaultdict</span></tt> is available.
+In order to use it, we have to supply a parameter which can be used to
+create the default value, e.g. <tt class="doctest"><span class="pre">int</span></tt>, <tt class="doctest"><span class="pre">float</span></tt>, <tt class="doctest"><span class="pre">str</span></tt>, <tt class="doctest"><span class="pre">list</span></tt>, <tt class="doctest"><span class="pre">dict</span></tt>,
+<tt class="doctest"><span class="pre">tuple</span></tt>.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> from collections import defaultdict
+>>> frequency = defaultdict(int)
+>>> frequency['colorless'] = 4
+>>> frequency['ideas']
+0
+>>> pos = defaultdict(list)
+>>> pos['sleep'] = ['NOUN', 'VERB']
+>>> pos['ideas']
+[]</td>
+</tr></table></td></tr>
+</table></div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">These default values are actually functions that convert other
+objects to the specified type (e.g. <tt class="doctest"><span class="pre">int("2")</span></tt>, <tt class="doctest"><span class="pre">list("2")</span></tt>).
+When they are called with no parameter &#8212; <tt class="doctest"><span class="pre">int()</span></tt>, <tt class="doctest"><span class="pre">list()</span></tt>
+&#8212; they return <tt class="doctest"><span class="pre">0</span></tt> and <tt class="doctest"><span class="pre">[]</span></tt> respectively.</p>
+</div>
+<p>The above examples specified the default value of a dictionary entry to
+be the default value of a particular data type.  However, we can specify
+any default value we like, simply by providing the name of a function
+that can be called with no arguments to create the required value.
+Let's return to our part-of-speech example, and create a dictionary
+whose default value for any entry is <tt class="doctest"><span class="pre">'N'</span></tt> <a class="reference internal" href="#default-noun"><span id="ref-default-noun"><img src="callouts/callout1.gif" alt="[1]" class="callout" /></span></a>.
+When we access a non-existent entry <a class="reference internal" href="#non-existent"><span id="ref-non-existent"><img src="callouts/callout2.gif" alt="[2]" class="callout" /></span></a>,
+it is automatically added to the dictionary <a class="reference internal" href="#automatically-added"><span id="ref-automatically-added"><img src="callouts/callout3.gif" alt="[3]" class="callout" /></span></a>.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> pos = defaultdict(lambda: 'NOUN') # [_default-noun]
+>>> pos['colorless'] = 'ADJ'
+>>> pos['blog'] # [_non-existent]
+'NOUN'
+>>> list(pos.items())
+[('blog', 'NOUN'), ('colorless', 'ADJ')] # [_automatically-added]</td>
+</tr></table></td></tr>
+</table></div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The above example used a <span class="emphasis">lambda expression</span>, introduced in
+<a href="#id10"><span class="problematic" id="id11">sec-functions_</span></a>.  This lambda expression specifies no
+parameters, so we call it using parentheses with no arguments.
+Thus, the definitions of <tt class="doctest"><span class="pre">f</span></tt> and <tt class="doctest"><span class="pre">g</span></tt> below are equivalent:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> f = lambda: 'NOUN'
+>>> f()
+'NOUN'
+>>> def g():
+...     return 'NOUN'
+>>> g()
+'NOUN'</td>
+</tr></table></td></tr>
+</table></div>
+</div>
+<p>Let's see how default dictionaries could be used in a more substantial
+language processing task.
+Many language processing tasks &#8212; including tagging &#8212; struggle to correctly process
+the hapaxes of a text.  They can perform better with a fixed vocabulary and a
+guarantee that no new words will appear.  We can preprocess a text to replace
+low-frequency words with a special &quot;out of vocabulary&quot; token <tt class="doctest"><span class="pre">UNK</span></tt>, with
+the help of a default dictionary.  (Can you work out how to do this without
+reading on?)</p>
+<p>We need to create a default dictionary that maps each word to its replacement.
+The most frequent <span class="math">n</span> words will be mapped to themselves.
+Everything else will be mapped to <tt class="doctest"><span class="pre">UNK</span></tt>.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> alice = nltk.corpus.gutenberg.words('carroll-alice.txt')
+>>> vocab = nltk.FreqDist(alice)
+>>> v1000 = [word for (word, _) in vocab.most_common(1000)]
+>>> mapping = defaultdict(lambda: 'UNK')
+>>> for v in v1000:
+...     mapping[v] = v
+...
+>>> alice2 = [mapping[v] for v in alice]
+>>> alice2[:100]
+['UNK', 'Alice', "'", 's', 'UNK', 'in', 'UNK', 'by', 'UNK', 'UNK', 'UNK',
+'UNK', 'CHAPTER', 'I', '.', 'UNK', 'the', 'Rabbit', '-', 'UNK', 'Alice',
+'was', 'beginning', 'to', 'get', 'very', 'tired', 'of', 'sitting', 'by',
+'her', 'sister', 'on', 'the', 'UNK', ',', 'and', 'of', 'having', 'nothing',
+'to', 'do', ':', 'once', 'or', 'twice', 'she', 'had', 'UNK', 'into', 'the',
+'book', 'her', 'sister', 'was', 'UNK', ',', 'but', 'it', 'had', 'no',
+'pictures', 'or', 'UNK', 'in', 'it', ',', "'", 'and', 'what', 'is', 'the',
+'use', 'of', 'a', 'book', ",'", 'thought', 'Alice', "'", 'without',
+'pictures', 'or', 'conversation', "?'" ...]
+>>> len(set(alice2))
+1001</td>
+</tr></table></td></tr>
+</table></div>
+<!-- note: |TRY|
+Repeat the above example for different vocabulary sizes and different texts.
+How small a vocabulary can you tolerate while still getting something useful
+from the text? -->
+</div>
+<div class="section" id="incrementally-updating-a-dictionary">
+<h2>3.5&nbsp;&nbsp;&nbsp;Incrementally Updating a Dictionary</h2>
+<p>We can employ dictionaries to count occurrences, emulating the method
+for tallying words shown in <a href="#id12"><span class="problematic" id="id13">fig-tally_</span></a>.
+We begin by initializing an empty <tt class="doctest"><span class="pre">defaultdict</span></tt>, then process each
+part-of-speech tag in the text.  If the tag hasn't been seen before,
+it will have a zero count by default.  Each time we encounter a tag,
+we increment its count using the <tt class="doctest"><span class="pre">+=</span></tt> operator.</p>
+<span class="target" id="code-dictionary"></span><div class="pylisting">
+<table border="0" cellpadding="0" cellspacing="0" class="pylisting" width="95%">
+<tr><td class="codeblock">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_codeblock_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> from collections import defaultdict
+>>> counts = defaultdict(int)
+>>> from nltk.corpus import brown
+>>> for (word, tag) in brown.tagged_words(categories='news', tagset='universal'):
+...     counts[tag] += 1
+...
+>>> counts['NOUN']
+30640
+>>> sorted(counts)
+['ADJ', 'PRT', 'ADV', 'X', 'CONJ', 'PRON', 'VERB', '.', 'NUM', 'NOUN', 'ADP', 'DET']
+
+>>> from operator import itemgetter
+>>> sorted(counts.items(), key=itemgetter(1), reverse=True)
+[('NOUN', 30640), ('VERB', 14399), ('ADP', 12355), ('.', 11928), ...]
+>>> [t for t, c in sorted(counts.items(), key=itemgetter(1), reverse=True)]
+['NOUN', 'VERB', 'ADP', '.', 'DET', 'ADJ', 'ADV', 'CONJ', 'PRON', 'PRT', 'NUM', 'X']</td>
+</tr></table></td></tr>
+<tr><td class="caption"><p class="caption">Incrementally Updating a Dictionary, and Sorting by Value</td></tr></p>
+</table></div>
+<p>The listing in <a class="reference internal" href="#code-dictionary">3.2</a> illustrates an important idiom for
+sorting a dictionary by its values, to show words in decreasing
+order of frequency.  The first parameter of <tt class="doctest"><span class="pre">sorted()</span></tt> is the items
+to sort, a list of tuples consisting of a POS tag and a frequency.
+The second parameter specifies the sort key using a function <tt class="doctest"><span class="pre">itemgetter()</span></tt>.
+In general, <tt class="doctest"><span class="pre">itemgetter(n)</span></tt> returns a function that can be called on
+some other sequence object to obtain the <span class="math">n</span>th element, e.g.:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> pair = ('NP', 8336)
+>>> pair[1]
+8336
+>>> itemgetter(1)(pair)
+8336</td>
+</tr></table></td></tr>
+</table></div>
+<p>The last parameter of <tt class="doctest"><span class="pre">sorted()</span></tt> specifies that the items should be returned
+in reverse order, i.e. decreasing values of frequency.</p>
+<p>There's a second useful programming idiom at the beginning of
+<a class="reference internal" href="#code-dictionary">3.2</a>, where we initialize a <tt class="doctest"><span class="pre">defaultdict</span></tt> and then use a
+<tt class="doctest"><span class="pre">for</span></tt> loop to update its values. Here's a schematic version:</p>
+<div class="line-block">
+<div class="line"><tt class="doctest"><span class="pre">>>> my_dictionary = defaultdict(</span></tt><em>function to create default value</em><tt class="doctest"><span class="pre">)</span></tt></div>
+<div class="line"><tt class="doctest"><span class="pre">>>> for</span></tt> <em>item</em> <tt class="doctest"><span class="pre">in</span></tt> <em>sequence</em><tt class="doctest"><span class="pre">:</span></tt></div>
+<div class="line"><tt class="doctest"><span class="pre">...      my_dictionary[</span></tt><em>item_key</em><tt class="doctest"><span class="pre">]</span></tt> <em>is updated with information about item</em></div>
+</div>
+<p>Here's another instance of this pattern, where we index words according to their last two letters:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> last_letters = defaultdict(list)
+>>> words = nltk.corpus.words.words('en')
+>>> for word in words:
+...     key = word[-2:]
+...     last_letters[key].append(word)
+...
+>>> last_letters['ly']
+['abactinally', 'abandonedly', 'abasedly', 'abashedly', 'abashlessly', 'abbreviately',
+'abdominally', 'abhorrently', 'abidingly', 'abiogenetically', 'abiologically', ...]
+>>> last_letters['zy']
+['blazy', 'bleezy', 'blowzy', 'boozy', 'breezy', 'bronzy', 'buzzy', 'Chazy', ...]</td>
+</tr></table></td></tr>
+</table></div>
+<p>The following example uses the same pattern to create an anagram dictionary.
+(You might experiment with the third line to get an idea of why this program works.)</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> anagrams = defaultdict(list)
+>>> for word in words:
+...     key = ''.join(sorted(word))
+...     anagrams[key].append(word)
+...
+>>> anagrams['aeilnrt']
+['entrail', 'latrine', 'ratline', 'reliant', 'retinal', 'trenail']</td>
+</tr></table></td></tr>
+</table></div>
+<p>Since accumulating words like this is such a common task,
+NLTK provides a more convenient way of creating a <tt class="doctest"><span class="pre">defaultdict(list)</span></tt>,
+in the form of <tt class="doctest"><span class="pre">nltk.Index()</span></tt>.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> anagrams = nltk.Index((''.join(sorted(w)), w) for w in words)
+>>> anagrams['aeilnrt']
+['entrail', 'latrine', 'ratline', 'reliant', 'retinal', 'trenail']</td>
+</tr></table></td></tr>
+</table></div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><tt class="doctest"><span class="pre">nltk.Index</span></tt> is a <tt class="doctest"><span class="pre">defaultdict(list)</span></tt> with extra support for
+initialization.  Similarly,
+<tt class="doctest"><span class="pre">nltk.FreqDist</span></tt> is essentially a <tt class="doctest"><span class="pre">defaultdict(int)</span></tt> with extra
+support for initialization (along with sorting and plotting methods).</p>
+</div>
+</div>
+<div class="section" id="complex-keys-and-values">
+<h2>3.6&nbsp;&nbsp;&nbsp;Complex Keys and Values</h2>
+<p>We can use default dictionaries with complex keys and values.
+Let's study the range of possible tags for a word, given the
+word itself, and the tag of the previous word.  We will see
+how this information can be used by a POS tagger.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> pos = defaultdict(lambda: defaultdict(int))
+>>> brown_news_tagged = brown.tagged_words(categories='news', tagset='universal')
+>>> for ((w1, t1), (w2, t2)) in nltk.bigrams(brown_news_tagged): # [_processing-pairs]
+...     pos[(t1, w2)][t2] += 1 # [_tag-word-update]
+...
+>>> pos[('DET', 'right')] # [_compound-key]
+defaultdict(<class 'int'>, {'ADJ': 11, 'NOUN': 5})</td>
+</tr></table></td></tr>
+</table></div>
+<p>This example uses a dictionary whose default value for an entry
+is a dictionary (whose default value is <tt class="doctest"><span class="pre">int()</span></tt>, i.e. zero).
+Notice how we iterated over the bigrams of the tagged
+corpus, processing a pair of word-tag pairs for each iteration <a class="reference internal" href="#processing-pairs"><span id="ref-processing-pairs"><img src="callouts/callout1.gif" alt="[1]" class="callout" /></span></a>.
+Each time through the loop we updated our <tt class="doctest"><span class="pre">pos</span></tt> dictionary's
+entry for <tt class="doctest"><span class="pre">(t1, w2)</span></tt>, a tag and its <em>following</em> word <a class="reference internal" href="#tag-word-update"><span id="ref-tag-word-update"><img src="callouts/callout2.gif" alt="[2]" class="callout" /></span></a>.
+When we look up an item in <tt class="doctest"><span class="pre">pos</span></tt> we must specify a compound key <a class="reference internal" href="#compound-key"><span id="ref-compound-key"><img src="callouts/callout3.gif" alt="[3]" class="callout" /></span></a>,
+and we get back a dictionary object.
+A POS tagger could use such information to decide that the
+word <span class="example">right</span>, when preceded by a determiner, should be tagged as <tt class="doctest"><span class="pre">ADJ</span></tt>.</p>
+</div>
+<div class="section" id="inverting-a-dictionary">
+<h2>3.7&nbsp;&nbsp;&nbsp;Inverting a Dictionary</h2>
+<p>Dictionaries support efficient lookup, so long as you want to get the value for
+any key.  If <tt class="doctest"><span class="pre">d</span></tt> is a dictionary and <tt class="doctest"><span class="pre">k</span></tt> is a key, we type <tt class="doctest"><span class="pre">d[k]</span></tt> and
+immediately obtain the value.  Finding a key given a value is slower and more
+cumbersome:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> counts = defaultdict(int)
+>>> for word in nltk.corpus.gutenberg.words('milton-paradise.txt'):
+...     counts[word] += 1
+...
+>>> [key for (key, value) in counts.items() if value == 32]
+['brought', 'Him', 'virtue', 'Against', 'There', 'thine', 'King', 'mortal',
+'every', 'been']</td>
+</tr></table></td></tr>
+</table></div>
+<p>If we expect to do this kind of &quot;reverse lookup&quot; often, it helps to construct
+a dictionary that maps values to keys.  In the case that no two keys have
+the same value, this is an easy thing to do.  We just get all the key-value
+pairs in the dictionary, and create a new dictionary of value-key
+pairs. The next example also illustrates another way of initializing a
+dictionary <tt class="doctest"><span class="pre">pos</span></tt> with key-value pairs.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> pos = {'colorless': 'ADJ', 'ideas': 'N', 'sleep': 'V', 'furiously': 'ADV'}
+>>> pos2 = dict((value, key) for (key, value) in pos.items())
+>>> pos2['N']
+'ideas'</td>
+</tr></table></td></tr>
+</table></div>
+<p>Let's first make our part-of-speech dictionary a bit more realistic
+and add some more words to <tt class="doctest"><span class="pre">pos</span></tt> using the dictionary <tt class="doctest"><span class="pre">update()</span></tt> method, to
+create the situation where multiple keys have the same value. Then the
+technique just shown for reverse lookup will no longer work (why
+not?).  Instead, we have to use <tt class="doctest"><span class="pre">append()</span></tt> to accumulate the words
+for each part-of-speech, as follows:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> pos.update({'cats': 'N', 'scratch': 'V', 'peacefully': 'ADV', 'old': 'ADJ'})
+>>> pos2 = defaultdict(list)
+>>> for key, value in pos.items():
+...     pos2[value].append(key)
+...
+>>> pos2['ADV']
+['peacefully', 'furiously']</td>
+</tr></table></td></tr>
+</table></div>
+<p>Now we have inverted the <tt class="doctest"><span class="pre">pos</span></tt> dictionary, and can look up any part-of-speech and find
+all words having that part-of-speech.  We can do the same thing even
+more simply using NLTK's support for indexing as follows:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> pos2 = nltk.Index((value, key) for (key, value) in pos.items())
+>>> pos2['ADV']
+['peacefully', 'furiously']</td>
+</tr></table></td></tr>
+</table></div>
+<p>A summary of Python's dictionary methods is given in <a class="reference internal" href="#tab-dict">3.2</a>.</p>
+<span class="target" id="tab-dict"></span><table border="1" class="docutils" id="tab-dict">
+<colgroup>
+<col width="37%" />
+<col width="63%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Example</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="doctest"><span class="pre">d = {}</span></tt></td>
+<td>create an empty dictionary and assign it to <tt class="doctest"><span class="pre">d</span></tt></td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">d[key] = value</span></tt></td>
+<td>assign a value to a given dictionary key</td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">d.keys()</span></tt></td>
+<td>the list of keys of the dictionary</td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">list(d)</span></tt></td>
+<td>the list of keys of the dictionary</td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">sorted(d)</span></tt></td>
+<td>the keys of the dictionary, sorted</td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">key in d</span></tt></td>
+<td>test whether a particular key is in the dictionary</td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">for key in d</span></tt></td>
+<td>iterate over the keys of the dictionary</td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">d.values()</span></tt></td>
+<td>the list of values in the dictionary</td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">dict([(k1,v1), (k2,v2), ...])</span></tt></td>
+<td>create a dictionary from a list of key-value pairs</td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">d1.update(d2)</span></tt></td>
+<td>add all items from <tt class="doctest"><span class="pre">d2</span></tt> to <tt class="doctest"><span class="pre">d1</span></tt></td>
+</tr>
+<tr><td><tt class="doctest"><span class="pre">defaultdict(int)</span></tt></td>
+<td>a dictionary whose default value is zero</td>
+</tr>
+</tbody>
+<p class="caption">Python's Dictionary Methods: A summary of commonly-used methods and idioms
+involving dictionaries.</p>
+</table>
+</div>
+</div>
+<div class="section" id="automatic-tagging">
+<span id="sec-automatic-tagging"></span><h1>4&nbsp;&nbsp;&nbsp;Automatic Tagging</h1>
+<p>In the rest of this chapter we will explore various ways to automatically
+add part-of-speech tags to text.  We will see that the tag of a word depends
+on the word and its context within a sentence.  For this reason, we will
+be working with data at the level of (tagged) sentences rather than words.
+We'll begin by loading the data we will be using.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> from nltk.corpus import brown
+>>> brown_tagged_sents = brown.tagged_sents(categories='news')
+>>> brown_sents = brown.sents(categories='news')</td>
+</tr></table></td></tr>
+</table></div>
+<div class="section" id="the-default-tagger">
+<h2>4.1&nbsp;&nbsp;&nbsp;The Default Tagger</h2>
+<p>The simplest possible tagger assigns the same tag to each token.  This
+may seem to be a rather banal step, but it establishes an important
+baseline for tagger performance.  In order to get the best result, we
+tag each word with the most likely tag.  Let's find out which tag is
+most likely (now using the unsimplified tagset):</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> tags = [tag for (word, tag) in brown.tagged_words(categories='news')]
+>>> nltk.FreqDist(tags).max()
+'NN'</td>
+</tr></table></td></tr>
+</table></div>
+<p>Now we can create a tagger that tags everything as <tt class="doctest"><span class="pre">NN</span></tt>.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> raw = 'I do not like green eggs and ham, I do not like them Sam I am!'
+>>> tokens = nltk.word_tokenize(raw)
+>>> default_tagger = nltk.DefaultTagger('NN')
+>>> default_tagger.tag(tokens)
+[('I', 'NN'), ('do', 'NN'), ('not', 'NN'), ('like', 'NN'), ('green', 'NN'),
+('eggs', 'NN'), ('and', 'NN'), ('ham', 'NN'), (',', 'NN'), ('I', 'NN'),
+('do', 'NN'), ('not', 'NN'), ('like', 'NN'), ('them', 'NN'), ('Sam', 'NN'),
+('I', 'NN'), ('am', 'NN'), ('!', 'NN')]</td>
+</tr></table></td></tr>
+</table></div>
+<p>Unsurprisingly, this method performs rather poorly.
+On a typical corpus, it will tag only about an eighth of the tokens correctly,
+as we see below:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> default_tagger.evaluate(brown_tagged_sents)
+0.13089484257215028</td>
+</tr></table></td></tr>
+</table></div>
+<p>Default taggers assign their tag to every single word, even words that
+have never been encountered before.  As it happens, once we have processed
+several thousand words of English text, most new words will be nouns.
+As we will see, this means that default taggers can help to improve the
+robustness of a language processing system.  We will return to them
+shortly.</p>
+</div>
+<div class="section" id="the-regular-expression-tagger">
+<h2>4.2&nbsp;&nbsp;&nbsp;The Regular Expression Tagger</h2>
+<p>The regular expression tagger assigns tags to tokens on the basis of
+matching patterns.  For instance, we might guess that any word ending
+in <span class="example">ed</span> is the past participle of a verb, and any word ending with
+<span class="example">'s</span> is a possessive noun.  We can express these as a list of
+regular expressions:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> patterns = [
+...     (r'.*ing$', 'VBG'),               # gerunds
+...     (r'.*ed$', 'VBD'),                # simple past
+...     (r'.*es$', 'VBZ'),                # 3rd singular present
+...     (r'.*ould$', 'MD'),               # modals
+...     (r'.*\'s$', 'NN$'),               # possessive nouns
+...     (r'.*s$', 'NNS'),                 # plural nouns
+...     (r'^-?[0-9]+(.[0-9]+)?$', 'CD'),  # cardinal numbers
+...     (r'.*', 'NN')                     # nouns (default)
+... ]</td>
+</tr></table></td></tr>
+</table></div>
+<p>Note that these are processed in order, and the first one that matches is applied.
+Now we can set up a tagger and use it to tag a sentence.  Now its right about a fifth
+of the time.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> regexp_tagger = nltk.RegexpTagger(patterns)
+>>> regexp_tagger.tag(brown_sents[3])
+[('``', 'NN'), ('Only', 'NN'), ('a', 'NN'), ('relative', 'NN'), ('handful', 'NN'),
+('of', 'NN'), ('such', 'NN'), ('reports', 'NNS'), ('was', 'NNS'), ('received', 'VBD'),
+("''", 'NN'), (',', 'NN'), ('the', 'NN'), ('jury', 'NN'), ('said', 'NN'), (',', 'NN'),
+('``', 'NN'), ('considering', 'VBG'), ('the', 'NN'), ('widespread', 'NN'), ...]
+>>> regexp_tagger.evaluate(brown_tagged_sents)
+0.20326391789486245</td>
+</tr></table></td></tr>
+</table></div>
+<p>The final regular expression &#171;<tt class="doctest"><span class="pre">.*</span></tt>&#187; is a catch-all that tags everything as a noun.
+This is equivalent to the default tagger (only much less efficient).
+Instead of re-specifying this as part of the regular expression tagger,
+is there a way to combine this tagger with the default tagger?  We
+will see how to do this shortly.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><strong>Your Turn:</strong>
+See if you can come up with patterns to improve the performance of the above
+regular expression tagger.  (Note that <a href="#id14"><span class="problematic" id="id15">sec-supervised-classification_</span></a>
+describes a way partially automate such work.)</p>
+</div>
+</div>
+<div class="section" id="the-lookup-tagger">
+<h2>4.3&nbsp;&nbsp;&nbsp;The Lookup Tagger</h2>
+<p>A lot of high-frequency words do not have the <tt class="doctest"><span class="pre">NN</span></tt> tag.
+Let's find the hundred most frequent words and store their most likely tag.
+We can then use this information as the model for a &quot;lookup tagger&quot;
+(an NLTK <tt class="doctest"><span class="pre">UnigramTagger</span></tt>):</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> fd = nltk.FreqDist(brown.words(categories='news'))
+>>> cfd = nltk.ConditionalFreqDist(brown.tagged_words(categories='news'))
+>>> most_freq_words = fd.most_common(100)
+>>> likely_tags = dict((word, cfd[word].max()) for (word, _) in most_freq_words)
+>>> baseline_tagger = nltk.UnigramTagger(model=likely_tags)
+>>> baseline_tagger.evaluate(brown_tagged_sents)
+0.45578495136941344</td>
+</tr></table></td></tr>
+</table></div>
+<p>It should come as no surprise by now that simply
+knowing the tags for the 100 most frequent words enables us to tag a large fraction of
+tokens correctly (nearly half in fact).
+Let's see what it does on some untagged input text:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> sent = brown.sents(categories='news')[3]
+>>> baseline_tagger.tag(sent)
+[('``', '``'), ('Only', None), ('a', 'AT'), ('relative', None),
+('handful', None), ('of', 'IN'), ('such', None), ('reports', None),
+('was', 'BEDZ'), ('received', None), ("''", "''"), (',', ','),
+('the', 'AT'), ('jury', None), ('said', 'VBD'), (',', ','),
+('``', '``'), ('considering', None), ('the', 'AT'), ('widespread', None),
+('interest', None), ('in', 'IN'), ('the', 'AT'), ('election', None),
+(',', ','), ('the', 'AT'), ('number', None), ('of', 'IN'),
+('voters', None), ('and', 'CC'), ('the', 'AT'), ('size', None),
+('of', 'IN'), ('this', 'DT'), ('city', None), ("''", "''"), ('.', '.')]</td>
+</tr></table></td></tr>
+</table></div>
+<p>Many words have been assigned a tag of <tt class="doctest"><span class="pre">None</span></tt>,
+because they were not among the 100 most frequent words.
+In these cases we would like to assign the default tag of <tt class="doctest"><span class="pre">NN</span></tt>.
+In other words, we want to use the lookup table first,
+and if it is unable to assign a tag, then use the default tagger,
+a process known as <a name="backoff_index_term" /><span class="termdef">backoff</span> (<a class="reference internal" href="#sec-n-gram-tagging">5</a>).
+We do this by specifying one tagger as a parameter to the other,
+as shown below.  Now the lookup tagger will only store word-tag pairs
+for words other than nouns, and whenever it cannot assign a tag to a
+word it will invoke the default tagger.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> baseline_tagger = nltk.UnigramTagger(model=likely_tags,
+...                                      backoff=nltk.DefaultTagger('NN'))</td>
+</tr></table></td></tr>
+</table></div>
+<p>Let's put all this together and write a program to create and
+evaluate lookup taggers having a range of sizes, in <a class="reference internal" href="#code-baseline-tagger">4.1</a>.</p>
+<span class="target" id="code-baseline-tagger"></span><div class="pylisting">
+<table border="0" cellpadding="0" cellspacing="0" class="pylisting" width="95%">
+<tr><td class="codeblock">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_codeblock_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">def performance(cfd, wordlist):
+    lt = dict((word, cfd[word].max()) for word in wordlist)
+    baseline_tagger = nltk.UnigramTagger(model=lt, backoff=nltk.DefaultTagger('NN'))
+    return baseline_tagger.evaluate(brown.tagged_sents(categories='news'))
+
+def display():
+    import pylab
+    word_freqs = nltk.FreqDist(brown.words(categories='news')).most_common()
+    words_by_freq = [w for (w, _) in word_freqs]
+    cfd = nltk.ConditionalFreqDist(brown.tagged_words(categories='news'))
+    sizes = 2 ** pylab.arange(15)
+    perfs = [performance(cfd, words_by_freq[:size]) for size in sizes]
+    pylab.plot(sizes, perfs, '-bo')
+    pylab.title('Lookup Tagger Performance with Varying Model Size')
+    pylab.xlabel('Model Size')
+    pylab.ylabel('Performance')
+    pylab.show()</td>
+</tr></table></td></tr>
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> display()                                  </td>
+</tr></table></td></tr>
+<tr><td class="caption"><p class="caption">Lookup Tagger Performance with Varying Model Size</td></tr></p>
+</table></div>
+<div class="system-message" id="fig-tag-lookup">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 1284)</p>
+<p>Error in &quot;figure&quot; directive:
+invalid option value: (option: &quot;scale&quot;; value: '20:20:30')
+invalid literal for int() with base 10: '20:20:30'.</p>
+<pre class="literal-block">
+.. figure:: ../images/tag-lookup.png
+   :scale: 20:20:30
+
+   Lookup Tagger
+
+</pre>
+</div>
+<p>Observe that performance initially increases rapidly as the model size grows, eventually
+reaching a plateau, when large increases in model size yield little improvement
+in performance.  (This example used the <tt class="doctest"><span class="pre">pylab</span></tt> plotting package, discussed
+in <a href="#id16"><span class="problematic" id="id17">sec-libraries_</span></a>.)</p>
+</div>
+<div class="section" id="evaluation">
+<h2>4.4&nbsp;&nbsp;&nbsp;Evaluation</h2>
+<p>In the above examples, you will have noticed an emphasis on
+accuracy scores.  In fact, evaluating the performance of
+such tools is a central theme in NLP.  Recall the processing
+pipeline in <a href="#id18"><span class="problematic" id="id19">fig-sds_</span></a>; any errors in the output of one
+module are greatly multiplied in the downstream modules.</p>
+<p>We evaluate the performance of a tagger relative to the tags
+a human expert would assign.  Since we don't usually have access
+to an expert and impartial human judge, we make do instead with
+<a name="gold_standard_index_term" /><span class="termdef">gold standard</span> test data. This is a corpus which has been manually
+annotated and which is accepted as a standard against which the
+guesses of an automatic system are assessed. The tagger is regarded as
+being correct if the tag it guesses for a given word is the same as
+the gold standard tag.</p>
+<p>Of course, the humans who designed and carried out the
+original gold standard annotation were only human. Further
+analysis might show mistakes in the gold standard, or may
+eventually lead to a revised tagset and more elaborate guidelines.
+Nevertheless, the gold standard is by definition &quot;correct&quot;
+as far as the evaluation of an automatic tagger is concerned.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Developing an annotated corpus is a major undertaking.
+Apart from the data, it generates sophisticated tools,
+documentation, and practices for ensuring high quality
+annotation.  The tagsets and other coding schemes inevitably
+depend on some theoretical position that is not shared by
+all, however corpus creators often go to great lengths to
+make their work as theory-neutral as possible in order to
+maximize the usefulness of their work.  We will discuss
+the challenges of creating a corpus in <a href="#id20"><span class="problematic" id="id21">chap-data_</span></a>.</p>
+</div>
+</div>
+</div>
+<div class="section" id="n-gram-tagging">
+<span id="sec-n-gram-tagging"></span><h1>5&nbsp;&nbsp;&nbsp;N-Gram Tagging</h1>
+<div class="section" id="unigram-tagging">
+<h2>5.1&nbsp;&nbsp;&nbsp;Unigram Tagging</h2>
+<p>Unigram taggers are based on a simple statistical algorithm:
+for each token, assign the tag that is most likely for
+that particular token. For example, it will assign the tag <tt class="doctest"><span class="pre">JJ</span></tt> to any
+occurrence of the word <span class="example">frequent</span>, since <span class="example">frequent</span> is used as an
+adjective (e.g. <span class="example">a frequent word</span>) more often than it is used as a
+verb (e.g. <span class="example">I frequent this cafe</span>).
+A unigram tagger behaves just like a lookup tagger (<a class="reference internal" href="#sec-automatic-tagging">4</a>),
+except there is a more convenient technique for setting it up,
+called <a name="training_index_term" /><span class="termdef">training</span>.  In the following code sample,
+we train a unigram tagger, use it to tag a sentence, then evaluate:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> from nltk.corpus import brown
+>>> brown_tagged_sents = brown.tagged_sents(categories='news')
+>>> brown_sents = brown.sents(categories='news')
+>>> unigram_tagger = nltk.UnigramTagger(brown_tagged_sents)
+>>> unigram_tagger.tag(brown_sents[2007])
+[('Various', 'JJ'), ('of', 'IN'), ('the', 'AT'), ('apartments', 'NNS'),
+('are', 'BER'), ('of', 'IN'), ('the', 'AT'), ('terrace', 'NN'), ('type', 'NN'),
+(',', ','), ('being', 'BEG'), ('on', 'IN'), ('the', 'AT'), ('ground', 'NN'),
+('floor', 'NN'), ('so', 'QL'), ('that', 'CS'), ('entrance', 'NN'), ('is', 'BEZ'),
+('direct', 'JJ'), ('.', '.')]
+>>> unigram_tagger.evaluate(brown_tagged_sents)
+0.9349006503968017</td>
+</tr></table></td></tr>
+</table></div>
+<p>We <a name="train_index_term" /><span class="termdef">train</span> a <tt class="doctest"><span class="pre">UnigramTagger</span></tt> by specifying tagged sentence data as
+a parameter when we initialize the tagger.  The training process involves
+inspecting the tag of each word and storing the most likely tag for any word
+in a dictionary, stored inside the tagger.</p>
+</div>
+<div class="section" id="separating-the-training-and-testing-data">
+<h2>5.2&nbsp;&nbsp;&nbsp;Separating the Training and Testing Data</h2>
+<p>Now that we are training a tagger on some data, we must be careful not to test it on the
+same data, as we did in the above example.  A tagger that simply memorized its training data
+and made no attempt to construct a general model would get a perfect score, but would also
+be useless for tagging new text.  Instead, we should split the data, training on 90% and
+testing on the remaining 10%:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> size = int(len(brown_tagged_sents) * 0.9)
+>>> size
+4160
+>>> train_sents = brown_tagged_sents[:size]
+>>> test_sents = brown_tagged_sents[size:]
+>>> unigram_tagger = nltk.UnigramTagger(train_sents)
+>>> unigram_tagger.evaluate(test_sents)
+0.811721...</td>
+</tr></table></td></tr>
+</table></div>
+<p>Although the score is worse, we now have a better picture of the usefulness of
+this tagger, i.e. its performance on previously unseen text.</p>
+</div>
+<div class="section" id="general-n-gram-tagging">
+<h2>5.3&nbsp;&nbsp;&nbsp;General N-Gram Tagging</h2>
+<p>When we perform a language processing task based on unigrams, we are using
+one item of context.  In the case of tagging, we only consider the current
+token, in isolation from any larger context.  Given such a model, the best
+we can do is tag each word with its <em>a priori</em> most likely tag.
+This means we would tag a word such as <span class="example">wind</span> with the same tag,
+regardless of whether it appears in the context <span class="example">the wind</span> or
+<span class="example">to wind</span>.</p>
+<p>An <a name="n_gram_tagger_index_term" /><span class="termdef">n-gram tagger</span> is a generalization of a unigram tagger whose context is
+the current word together with the part-of-speech tags of the
+<em>n</em>-1 preceding tokens, as shown in <a class="reference internal" href="#fig-tag-context">5.1</a>. The tag to be
+chosen, <em>t</em><sub>n</sub>, is circled, and the context is shaded
+in grey. In the example of an n-gram tagger shown in <a class="reference internal" href="#fig-tag-context">5.1</a>,
+we have <em>n</em>=3; that is, we consider the tags of the two preceding words in addition
+to the current word.  An n-gram tagger
+picks the tag that is most likely in the given context.</p>
+<span class="target" id="fig-tag-context"></span><div class="figure" id="fig-tag-context">
+<img alt="../images/tag-context.png" src="../images/tag-context.png" />
+<p class="caption">Tagger Context</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">A 1-gram tagger is another term for a unigram tagger: i.e.,
+the context used to tag a token is just the text of the token itself.
+2-gram taggers are also called <em>bigram taggers</em>, and 3-gram taggers
+are called <em>trigram taggers</em>.</p>
+</div>
+<p>The <tt class="doctest"><span class="pre">NgramTagger</span></tt> class uses a tagged training corpus to determine which
+part-of-speech tag is most likely for each context.  Here we see
+a special case of an n-gram tagger, namely a bigram tagger.
+First we train it, then use it to tag untagged sentences:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> bigram_tagger = nltk.BigramTagger(train_sents)
+>>> bigram_tagger.tag(brown_sents[2007])
+[('Various', 'JJ'), ('of', 'IN'), ('the', 'AT'), ('apartments', 'NNS'),
+('are', 'BER'), ('of', 'IN'), ('the', 'AT'), ('terrace', 'NN'),
+('type', 'NN'), (',', ','), ('being', 'BEG'), ('on', 'IN'), ('the', 'AT'),
+('ground', 'NN'), ('floor', 'NN'), ('so', 'CS'), ('that', 'CS'),
+('entrance', 'NN'), ('is', 'BEZ'), ('direct', 'JJ'), ('.', '.')]
+>>> unseen_sent = brown_sents[4203]
+>>> bigram_tagger.tag(unseen_sent)
+[('The', 'AT'), ('population', 'NN'), ('of', 'IN'), ('the', 'AT'), ('Congo', 'NP'),
+('is', 'BEZ'), ('13.5', None), ('million', None), (',', None), ('divided', None),
+('into', None), ('at', None), ('least', None), ('seven', None), ('major', None),
+('``', None), ('culture', None), ('clusters', None), ("''", None), ('and', None),
+('innumerable', None), ('tribes', None), ('speaking', None), ('400', None),
+('separate', None), ('dialects', None), ('.', None)]</td>
+</tr></table></td></tr>
+</table></div>
+<p>Notice that the bigram tagger manages to tag every word in a sentence it saw during
+training, but does badly on an unseen sentence.  As soon as it encounters a new word
+(i.e., <span class="example">13.5</span>), it is unable to assign a tag.  It cannot tag the following word
+(i.e., <span class="example">million</span>) even if it was seen during training, simply because it never
+saw it during training with a <tt class="doctest"><span class="pre">None</span></tt> tag on the previous word.  Consequently, the
+tagger fails to tag the rest of the sentence.  Its overall accuracy score is very low:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> bigram_tagger.evaluate(test_sents)
+0.102063...</td>
+</tr></table></td></tr>
+</table></div>
+<!-- expand the following discussion if possible: -->
+<p>As <em>n</em> gets larger, the specificity of the contexts increases,
+as does the chance that the data we wish to tag contains contexts that
+were not present in the training data. This is known as the <em>sparse
+data</em> problem, and is quite pervasive in NLP. As a consequence, there is a
+trade-off between the accuracy and the coverage of our results (and
+this is related to the <a name="precision_recall_trade_off_index_term" /><span class="termdef">precision/recall trade-off</span> in information
+retrieval).</p>
+<div class="admonition caution">
+<p class="first admonition-title">Caution!</p>
+<p class="last">n-gram taggers should not consider context that crosses a
+sentence boundary.  Accordingly, NLTK taggers are designed to work
+with lists of sentences, where each sentence is a list of words.  At
+the start of a sentence, <em>t</em><sub>n-1</sub> and preceding
+tags are set to <tt class="doctest"><span class="pre">None</span></tt>.</p>
+</div>
+</div>
+<div class="section" id="combining-taggers">
+<h2>5.4&nbsp;&nbsp;&nbsp;Combining Taggers</h2>
+<p>One way to address the trade-off between accuracy and coverage is to
+use the more accurate algorithms when we can, but to fall back on
+algorithms with wider coverage when necessary. For example, we could
+combine the results of a bigram tagger, a unigram tagger, and
+a default tagger, as follows:</p>
+<ol class="arabic simple">
+<li>Try tagging the token with the bigram tagger.</li>
+<li>If the bigram tagger is unable to find a tag for the token, try
+the unigram tagger.</li>
+<li>If the unigram tagger is also unable to find a tag, use a default tagger.</li>
+</ol>
+<p>Most NLTK taggers permit a backoff-tagger to be specified.
+The backoff-tagger may itself have a backoff tagger:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> t0 = nltk.DefaultTagger('NN')
+>>> t1 = nltk.UnigramTagger(train_sents, backoff=t0)
+>>> t2 = nltk.BigramTagger(train_sents, backoff=t1)
+>>> t2.evaluate(test_sents)
+0.844513...</td>
+</tr></table></td></tr>
+</table></div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><strong>Your Turn:</strong>
+Extend the above example by defining a <tt class="doctest"><span class="pre">TrigramTagger</span></tt> called
+<tt class="doctest"><span class="pre">t3</span></tt>, which backs off to <tt class="doctest"><span class="pre">t2</span></tt>.</p>
+</div>
+<p>Note that we specify the backoff tagger when the tagger is
+initialized so that training can take advantage of the backoff tagger.
+Thus, if the bigram tagger would assign the same tag
+as its unigram backoff tagger in a certain context,
+the bigram tagger discards the training instance.
+This keeps the bigram tagger model as small as possible.  We can
+further specify that a tagger needs to see more than one instance of a
+context in order to retain it, e.g. <tt class="doctest"><span class="pre">nltk.BigramTagger(sents, cutoff=2, backoff=t1)</span></tt>
+will discard contexts that have only been seen once or twice.</p>
+</div>
+<div class="section" id="tagging-unknown-words">
+<h2>5.5&nbsp;&nbsp;&nbsp;Tagging Unknown Words</h2>
+<p>Our approach to tagging unknown words still uses backoff to a regular-expression tagger
+or a default tagger.  These are unable to make use of context.  Thus, if our tagger
+encountered the word <span class="example">blog</span>, not seen during training, it would assign it the same tag,
+regardless of whether this word appeared in the context <span class="example">the blog</span> or <span class="example">to blog</span>.
+How can we do better with these unknown words, or <a name="out_of_vocabulary_index_term" /><span class="termdef">out-of-vocabulary</span> items?</p>
+<p>A useful method to tag unknown words based on context is to limit the vocabulary
+of a tagger to the most frequent <span class="math">n</span> words, and to replace every other word
+with a special word <span class="example">UNK</span> using the method shown in <a class="reference internal" href="#sec-dictionaries">3</a>.
+During training, a unigram tagger will probably learn that <span class="example">UNK</span> is usually a noun.
+However, the n-gram taggers will detect contexts in which it has some other tag.
+For example, if the preceding word is <span class="example">to</span> (tagged <tt class="doctest"><span class="pre">TO</span></tt>), then <span class="example">UNK</span>
+will probably be tagged as a verb.</p>
+<!-- XXX TODO: classification of unknown words based on string patterns -->
+</div>
+<div class="section" id="storing-taggers">
+<h2>5.6&nbsp;&nbsp;&nbsp;Storing Taggers</h2>
+<p>Training a tagger on a large corpus may take a significant time.  Instead of training a tagger
+every time we need one, it is convenient to save a trained tagger in a file for later re-use.
+Let's save our tagger <tt class="doctest"><span class="pre">t2</span></tt> to a file <tt class="doctest"><span class="pre">t2.pkl</span></tt>.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> from pickle import dump
+>>> output = open('t2.pkl', 'wb')
+>>> dump(t2, output, -1)
+>>> output.close()</td>
+</tr></table></td></tr>
+</table></div>
+<p>Now, in a separate Python process, we can load our saved tagger.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> from pickle import load
+>>> input = open('t2.pkl', 'rb')
+>>> tagger = load(input)
+>>> input.close()</td>
+</tr></table></td></tr>
+</table></div>
+<p>Now let's check that it can be used for tagging.</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> text = """The board's action shows what free enterprise
+...     is up against in our complex maze of regulatory laws ."""
+>>> tokens = text.split()
+>>> tagger.tag(tokens)
+[('The', 'AT'), ("board's", 'NN$'), ('action', 'NN'), ('shows', 'NNS'),
+('what', 'WDT'), ('free', 'JJ'), ('enterprise', 'NN'), ('is', 'BEZ'),
+('up', 'RP'), ('against', 'IN'), ('in', 'IN'), ('our', 'PP$'), ('complex', 'JJ'),
+('maze', 'NN'), ('of', 'IN'), ('regulatory', 'NN'), ('laws', 'NNS'), ('.', '.')]</td>
+</tr></table></td></tr>
+</table></div>
+</div>
+<div class="section" id="performance-limitations">
+<h2>5.7&nbsp;&nbsp;&nbsp;Performance Limitations</h2>
+<p>What is the upper limit to the performance of an n-gram tagger?
+Consider the case of a trigram tagger.  How many cases of part-of-speech ambiguity does it
+encounter?  We can determine the answer to this question empirically:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> cfd = nltk.ConditionalFreqDist(
+...            ((x[1], y[1], z[0]), z[1])
+...            for sent in brown_tagged_sents
+...            for x, y, z in nltk.trigrams(sent))
+>>> ambiguous_contexts = [c for c in cfd.conditions() if len(cfd[c]) > 1]
+>>> sum(cfd[c].N() for c in ambiguous_contexts) / cfd.N()
+0.049297702068029296</td>
+</tr></table></td></tr>
+</table></div>
+<p>Thus, one out of twenty trigrams is ambiguous [EXAMPLES].  Given the
+current word and the previous two tags, in 5% of cases there is more than one tag
+that could be legitimately assigned to the current word according to
+the training data.  Assuming we always pick the most likely tag in
+such ambiguous contexts, we can derive a lower bound on
+the performance of a trigram tagger.</p>
+<!-- be more specific about this bound? -->
+<p>Another way to investigate the performance of a tagger is to study
+its mistakes.  Some tags may be harder than others to assign, and
+it might be possible to treat them specially by pre- or post-processing
+the data.  A convenient way to look at tagging errors is the
+<a name="confusion_matrix_index_term" /><span class="termdef">confusion matrix</span>.  It charts expected tags (the gold standard)
+against actual tags generated by a tagger:</p>
+<div class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" class="doctest" width="95%">
+<tr><td class="doctest">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_doctest_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> test_tags = [tag for sent in brown.sents(categories='editorial')
+...                  for (word, tag) in t2.tag(sent)]
+>>> gold_tags = [tag for (word, tag) in brown.tagged_words(categories='editorial')]
+>>> print(nltk.ConfusionMatrix(gold_tags, test_tags))           </td>
+</tr></table></td></tr>
+</table></div>
+<!-- XXX EXAMPLE OF CONFUSION MATRIX -->
+<p>Based on such analysis we may decide to modify the tagset.  Perhaps
+a distinction between tags that is difficult to make can be dropped,
+since it is not important in the context of some larger processing task.</p>
+<p>Another way to analyze the performance bound on a tagger comes from
+the less than 100% agreement between human annotators.  [MORE]</p>
+<p>In general, observe that the tagging process collapses distinctions:
+e.g. lexical identity is usually lost when all personal pronouns are
+tagged <tt class="doctest"><span class="pre">PRP</span></tt>.  At the same time, the tagging process introduces
+new distinctions and removes ambiguities: e.g. <span class="example">deal</span> tagged as <tt class="doctest"><span class="pre">VB</span></tt> or <tt class="doctest"><span class="pre">NN</span></tt>.
+This characteristic of collapsing certain distinctions and introducing new
+distinctions is an important feature of tagging which
+facilitates classification and prediction.
+When we introduce finer distinctions in a tagset, an n-gram tagger gets
+more detailed information about the left-context when it is deciding
+what tag to assign to a particular word.
+However, the tagger simultaneously has to do more work to classify the
+current token, simply because there are more tags to choose from.
+Conversely, with fewer distinctions (as with the simplified tagset),
+the tagger has less information about context, and it has a smaller
+range of choices in classifying the current token.</p>
+<p>We have seen that ambiguity in the training data leads to an upper limit
+in tagger performance.  Sometimes more context will resolve the
+ambiguity.  In other cases however, as noted by <a href="#id22"><span class="problematic" id="id1">[Abney1996PST]_</span></a>, the
+ambiguity can only be resolved with reference to syntax, or to world
+knowledge.  Despite these imperfections, part-of-speech tagging has
+played a central role in the rise of statistical approaches to natural
+language processing.  In the early 1990s, the surprising accuracy of
+statistical taggers was a striking demonstration that it was possible
+to solve one small part of the language understanding problem, namely
+part-of-speech disambiguation, without reference to deeper sources of
+linguistic knowledge.  Can this idea be pushed further?  In <a href="#id23"><span class="problematic" id="id24">chap-chunk_</span></a>,
+we shall see that it can.</p>
+</div>
+</div>
+<div class="section" id="transformation-based-tagging">
+<span id="sec-transformation-based-tagging"></span><h1>6&nbsp;&nbsp;&nbsp;Transformation-Based Tagging</h1>
+<p>A potential issue with n-gram taggers is the size of their n-gram
+table (or language model).  If tagging is to be employed in a variety
+of language technologies deployed on mobile computing devices, it is
+important to strike a balance between model size and tagger
+performance.  An n-gram tagger with backoff may store trigram and
+bigram tables, large sparse arrays which may have hundreds of millions
+of entries.</p>
+<p>A second issue concerns context.  The only information an n-gram
+tagger considers from prior context is tags, even though words
+themselves might be a useful source of information.  It is simply
+impractical for n-gram models to be conditioned on the identities of
+words in the context.  In this section we examine Brill tagging,
+an inductive tagging method which performs very well using models
+that are only a tiny fraction of the size of n-gram taggers.</p>
+<p>Brill tagging is a kind of <em>transformation-based learning</em>, named
+after its inventor.  The
+general idea is very simple: guess the tag of each word, then go back
+and fix the mistakes.  In this way, a Brill tagger successively
+transforms a bad tagging of a text into a better one.  As with n-gram
+tagging, this is a <em>supervised learning</em> method, since we need
+annotated training data to figure out whether the tagger's guess is a
+mistake or not.  However, unlike n-gram tagging, it does
+not count observations but compiles a list of transformational
+correction rules.</p>
+<p>The process of Brill tagging is usually explained by analogy with
+painting.  Suppose we were painting a tree, with all its details of
+boughs, branches, twigs and leaves, against a uniform sky-blue
+background.  Instead of painting the tree first then trying to paint
+blue in the gaps, it is simpler to paint the whole canvas blue, then
+&quot;correct&quot; the tree section by over-painting the blue background.  In
+the same fashion we might paint the trunk a uniform brown before going
+back to over-paint further details with even finer brushes.  Brill
+tagging uses the same idea: begin with broad brush strokes then fix up
+the details, with successively finer changes.  Let's look at an
+example involving the following sentence:</p>
+<p><table border="0" cellpadding="0" cellspacing="0" class="example">
+  <tr valign="top"><td width="30" align="right">(1)</td><td width="15"></td><td>The President said he will ask Congress to increase grants to states
+for vocational rehabilitation</td></tr></table></p>
+<p>We will examine the operation of two rules:
+(a) Replace <tt class="doctest"><span class="pre">NN</span></tt> with <tt class="doctest"><span class="pre">VB</span></tt> when the previous word is <tt class="doctest"><span class="pre">TO</span></tt>;
+(b) Replace <tt class="doctest"><span class="pre">TO</span></tt> with <tt class="doctest"><span class="pre">IN</span></tt> when the next tag is <tt class="doctest"><span class="pre">NNS</span></tt>.
+<a class="reference internal" href="#tab-brill-tagging">6.1</a>
+illustrates this process, first tagging with the unigram tagger, then
+applying the rules to fix the errors.</p>
+<span class="target" id="tab-brill-tagging"></span><table border="1" class="docutils" id="tab-brill-tagging">
+<colgroup>
+<col width="17%" />
+<col width="3%" />
+<col width="13%" />
+<col width="9%" />
+<col width="6%" />
+<col width="9%" />
+<col width="5%" />
+<col width="16%" />
+<col width="22%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><strong>Phrase</strong></td>
+<td>to</td>
+<td>increase</td>
+<td>grants</td>
+<td>to</td>
+<td>states</td>
+<td>for</td>
+<td>vocational</td>
+<td>rehabilitation</td>
+</tr>
+<tr><td><strong>Unigram</strong></td>
+<td>TO</td>
+<td><em>NN</em></td>
+<td>NNS</td>
+<td><em>TO</em></td>
+<td>NNS</td>
+<td>IN</td>
+<td>JJ</td>
+<td>NN</td>
+</tr>
+<tr><td><strong>Rule 1</strong></td>
+<td>&nbsp;</td>
+<td><em>VB</em></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td><strong>Rule 2</strong></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td><em>IN</em></td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td><strong>Output</strong></td>
+<td>TO</td>
+<td>VB</td>
+<td>NNS</td>
+<td>IN</td>
+<td>NNS</td>
+<td>IN</td>
+<td>JJ</td>
+<td>NN</td>
+</tr>
+<tr><td><strong>Gold</strong></td>
+<td>TO</td>
+<td>VB</td>
+<td>NNS</td>
+<td>IN</td>
+<td>NNS</td>
+<td>IN</td>
+<td>JJ</td>
+<td>NN</td>
+</tr>
+</tbody>
+<p class="caption">Steps in Brill Tagging</p>
+</table>
+<p>In this table we see two rules.  All such rules are generated from a
+template of the following form: &quot;replace <em>T</em><sub>1</sub> with
+<em>T</em><sub>2</sub> in the context <em>C</em>&quot;.  Typical contexts are the
+identity or the tag of the preceding or following word, or the
+appearance of a specific tag within 2-3 words of the current word.  During
+its training phase, the tagger guesses values for <em>T</em><sub>1</sub>,
+<em>T</em><sub>2</sub> and <em>C</em>, to create thousands of candidate rules.
+Each rule is scored according to its net benefit: the
+number of incorrect tags that it corrects, less the number of correct
+tags it incorrectly modifies.</p>
+<!-- XXX How Brill tagger rules are learnt -->
+<p>Brill taggers have another interesting property: the rules are
+linguistically interpretable.  Compare this with the n-gram taggers,
+which employ a potentially massive table of n-grams.  We cannot learn
+much from direct inspection of such a table, in comparison to the
+rules learned by the Brill tagger.
+<a class="reference internal" href="#code-brill-demo">6.1</a> demonstrates NLTK's Brill tagger.</p>
+<span class="target" id="code-brill-demo"></span><div class="pylisting">
+<table border="0" cellpadding="0" cellspacing="0" class="pylisting" width="95%">
+<tr><td class="codeblock">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td width="1" class="copybar"
+        onclick="javascript:copy_codeblock_to_clipboard(this.nextSibling);"
+        >&nbsp;</td>
+<td class="pysrc">>>> from nltk.tbl import demo as brill_demo
+>>> brill_demo.demo()
+Training Brill tagger on 80 sentences...
+Finding initial useful rules...
+    Found 6555 useful rules.
+
+           B      |
+   S   F   r   O  |        Score = Fixed - Broken
+   c   i   o   t  |  R     Fixed = num tags changed incorrect -> correct
+   o   x   k   h  |  u     Broken = num tags changed correct -> incorrect
+   r   e   e   e  |  l     Other = num tags changed incorrect -> incorrect
+   e   d   n   r  |  e
+------------------+-------------------------------------------------------
+  12  13   1   4  | NN -> VB if the tag of the preceding word is 'TO'
+   8   9   1  23  | NN -> VBD if the tag of the following word is 'DT'
+   8   8   0   9  | NN -> VBD if the tag of the preceding word is 'NNS'
+   6   9   3  16  | NN -> NNP if the tag of words i-2...i-1 is '-NONE-'
+   5   8   3   6  | NN -> NNP if the tag of the following word is 'NNP'
+   5   6   1   0  | NN -> NNP if the text of words i-2...i-1 is 'like'
+   5   5   0   3  | NN -> VBN if the text of the following word is '*-1'
+   ...
+>>> print(open("errors.out").read())
+             left context |    word/test->gold     | right context
+--------------------------+------------------------+--------------------------
+                          |      Then/NN->RB       | ,/, in/IN the/DT guests/N
+, in/IN the/DT guests/NNS |       '/VBD->POS       | honor/NN ,/, the/DT speed
+'/POS honor/NN ,/, the/DT |    speedway/JJ->NN     | hauled/VBD out/RP four/CD
+NN ,/, the/DT speedway/NN |     hauled/NN->VBD     | out/RP four/CD drivers/NN
+DT speedway/NN hauled/VBD |      out/NNP->RP       | four/CD drivers/NNS ,/, c
+dway/NN hauled/VBD out/RP |      four/NNP->CD      | drivers/NNS ,/, crews/NNS
+hauled/VBD out/RP four/CD |    drivers/NNP->NNS    | ,/, crews/NNS and/CC even
+P four/CD drivers/NNS ,/, |     crews/NN->NNS      | and/CC even/RB the/DT off
+NNS and/CC even/RB the/DT |    official/NNP->JJ    | Indianapolis/NNP 500/CD a
+                          |     After/VBD->IN      | the/DT race/NN ,/, Fortun
+ter/IN the/DT race/NN ,/, |    Fortune/IN->NNP     | 500/CD executives/NNS dro
+s/NNS drooled/VBD like/IN |  schoolboys/NNP->NNS   | over/IN the/DT cars/NNS a
+olboys/NNS over/IN the/DT |      cars/NN->NNS      | and/CC drivers/NNS ./.</td>
+</tr></table></td></tr>
+<tr><td class="caption"><p class="caption">Brill Tagger Demonstration: the tagger has a collection of
+templates of the form <tt class="doctest"><span class="pre">X -> Y if the preceding word is Z</span></tt>;
+the variables in these templates are instantiated to particular
+words and tags to create &quot;rules&quot;; the score for a rule is the
+number of broken examples it corrects minus the number of
+correct cases it breaks; apart from training a tagger, the
+demonstration displays residual errors.</td></tr></p>
+</table></div>
+<!-- XXX saving a Brill tagger to a file, reloading -->
+<!-- XXX comment on performance -->
+</div>
+<div class="section" id="how-to-determine-the-category-of-a-word">
+<span id="sec-how-to-determine-the-category-of-a-word"></span><h1>7&nbsp;&nbsp;&nbsp;How to Determine the Category of a Word</h1>
+<p>Now that we have examined word classes in detail, we turn to a more
+basic question: how do we decide what category a word belongs to in
+the first place? In general, linguists use morphological, syntactic,
+and semantic clues to determine the category of a word.</p>
+<div class="section" id="morphological-clues">
+<h2>7.1&nbsp;&nbsp;&nbsp;Morphological Clues</h2>
+<p>The internal structure of a word may give useful clues as to the
+word's category. For example, <span class="example">-ness</span> is a suffix
+that combines with an adjective to produce a noun, e.g.
+<span class="example">happy</span> &#8594; <span class="example">happiness</span>, <span class="example">ill</span> &#8594; <span class="example">illness</span>. So
+if we encounter a word that ends in <span class="example">-ness</span>, this is very likely
+to be a noun.  Similarly, <span class="example">-ment</span> is a suffix that combines
+with some verbs to produce a noun, e.g.
+<span class="example">govern</span> &#8594; <span class="example">government</span> and <span class="example">establish</span> &#8594; <span class="example">establishment</span>.</p>
+<p>English verbs can also be morphologically complex.  For instance, the
+<a name="present_participle_index_term" /><span class="termdef">present participle</span> of a verb ends in <span class="example">-ing</span>, and expresses
+the idea of ongoing, incomplete action (e.g. <span class="example">falling</span>, <span class="example">eating</span>).
+The <span class="example">-ing</span> suffix also appears on nouns derived from verbs, e.g. <span class="example">the
+falling of the leaves</span> (this is known as the <a name="gerund_index_term" /><span class="termdef">gerund</span>).</p>
+</div>
+<div class="section" id="syntactic-clues">
+<h2>7.2&nbsp;&nbsp;&nbsp;Syntactic Clues</h2>
+<p>Another source of information is the typical contexts in which a word can
+occur. For example, assume that we have already determined the
+category of nouns. Then we might say that a syntactic criterion for an
+adjective in English is that it can occur immediately before a noun,
+or immediately following the words <span class="example">be</span> or <span class="example">very</span>. According
+to these tests, <span class="example">near</span> should be categorized as an adjective:</p>
+<p><table border="0" cellpadding="0" cellspacing="0" class="example">
+  <tr valign="top"><td width="30" align="right">(2)</td><td width="15"></td><td><p><table border="0" cellpadding="0" cellspacing="0" class="example">
+  <tr valign="top"><td width="30" align="right">a.</td><td width="15"></td><td>the near window</td></tr></table></p>
+<p><table border="0" cellpadding="0" cellspacing="0" class="example">
+  <tr valign="top"><td width="30" align="right">b.</td><td width="15"></td><td>The end is (very) near.</td></tr></table></p>
+</td></tr></table></p>
+</div>
+<div class="section" id="semantic-clues">
+<h2>7.3&nbsp;&nbsp;&nbsp;Semantic Clues</h2>
+<p>Finally, the meaning of a word is a useful clue as to its lexical
+category.  For example, the best-known definition of a noun is
+semantic: &quot;the name of a person, place or thing&quot;. Within modern linguistics,
+semantic criteria for word classes are treated with suspicion, mainly
+because they are hard to formalize. Nevertheless, semantic criteria
+underpin many of our intuitions about word classes, and enable us to
+make a good guess about the categorization of words in languages that
+we are unfamiliar with.  For example, if all we know about the Dutch word
+<span class="example">verjaardag</span> is that it means the same as the English word
+<span class="example">birthday</span>, then we can guess that <span class="example">verjaardag</span> is a noun in
+Dutch. However, some care is needed: although we might translate <span class="example">zij
+is vandaag jarig</span> as <span class="example">it's her birthday today</span>, the word
+<span class="example">jarig</span> is in fact an adjective in Dutch, and has no exact
+equivalent in English.</p>
+</div>
+<div class="section" id="new-words">
+<h2>7.4&nbsp;&nbsp;&nbsp;New Words</h2>
+<p>All languages acquire new lexical items. A list of words recently
+added to the Oxford Dictionary of English includes <span class="example">cyberslacker,
+fatoush, blamestorm, SARS, cantopop, bupkis, noughties, muggle</span>, and
+<span class="example">robata</span>. Notice that all these new words are nouns, and this is
+reflected in calling nouns an <a name="open_class_index_term" /><span class="termdef">open class</span>. By contrast, prepositions
+are regarded as a <a name="closed_class_index_term" /><span class="termdef">closed class</span>. That is, there is a limited set of
+words belonging to the class (e.g., <span class="example">above, along, at, below, beside,
+between, during, for, from, in, near, on, outside, over, past,
+through, towards, under, up, with</span>), and membership of the set only
+changes very gradually over time.</p>
+</div>
+<div class="section" id="morphology-in-part-of-speech-tagsets">
+<h2>7.5&nbsp;&nbsp;&nbsp;Morphology in Part of Speech Tagsets</h2>
+<!-- TODO: Modal verbs, e.g. `would`:lx: ... -->
+<p>Common tagsets often capture some <a name="morpho_syntactic_index_term" /><span class="termdef">morpho-syntactic</span> information;
+that is, information about the kind of morphological markings that
+words receive by virtue of their syntactic role.  Consider, for
+example, the selection of distinct grammatical forms of the word
+<span class="example">go</span> illustrated in the following sentences:</p>
+<span class="target" id="ex-go"></span><p><table border="0" cellpadding="0" cellspacing="0" class="example">
+  <tr valign="top"><td width="30" align="right">(3)</td><td width="15"></td><td><p><table border="0" cellpadding="0" cellspacing="0" class="example">
+  <tr valign="top"><td width="30" align="right">a.</td><td width="15"></td><td><em>Go</em> away!</td></tr></table></p>
+<p><table border="0" cellpadding="0" cellspacing="0" class="example">
+  <tr valign="top"><td width="30" align="right">b.</td><td width="15"></td><td>He sometimes <em>goes</em> to the cafe.</td></tr></table></p>
+<p><table border="0" cellpadding="0" cellspacing="0" class="example">
+  <tr valign="top"><td width="30" align="right">c.</td><td width="15"></td><td>All the cakes have <em>gone</em>.</td></tr></table></p>
+<p><table border="0" cellpadding="0" cellspacing="0" class="example">
+  <tr valign="top"><td width="30" align="right">d.</td><td width="15"></td><td>We <em>went</em> on the excursion.</td></tr></table></p>
+</td></tr></table></p>
+<p>Each of these forms &#8212; <span class="example">go</span>, <span class="example">goes</span>, <span class="example">gone</span>, and <span class="example">went</span> &#8212;
+is morphologically distinct from the others. Consider the form,
+<span class="example">goes</span>. This occurs in a restricted set of grammatical contexts, and
+requires a third person singular subject. Thus, the
+following sentences are ungrammatical.</p>
+<p><table border="0" cellpadding="0" cellspacing="0" class="example">
+  <tr valign="top"><td width="30" align="right">(4)</td><td width="15"></td><td><p><table border="0" cellpadding="0" cellspacing="0" class="example">
+  <tr valign="top"><td width="30" align="right">a.</td><td width="15"></td><td>*They sometimes <em>goes</em> to the cafe.</td></tr></table></p>
+<p><table border="0" cellpadding="0" cellspacing="0" class="example">
+  <tr valign="top"><td width="30" align="right">b.</td><td width="15"></td><td>*I sometimes <em>goes</em> to the cafe.</td></tr></table></p>
+</td></tr></table></p>
+<p>By contrast, <span class="example">gone</span> is the past participle form; it is required
+after <span class="example">have</span> (and cannot be replaced in this context by
+<span class="example">goes</span>), and cannot occur as the main verb of a clause.</p>
+<p><table border="0" cellpadding="0" cellspacing="0" class="example">
+  <tr valign="top"><td width="30" align="right">(5)</td><td width="15"></td><td><p><table border="0" cellpadding="0" cellspacing="0" class="example">
+  <tr valign="top"><td width="30" align="right">a.</td><td width="15"></td><td>*All the cakes have <em>goes</em>.</td></tr></table></p>
+<p><table border="0" cellpadding="0" cellspacing="0" class="example">
+  <tr valign="top"><td width="30" align="right">b.</td><td width="15"></td><td>*He sometimes <em>gone</em> to the cafe.</td></tr></table></p>
+</td></tr></table></p>
+<p>We can easily imagine a tagset in which the four distinct
+grammatical forms just discussed were all tagged as <tt class="doctest"><span class="pre">VB</span></tt>. Although
+this would be adequate for some purposes, a more fine-grained tagset
+provides useful information about these forms that can help
+other processors that try to detect patterns in tag
+sequences.  The Brown tagset captures these distinctions,
+as summarized in <a class="reference internal" href="#tab-morphosyntax">7.1</a>.</p>
+<span class="target" id="tab-morphosyntax"></span><table border="1" class="docutils" id="tab-morphosyntax">
+<colgroup>
+<col width="21%" />
+<col width="65%" />
+<col width="15%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Form</th>
+<th class="head">Category</th>
+<th class="head">Tag</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>go</td>
+<td>base</td>
+<td>VB</td>
+</tr>
+<tr><td>goes</td>
+<td>3rd singular present</td>
+<td>VBZ</td>
+</tr>
+<tr><td>gone</td>
+<td>past participle</td>
+<td>VBN</td>
+</tr>
+<tr><td>going</td>
+<td>gerund</td>
+<td>VBG</td>
+</tr>
+<tr><td>went</td>
+<td>simple past</td>
+<td>VBD</td>
+</tr>
+</tbody>
+<p class="caption">Some morphosyntactic distinctions in the Brown tagset</p>
+</table>
+<p>In addition to this set of verb tags, the various forms of the verb <span class="example">to be</span>
+have special tags:
+<tt class="doctest"><span class="pre">be/BE, being/BEG, am/BEM, are/BER, is/BEZ, been/BEN, were/BED</span></tt> and
+<tt class="doctest"><span class="pre">was/BEDZ</span></tt> (plus extra tags for negative forms of the verb).   All told,
+this fine-grained tagging of verbs means that an automatic tagger
+that uses this tagset is effectively carrying out a limited amount
+of <a name="morphological_analysis_index_term" /><span class="termdef">morphological analysis</span>.</p>
+<p>Most part-of-speech tagsets make use of the same basic categories,
+such as noun, verb, adjective, and preposition. However, tagsets
+differ both in how finely they divide words into categories, and in
+how they define their categories. For example, <span class="example">is</span> might be tagged
+simply as a verb in one tagset; but as a distinct form of the lexeme <span class="example">be</span>
+in another tagset (as in the Brown Corpus).  This variation in tagsets is
+unavoidable, since part-of-speech tags are used in different ways for
+different tasks. In other words, there is no one 'right way' to assign
+tags, only more or less useful ways depending on one's goals.</p>
+<!-- TODO: tagging other languages -->
+</div>
+</div>
+<div class="section" id="summary">
+<h1>8&nbsp;&nbsp;&nbsp;Summary</h1>
+<ul class="simple">
+<li>Words can be grouped into classes, such as nouns, verbs, adjectives, and adverbs.
+These classes are known as lexical categories or parts of speech.
+Parts of speech are assigned short labels, or tags, such as <tt class="doctest"><span class="pre">NN</span></tt>, <tt class="doctest"><span class="pre">VB</span></tt>,</li>
+<li>The process of automatically assigning parts of speech to words in text
+is called part-of-speech tagging, POS tagging, or just tagging.</li>
+<li>Automatic tagging is an important step in the NLP pipeline,
+and is useful in a variety of situations including:
+predicting the behavior of previously unseen words,
+analyzing word usage in corpora, and text-to-speech systems.</li>
+<li>Some linguistic corpora, such as the Brown Corpus, have been POS tagged.</li>
+<li>A variety of tagging methods are possible, e.g.
+default tagger, regular expression tagger, unigram tagger and n-gram taggers.
+These can be combined using a technique known as backoff.</li>
+<li>Taggers can be trained and evaluated using tagged corpora.</li>
+<li>Backoff is a method for combining models: when a more specialized
+model (such as a bigram tagger) cannot assign a tag in a given
+context, we backoff to a more general model (such as a unigram tagger).</li>
+<li>Part-of-speech tagging is an important, early example of a sequence
+classification task in NLP: a classification decision at any one point
+in the sequence makes use of words and tags in the local context.</li>
+<li>A dictionary is used to map between arbitrary types of information,
+such as a string and a number: <tt class="doctest"><span class="pre">freq['cat'] = 12</span></tt>.  We create
+dictionaries using the brace notation: <tt class="doctest"><span class="pre">pos = {}</span></tt>,
+<tt class="doctest"><span class="pre">pos = {'furiously': 'adv', 'ideas': 'n', 'colorless': 'adj'}</span></tt>.</li>
+<li>N-gram taggers can be defined for large values of <em>n</em>, but once
+<em>n</em> is larger than 3 we usually encounter the sparse data problem;
+even with a large quantity of training data we only see a tiny
+fraction of possible contexts.</li>
+<li>Transformation-based tagging involves learning a series
+of repair rules of the form &quot;change tag <span class="math">s</span> to tag
+<span class="math">t</span> in context <span class="math">c</span>&quot;, where each rule
+fixes mistakes and possibly introduces a (smaller) number
+of errors.</li>
+</ul>
+</div>
+<div class="section" id="further-reading">
+<span id="sec-tag-further-reading"></span><h1>9&nbsp;&nbsp;&nbsp;Further Reading</h1>
+<p>Extra materials for this chapter are posted at <tt class="doctest"><span class="pre">http://nltk.org/</span></tt>, including links to freely
+available resources on the web.
+For more examples of tagging with NLTK, please see the
+Tagging HOWTO at <tt class="doctest"><span class="pre">http://nltk.org/howto</span></tt>.
+Chapters 4 and 5 of <a href="#id25"><span class="problematic" id="id2">[JurafskyMartin2008]_</span></a> contain more advanced
+material on n-grams and part-of-speech tagging.
+The &quot;Universal Tagset&quot; is described by <a href="#id26"><span class="problematic" id="id3">[Petrov2011]_</span></a>.
+Other approaches to tagging involve machine learning methods (<a href="#id27"><span class="problematic" id="id28">chap-data-intensive_</span></a>).
+In <a href="#id29"><span class="problematic" id="id30">chap-chunk_</span></a> we will see a generalization of tagging called <em>chunking</em> in which a
+contiguous sequence of words is assigned a single tag.</p>
+<p>For tagset documentation, see
+<tt class="doctest"><span class="pre">nltk.help.upenn_tagset()</span></tt> and <tt class="doctest"><span class="pre">nltk.help.brown_tagset()</span></tt>.
+Lexical categories are introduced in linguistics textbooks, including those
+listed in <a href="#id31"><span class="problematic" id="id32">chap-introduction_</span></a>.</p>
+<p>There are many other kinds of tagging.
+Words can be tagged with directives to a speech synthesizer,
+indicating which words should be emphasized.  Words can be tagged with sense
+numbers, indicating which sense of the word was used.  Words can also
+be tagged with morphological features.
+Examples of each of these kinds of tags are shown below.
+For space reasons, we only show the tag for a single
+word. Note also that the first two examples use XML-style
+tags, where elements in angle brackets enclose the word that is
+tagged.</p>
+<ol class="arabic simple">
+<li><em>Speech Synthesis Markup Language (W3C SSML):</em>
+<tt class="doctest"><span class="pre">That is a <emphasis>big</emphasis> car!</span></tt></li>
+<li><em>SemCor: Brown Corpus tagged with WordNet senses:</em>
+<tt class="doctest"><span class="pre">Space in any <wf pos="NN" lemma="form" wnsn="4">form</wf>
+is completely measured by the three dimensions.</span></tt>
+(Wordnet form/nn sense 4: &quot;shape, form, configuration,
+contour, conformation&quot;)</li>
+<li><em>Morphological tagging, from the Turin University Italian Treebank:</em>
+<tt class="doctest"><span class="pre">E' italiano , come progetto e realizzazione , il
+primo (PRIMO ADJ ORDIN M SING) porto turistico dell' Albania .</span></tt></li>
+</ol>
+<p>Note that tagging is also performed at higher levels.  Here is an example
+of dialogue act tagging, from the NPS Chat Corpus <a href="#id33"><span class="problematic" id="id4">[Forsyth2007]_</span></a> included with
+NLTK.  Each turn of the dialogue is categorized as to its communicative
+function:</p>
+<pre class="literal-block">
+Statement  User117 Dude..., I wanted some of that
+ynQuestion User120 m I missing something?
+Bye        User117 I'm gonna go fix food, I'll be back later.
+System     User122 JOIN
+System     User2   slaps User122 around a bit with a large trout.
+Statement  User121 18/m pm me if u tryin to chat
+</pre>
+</div>
+<div class="section" id="exercises">
+<h1>10&nbsp;&nbsp;&nbsp;Exercises</h1>
+<ol class="arabic simple">
+<li>&#9788;
+Search the web for &quot;spoof newspaper headlines&quot;, to find such gems as:
+<span class="example">British Left Waffles on Falkland Islands</span>, and
+<span class="example">Juvenile Court to Try Shooting Defendant</span>.
+Manually tag these headlines to see if knowledge of the part-of-speech
+tags removes the ambiguity.</li>
+<li>&#9788;
+Working with someone else, take turns to pick a word that can be
+either a noun or a verb (e.g. <span class="example">contest</span>); the opponent has to
+predict which one is likely to be the most frequent in the Brown corpus; check the
+opponent's prediction, and tally the score over several turns.</li>
+<li>&#9788;
+Tokenize and tag the following sentence:
+<span class="example">They wind back the clock, while we chase after the wind</span>.
+What different pronunciations and parts of speech are involved?</li>
+<li>&#9788; Review the mappings in <a class="reference internal" href="#tab-linguistic-objects">3.1</a>.  Discuss any other
+examples of mappings you can think of.  What type of information do they map
+from and to?</li>
+<li>&#9788; Using the Python interpreter in interactive mode, experiment with
+the dictionary examples in this chapter.  Create a dictionary <tt class="doctest"><span class="pre">d</span></tt>, and add
+some entries.  What happens if you try to access a non-existent
+entry, e.g. <tt class="doctest"><span class="pre">d['xyz']</span></tt>?</li>
+<li>&#9788; Try deleting an element from a dictionary <tt class="doctest"><span class="pre">d</span></tt>, using the syntax
+<tt class="doctest"><span class="pre">del d['abc']</span></tt>.  Check that the item was deleted.</li>
+<li>&#9788; Create two dictionaries, <tt class="doctest"><span class="pre">d1</span></tt> and <tt class="doctest"><span class="pre">d2</span></tt>, and add some entries to
+each.  Now issue the command <tt class="doctest"><span class="pre">d1.update(d2)</span></tt>.  What did this do?
+What might it be useful for?</li>
+<li>&#9788; Create a dictionary <tt class="doctest"><span class="pre">e</span></tt>, to represent a single lexical entry
+for some word of your choice.
+Define keys like <tt class="doctest"><span class="pre">headword</span></tt>, <tt class="doctest"><span class="pre">part-of-speech</span></tt>, <tt class="doctest"><span class="pre">sense</span></tt>, and
+<tt class="doctest"><span class="pre">example</span></tt>, and assign them suitable values.</li>
+<li>&#9788; Satisfy yourself that there are
+restrictions on the distribution of <span class="example">go</span> and <span class="example">went</span>, in the
+sense that they cannot be freely interchanged in the kinds of contexts
+illustrated in <a class="reference internal" href="#ex-go">(3d)</a> in <a class="reference internal" href="#sec-how-to-determine-the-category-of-a-word">7</a>.</li>
+<li>&#9788;
+Train a unigram tagger and run it on some new text.
+Observe that some words are not assigned a tag.  Why not?</li>
+<li>&#9788;
+Learn about the affix tagger (type <tt class="doctest"><span class="pre">help(nltk.AffixTagger)</span></tt>).
+Train an affix tagger and run it on some new text.
+Experiment with different settings for the affix length
+and the minimum word length.  Discuss your findings.</li>
+<li>&#9788;
+Train a bigram tagger with no backoff tagger, and run it on some of the training
+data.  Next, run it on some new data.
+What happens to the performance of the tagger?  Why?</li>
+<li>&#9788; We can use a dictionary to specify the values to be
+substituted into a formatting string.  Read Python's library
+documentation for formatting strings
+<tt class="doctest"><span class="pre">http://docs.python.org/lib/typesseq-strings.html</span></tt>
+and use this method to display today's date in two
+different formats.</li>
+<li>&#9681; Use <tt class="doctest"><span class="pre">sorted()</span></tt> and <tt class="doctest"><span class="pre">set()</span></tt> to get a sorted list of tags used in the Brown
+corpus, removing duplicates.</li>
+<li>&#9681; Write programs to process the Brown Corpus and find answers to the following
+questions:<ol class="arabic">
+<li>Which nouns are more common in their plural form, rather than their singular
+form? (Only consider regular plurals, formed with the <span class="example">-s</span> suffix.)</li>
+<li>Which word has the greatest number of distinct tags.  What are they, and
+what do they represent?</li>
+<li>List tags in order of decreasing frequency.  What do the 20 most frequent tags represent?</li>
+<li>Which tags are nouns most commonly found after?  What do these tags represent?</li>
+</ol>
+</li>
+<li>&#9681; Explore the following issues that arise in connection with the lookup tagger:<ol class="loweralpha">
+<li>What happens to the tagger performance for the various
+model sizes when a backoff tagger is omitted?</li>
+<li>Consider the curve in <a class="reference internal" href="#fig-tag-lookup">fig-tag-lookup</a>; suggest a
+good size for a lookup tagger that balances memory and performance.
+Can you come up with scenarios where it would be preferable to
+minimize memory usage, or to maximize performance with no regard for memory usage?</li>
+</ol>
+</li>
+<li>&#9681; What is the upper limit of performance for a lookup tagger,
+assuming no limit to the size of its table?  (Hint: write a program
+to work out what percentage of tokens of a word are assigned
+the most likely tag for that word, on average.)</li>
+<li>&#9681; Generate some statistics for tagged data to answer the following questions:<ol class="loweralpha">
+<li>What proportion of word types are always assigned the same part-of-speech tag?</li>
+<li>How many words are ambiguous, in the sense that they appear with at least two tags?</li>
+<li>What percentage of word <em>tokens</em> in the Brown Corpus involve
+these ambiguous words?</li>
+</ol>
+</li>
+<li>&#9681; The <tt class="doctest"><span class="pre">evaluate()</span></tt> method works out how accurately
+the tagger performs on this text.  For example, if the supplied tagged text
+was <tt class="doctest"><span class="pre">[('the', 'DT'), ('dog', 'NN')]</span></tt> and the tagger produced the output
+<tt class="doctest"><span class="pre">[('the', 'NN'), ('dog', 'NN')]</span></tt>, then the score would be <tt class="doctest"><span class="pre">0.5</span></tt>.
+Let's try to figure out how the evaluation method works:<ol class="loweralpha">
+<li>A tagger <tt class="doctest"><span class="pre">t</span></tt> takes a list of words as input, and produces a list of tagged words
+as output.  However, <tt class="doctest"><span class="pre">t.evaluate()</span></tt> is given correctly tagged text as its only parameter.
+What must it do with this input before performing the tagging?</li>
+<li>Once the tagger has created newly tagged text, how might the <tt class="doctest"><span class="pre">evaluate()</span></tt> method
+go about comparing it with the original tagged text and computing the accuracy score?</li>
+<li>Now examine the source code to see how the method is implemented.  Inspect
+<tt class="doctest"><span class="pre">nltk.tag.api.__file__</span></tt> to discover the location of the source code,
+and open this file using an editor (be sure to use the <tt class="doctest"><span class="pre">api.py</span></tt> file and
+not the compiled <tt class="doctest"><span class="pre">api.pyc</span></tt> binary file).</li>
+</ol>
+</li>
+<li>&#9681; Write code to search the Brown Corpus for particular words and phrases
+according to tags, to answer the following questions:<ol class="loweralpha">
+<li>Produce an alphabetically sorted list of the distinct words tagged as <tt class="doctest"><span class="pre">MD</span></tt>.</li>
+<li>Identify words that can be plural nouns or third person singular verbs
+(e.g. <span class="example">deals</span>, <span class="example">flies</span>).</li>
+<li>Identify three-word prepositional phrases of the form IN + DET + NN
+(eg. <span class="example">in the lab</span>).</li>
+<li>What is the ratio of masculine to feminine pronouns?</li>
+</ol>
+</li>
+<li>&#9681; In <a href="#id34"><span class="problematic" id="id35">tab-absolutely_</span></a> we saw a table involving frequency counts for
+the verbs <span class="example">adore</span>, <span class="example">love</span>, <span class="example">like</span>, <span class="example">prefer</span> and
+preceding qualifiers <span class="example">absolutely</span> and <span class="example">definitely</span>.
+Investigate the full range of adverbs that appear before these four verbs.</li>
+<li>&#9681;
+We defined the <tt class="doctest"><span class="pre">regexp_tagger</span></tt> that can be used
+as a fall-back tagger for unknown words.  This tagger only checks for
+cardinal numbers.  By testing for particular prefix or suffix strings,
+it should be possible to guess other tags.  For example,
+we could tag any word that ends with <span class="example">-s</span> as a plural noun.
+Define a regular expression tagger (using <tt class="doctest"><span class="pre">RegexpTagger()</span></tt>)
+that tests for at least five other patterns in the spelling of words.
+(Use inline documentation to explain the rules.)</li>
+<li>&#9681;
+Consider the regular expression tagger developed in the exercises in
+the previous section.  Evaluate the tagger using its <tt class="doctest"><span class="pre">accuracy()</span></tt> method,
+and try to come up with ways to improve its performance.  Discuss your findings.
+How does objective evaluation help in the development process?</li>
+<li>&#9681;
+How serious is the sparse data problem?  Investigate the
+performance of n-gram taggers as <span class="math">n</span> increases from 1 to 6.
+Tabulate the accuracy score.  Estimate the training data required
+for these taggers, assuming a vocabulary size of
+10<sup>5</sup> and a tagset size of 10<sup>2</sup>.</li>
+<li>&#9681; Obtain some tagged data for another language, and train and
+evaluate a variety of taggers on it.  If the language is
+morphologically complex, or if there are any orthographic clues
+(e.g. capitalization) to word classes, consider developing a
+regular expression tagger for it (ordered after the unigram
+tagger, and before the default tagger).  How does the accuracy of
+your tagger(s) compare with the same taggers run on English data?
+Discuss any issues you encounter in applying these methods to the language.</li>
+<li>&#9681; <a class="reference internal" href="#code-baseline-tagger">4.1</a> plotted a curve showing
+change in the performance of a lookup tagger as the model size was increased.
+Plot the performance curve for a unigram tagger, as the amount of training
+data is varied.</li>
+<li>&#9681;
+Inspect the confusion matrix for the bigram tagger <tt class="doctest"><span class="pre">t2</span></tt> defined in <a class="reference internal" href="#sec-n-gram-tagging">5</a>,
+and identify one or more sets of tags to collapse.  Define a dictionary to do
+the mapping, and evaluate the tagger on the simplified data.</li>
+<li>&#9681;
+Experiment with taggers using the simplified tagset (or make one of your
+own by discarding all but the first character of each tag name).
+Such a tagger has fewer distinctions to make, but much less
+information on which to base its work.  Discuss your findings.</li>
+<li>&#9681;
+Recall the example of a bigram tagger which encountered a word it hadn't
+seen during training, and tagged the rest of the sentence as <tt class="doctest"><span class="pre">None</span></tt>.
+It is possible for a bigram tagger to fail part way through a sentence
+even if it contains no unseen words (even if the sentence was used during
+training).  In what circumstance can this happen?  Can you write a program
+to find some examples of this?</li>
+<li>&#9681;
+Preprocess the Brown News data by replacing low frequency words with <span class="example">UNK</span>,
+but leaving the tags untouched.  Now train and evaluate a bigram tagger
+on this data.  How much does this help?  What is the contribution of the unigram
+tagger and default tagger now?</li>
+<li>&#9681;
+Modify the program in <a class="reference internal" href="#code-baseline-tagger">4.1</a> to use a logarithmic scale on
+the <em>x</em>-axis, by replacing <tt class="doctest"><span class="pre">pylab.plot()</span></tt> with <tt class="doctest"><span class="pre">pylab.semilogx()</span></tt>.
+What do you notice about the shape of the resulting plot?  Does the gradient
+tell you anything?</li>
+<li>&#9681;
+Consult the documentation for the Brill tagger demo function,
+using <tt class="doctest"><span class="pre">help(nltk.tag.brill.demo)</span></tt>.
+Experiment with the tagger by setting different values for the parameters.
+Is there any trade-off between training time (corpus size) and performance?</li>
+<li>&#9681; Write code that builds a dictionary of dictionaries of sets.
+Use it to store the set of POS tags that can follow a given word having
+a given POS tag, i.e. word<sub>i</sub> &#8594; tag<sub>i</sub>
+&#8594; tag<sub>i+1</sub>.</li>
+<li>&#9733; There are 264 distinct words in the Brown Corpus having exactly
+three possible tags.<ol class="loweralpha">
+<li>Print a table with the integers 1..10 in one column, and the
+number of distinct words in the corpus having 1..10 distinct tags
+in the other column.</li>
+<li>For the word with the greatest number of distinct tags, print
+out sentences from the corpus containing the word, one for each
+possible tag.</li>
+</ol>
+</li>
+<li>&#9733; Write a program to classify contexts involving the word <span class="example">must</span> according
+to the tag of the following word.  Can this be used to discriminate between the
+epistemic and deontic uses of <span class="example">must</span>?</li>
+<li>&#9733;
+Create a regular expression tagger and various unigram and n-gram taggers,
+incorporating backoff, and train them on part of the Brown corpus.<ol class="loweralpha">
+<li>Create three different combinations of the taggers. Test the
+accuracy of each combined tagger. Which combination works best?</li>
+<li>Try varying the size of the training corpus. How does it affect
+your results?</li>
+</ol>
+</li>
+<li>&#9733;
+Our approach for tagging an unknown word has been to consider the letters of the word
+(using <tt class="doctest"><span class="pre">RegexpTagger()</span></tt>), or to ignore the word altogether and tag
+it as a noun (using <tt class="doctest"><span class="pre">nltk.DefaultTagger()</span></tt>).  These methods will not do well for texts having
+new words that are not nouns.
+Consider the sentence <span class="example">I like to blog on Kim's blog</span>.  If <span class="example">blog</span> is a new
+word, then looking at the previous tag (<tt class="doctest"><span class="pre">TO</span></tt> versus <tt class="doctest"><span class="pre">NP$</span></tt>) would probably be helpful.
+I.e. we need a default tagger that is sensitive to the preceding tag.<ol class="loweralpha">
+<li>Create a new kind of unigram tagger that looks at the tag of the previous word,
+and ignores the current word.  (The best way to do this is to modify the source
+code for <tt class="doctest"><span class="pre">UnigramTagger()</span></tt>, which presumes knowledge of object-oriented
+programming in Python.)</li>
+<li>Add this tagger to the sequence of backoff taggers (including ordinary trigram
+and bigram taggers that look at words), right before the usual default tagger.</li>
+<li>Evaluate the contribution of this new unigram tagger.</li>
+</ol>
+</li>
+<li>&#9733;
+Consider the code in <a class="reference internal" href="#sec-n-gram-tagging">5</a> which
+determines the upper bound for accuracy of a trigram tagger.
+Review Abney's discussion concerning the impossibility of
+exact tagging <a href="#id36"><span class="problematic" id="id5">[Abney1996PST]_</span></a>.  Explain why correct tagging of
+these examples requires access to other kinds of information than
+just words and tags.  How might you estimate the scale of this problem?</li>
+<li>&#9733;
+Use some of the estimation techniques in <tt class="doctest"><span class="pre">nltk.probability</span></tt>,
+such as <em>Lidstone</em> or <em>Laplace</em> estimation, to develop a statistical
+tagger that does a better job than n-gram backoff taggers in cases where
+contexts encountered during testing were not seen during training.</li>
+<li>&#9733;
+Inspect the diagnostic files created by the Brill tagger <tt class="doctest"><span class="pre">rules.out</span></tt> and
+<tt class="doctest"><span class="pre">errors.out</span></tt>.  Obtain the demonstration code by accessing the source code
+(at <tt class="doctest"><span class="pre">http://www.nltk.org/code</span></tt>)
+and create your own version of the Brill tagger.
+Delete some of the rule templates, based on what you learned from inspecting <tt class="doctest"><span class="pre">rules.out</span></tt>.
+Add some new rule templates which employ contexts that might help to
+correct the errors you saw in <tt class="doctest"><span class="pre">errors.out</span></tt>.</li>
+<li>&#9733;
+Develop an n-gram backoff tagger that permits &quot;anti-n-grams&quot; such as
+<tt class="doctest"><span class="pre">["the", "the"]</span></tt> to be specified when a tagger is initialized.
+An anti-ngram is assigned a count of zero and is used to prevent
+backoff for this n-gram (e.g. to avoid
+estimating P(<span class="example">the</span> | <span class="example">the</span>) as just P(<span class="example">the</span>)).</li>
+<li>&#9733;
+Investigate three different ways to define the split between training and
+testing data when developing a tagger using the Brown Corpus:
+genre (<tt class="doctest"><span class="pre">category</span></tt>), source (<tt class="doctest"><span class="pre">fileid</span></tt>), and sentence.
+Compare their relative performance and discuss which method
+is the most legitimate.  (You might use n-fold cross validation,
+discussed in <a href="#id37"><span class="problematic" id="id38">sec-evaluation_</span></a>, to improve the accuracy of the evaluations.)</li>
+<li>&#9733;
+Develop your own <tt class="doctest"><span class="pre">NgramTagger</span></tt> class that inherits from NLTK's class,
+and which encapsulates the method of collapsing the vocabulary of
+the tagged training and testing data that was described in
+this chapter.  Make sure that the unigram and default backoff taggers
+have access to the full vocabulary.</li>
+</ol>
+<!-- Footer to be used in all chapters -->
+<div class="admonition admonition-about-this-document">
+<p class="first admonition-title">About this document...</p>
+<p>UPDATED FOR NLTK 3.0.
+This is a chapter from <em>Natural Language Processing with Python</em>,
+by <a class="reference external" href="http://estive.net/">Steven Bird</a>, <a class="reference external" href="http://homepages.inf.ed.ac.uk/ewan/">Ewan Klein</a> and <a class="reference external" href="http://ed.loper.org/">Edward Loper</a>,
+Copyright &#169; 2014 the authors.
+It is distributed with the <em>Natural Language Toolkit</em> [<tt class="doctest"><span class="pre">http://nltk.org/</span></tt>],
+Version 3.0, under the terms of the
+<em>Creative Commons Attribution-Noncommercial-No Derivative Works 3.0 United States License</em>
+[<a class="reference external" href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">http://creativecommons.org/licenses/by-nc-nd/3.0/us/</a>].</p>
+<p class="last">This document was built on
+Wed 20 Aug 2014 11:10:48 GET</p>
+</div>
+</div>
+<div class="system-messages section">
+<h1>Docutils System Messages</h1>
+<div class="system-message" id="id6">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 635); <em><a href="#id7">backlink</a></em></p>
+Unknown target name: &quot;sec-computing-with-language-simple-statistics&quot;.</div>
+<div class="system-message" id="id8">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 792); <em><a href="#id9">backlink</a></em></p>
+Unknown target name: &quot;sec-lexical-resources&quot;.</div>
+<div class="system-message" id="id10">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 863); <em><a href="#id11">backlink</a></em></p>
+Unknown target name: &quot;sec-functions&quot;.</div>
+<div class="system-message" id="id12">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 918); <em><a href="#id13">backlink</a></em></p>
+Unknown target name: &quot;fig-tally&quot;.</div>
+<div class="system-message" id="id14">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 1205); <em><a href="#id15">backlink</a></em></p>
+Unknown target name: &quot;sec-supervised-classification&quot;.</div>
+<div class="system-message" id="id16">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 1289); <em><a href="#id17">backlink</a></em></p>
+Unknown target name: &quot;sec-libraries&quot;.</div>
+<div class="system-message" id="id18">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 1297); <em><a href="#id19">backlink</a></em></p>
+Unknown target name: &quot;fig-sds&quot;.</div>
+<div class="system-message" id="id20">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 1320); <em><a href="#id21">backlink</a></em></p>
+Unknown target name: &quot;chap-data&quot;.</div>
+<div class="system-message" id="id22">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 1615); <em><a href="#id1">backlink</a></em></p>
+Unknown target name: &quot;abney1996pst&quot;.</div>
+<div class="system-message" id="id23">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 1615); <em><a href="#id24">backlink</a></em></p>
+Unknown target name: &quot;chap-chunk&quot;.</div>
+<div class="system-message" id="id25">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 1976); <em><a href="#id2">backlink</a></em></p>
+Unknown target name: &quot;jurafskymartin2008&quot;.</div>
+<div class="system-message" id="id26">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 1976); <em><a href="#id3">backlink</a></em></p>
+Unknown target name: &quot;petrov2011&quot;.</div>
+<div class="system-message" id="id27">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 1976); <em><a href="#id28">backlink</a></em></p>
+Unknown target name: &quot;chap-data-intensive&quot;.</div>
+<div class="system-message" id="id29">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 1976); <em><a href="#id30">backlink</a></em></p>
+Unknown target name: &quot;chap-chunk&quot;.</div>
+<div class="system-message" id="id31">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 1987); <em><a href="#id32">backlink</a></em></p>
+Unknown target name: &quot;chap-introduction&quot;.</div>
+<div class="system-message" id="id33">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 2014); <em><a href="#id4">backlink</a></em></p>
+Unknown target name: &quot;forsyth2007&quot;.</div>
+<div class="system-message" id="id34">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 2157); <em><a href="#id35">backlink</a></em></p>
+Unknown target name: &quot;tab-absolutely&quot;.</div>
+<div class="system-message" id="id36">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 2281); <em><a href="#id5">backlink</a></em></p>
+Unknown target name: &quot;abney1996pst&quot;.</div>
+<div class="system-message" id="id37">
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">/home/user/.pr/nltk_book/book/ch05.rst</tt>, line 2311); <em><a href="#id38">backlink</a></em></p>
+Unknown target name: &quot;sec-evaluation&quot;.</div>
+</div>
+</div>
+</body>
+</html>

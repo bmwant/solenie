@@ -2512,6 +2512,18 @@ def main():
         logger.end_progress()
 
 
+def process_file_to_html(in_filepath, out_filepath):
+    writer = CustomizedHTMLWriter()
+    settings = { 'warning_stream': WarningStream(), }
+    docutils.core.publish_file(
+        source_path=in_filepath,
+        writer=writer,
+        destination_path=out_filepath,
+        reader=CustomizedReader(),
+        settings_overrides=settings,
+    )
+
+
 if __name__ == '__main__':
     try:
         main()
