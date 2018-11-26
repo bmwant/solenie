@@ -40,8 +40,7 @@ operator.isSequenceType = lambda x:isinstance(x, collections.Sequence)
 
 import re, os.path, textwrap, sys, pickle
 from optparse import OptionParser
-from .tree2image import tree_to_image
-from epydoc.docwriter.html_colorize import PythonSourceColorizer
+# from epydoc.docwriter.html_colorize import PythonSourceColorizer
 import docutils.core, docutils.nodes, docutils.io
 from docutils.writers import Writer
 from docutils.writers.html4css1 import HTMLTranslator, Writer as HTMLWriter
@@ -54,6 +53,9 @@ from doctest import DocTestParser
 import docutils.statemachine
 try: import PIL.Image
 except: pass
+
+# my custom copied libs
+from jerry.tree2image import tree_to_image
 
 LATEX_VALIGN_IS_BROKEN = True
 """Set to true to compensate for a bug in the latex writer.  I've
@@ -1467,9 +1469,9 @@ class UnindentDoctestVisitor(docutils.nodes.NodeVisitor):
 ######################################################################
 #{ HTML Output
 ######################################################################
-from epydoc.docwriter.html_colorize import PythonSourceColorizer
-import epydoc.docwriter.html_colorize
-epydoc.docwriter.html_colorize .PYSRC_EXPANDTO_JAVASCRIPT = ''
+# from epydoc.docwriter.html_colorize import PythonSourceColorizer
+# import epydoc.docwriter.html_colorize
+# epydoc.docwriter.html_colorize .PYSRC_EXPANDTO_JAVASCRIPT = ''
 
 class CustomizedHTMLWriter(HTMLWriter):
     settings_defaults = HTMLWriter.settings_defaults.copy()
@@ -1509,7 +1511,7 @@ class CustomizedHTMLTranslator(HTMLTranslator):
         # text = text.decode('latin1')
 
         # Colorize the contents of the doctest block.
-        colorizer = HTMLDoctestColorizer(self.encode, node['callouts'])
+        colorizer = DummyColorizer(self.encode, node['callouts'])
         if node.get('is_codeblock'):
             pysrc = colorizer.colorize_codeblock(text)
         else:
@@ -1586,7 +1588,7 @@ class CustomizedHTMLTranslator(HTMLTranslator):
         """Process text to prevent tokens from wrapping."""
         text = ''.join(('%s' % c) for c in node)
         #text = text.decode('latin1')
-        colorizer = HTMLDoctestColorizer(self.encode)
+        colorizer = DummyColorizer(self.encode)
         pysrc = colorizer.colorize_inline(text)#.strip()
         #pysrc = colorize_doctestblock(text, self._markup_pysrc, True)
         self.body+= [self.starttag(node, 'tt', '', CLASS='doctest'),
@@ -1791,192 +1793,6 @@ function copy_text_to_clipboard(data)
 '''
 
 ######################################################################
-#{ Docbook Output
-######################################################################
-
-from docbook import Writer as DocBookWriter, DocBookTranslator
-import docbook
-
-DOCBOOK_ROOT_NODE = "chapter"
-
-APPENDIX_TITLE_RE = re.compile("^Appendix: (.*)$")
-
-class CustomizedDocBookWriter(DocBookWriter):
-    def translate(self):
-        # what's the correct way to generate this??  why isn't it
-        # getting generated for us??
-        self.document.settings = docutils.frontend.Values(dict(
-            strict_visitor=True, language_code='en',
-            doctype=DOCBOOK_ROOT_NODE, output_encoding='utf-8',
-        ))
-        visitor = CustomizedDocBookTranslator(self.document)
-        self.document.walkabout(visitor)
-        self.output = visitor.astext()
-
-class CustomizedDocBookTranslator(DocBookTranslator):
-    def __init__(self, document):
-        DocBookTranslator.__init__(self, document)
-
-    def visit_compound(self, node):
-        # Does compound need to be handled at all?
-        warning('compound not handled yet')
-    def depart_compound(self, node):
-        pass
-
-    # the standard writer doesn't like node['ids'] = []
-    _next_id = 0
-    def visit_target(self, node):
-        if node.get('ids') == []:
-            node['ids'] = ['target-id-%d' % self._next_id]
-            self._next_id += 1
-        DocBookTranslator.visit_target(self, node)
-
-    # This is just a typo in the original (node.SkipNode should be
-    # nodes.SkipNode)
-    def visit_raw(self, node):
-        if 'format' in node and node['format'] == 'docbook':
-            self.body.append(node.astext())
-        raise docutils.nodes.SkipNode
-
-    def visit_inline(self, node):
-        if 'category' in node.get('classes', ()):
-            self.body.append('<emphasis role="smallcaps">')
-        else:
-            self.body.append("<emphasis>")
-    def depart_inline(self, node):
-        self.body.append("</emphasis>")
-
-    def visit_caption(self, node):
-        if isinstance(node.parent, pylisting):
-            self.body.append("<title>")
-        else:
-            DocBookTranslator.visit_caption(self, node)
-
-    def depart_caption(self, node):
-        if isinstance(node.parent, pylisting):
-            self.body.append("</title>\n")
-        else:
-            DocBookTranslator.depart_caption(self, node)
-
-    def visit_pylisting(self, node):
-        self.visit_figure(node)
-
-    def visit_pylisting(self, node):
-        atts = {}
-        if 'ids' in node.attributes and node.attributes['ids']:
-            atts['id'] = node.attributes['ids'][0]
-        try:
-            last_child = node.children[-1]
-            if isinstance(last_child, docutils.nodes.caption) and \
-                    last_child.children != []:
-                # Move the caption to the first element.
-                node.children = [last_child] + node.children[0:-1]
-        except IndexError:
-            pass
-
-        self.body.append(self.starttag(node, 'example', **atts))
-
-    def depart_pylisting(self, node):
-        self.body.append('</example>\n')
-
-    # idxterm nodes have no special formatting.
-    def visit_idxterm(self, node):
-        self.body.append('<emphasis role="strong">')
-
-    def depart_idxterm(self, node):
-        self.body.append("</emphasis>")
-
-    def visit_line(self, node):
-        pass
-    def depart_line(self, node):
-        self.body.append('\n')
-
-    def visit_example(self, node):
-
-        title_child_idx, title_child = \
-            docbook.child_of_instance(node, docbook.nodes.caption)
-
-        atts = {}
-
-        #        No need to deliver these ids through to docbook
-        #        if 'ids' in node.attributes and node.attributes['ids']:
-        #            atts['id'] = node.attributes['ids'][-1]
-
-        if "id" in node.attributes:
-            atts["id"] = node.attributes["id"]
-
-        # example with a title
-        if title_child and title_child.children != []:
-            self.stack_push(self.example_tag_stack, "example")
-            self.body.append(self.starttag(node, "example", **atts))
-            node.children = \
-                docbook.item_to_front(node.children, title_child_idx)
-
-        # linguistic examples (no title)
-        else:
-            if len(self.example_tag_stack) == 0:
-                self.stack_push(self.example_tag_stack, "example")
-                atts["role"] = "linguistic"
-                self.body.append(self.starttag(node, "example", **atts))
-                self.body.append("<title/>")
-            else:
-                self.stack_push(self.example_tag_stack, "orderedlist")
-                if self.body[-1] != "</listitem>":
-                    self.body.append('<orderedlist numeration="loweralpha">')
-                self.body.append(self.starttag(node, "listitem", **atts))
-
-    def depart_example(self, node):
-        example_tag = self.stack_pop(self.example_tag_stack)
-        if example_tag == "orderedlist":
-            self.body.append("</listitem>")
-        elif example_tag == "example":
-            if self.body[-1] == "</listitem>":
-                self.body.append("</orderedlist>")
-            self.body.append("</%s>\n" % example_tag)
-
-    def visit_image(self, node):
-        if isinstance(node.parent, example):
-            DocBookTranslator.visit_image(self, node, 'mediaobject')
-        else:
-            DocBookTranslator.visit_image(self, node)
-
-    def visit_callout_marker(self, node):
-        self.body.append('<xref linkend="%s"/>' % node['name'])
-
-    def depart_callout_marker(self, node):
-        pass
-
-    def visit_title(self, node):
-        # Remove the '^Appendix: ' string from titles within real
-        # appendixes.  The name of the title seems to be the second
-        # element in the node.
-        match = APPENDIX_TITLE_RE.match(docbook.node_to_str(node[-1]))
-        if match and DOCBOOK_ROOT_NODE == "appendix":
-            del node[1]
-            node.append(docutils.nodes.Text(match.group(1)))
-        DocBookTranslator.visit_title(self, node)
-
-    _not_handled = set()
-    def unknown_visit(self, node):
-        # print helpful warnings
-        typ = node.__class__.__name__
-        if typ not in self._not_handled:
-            warning('not handled: %s' % typ)
-            self._not_handled.add(typ)
-        self.body.append('<!-- unknown visit: %s -->' % node)
-
-        # display as literal
-        #self.body.append('\n\n'+self.starttag(node, 'programlisting'))
-        #self.body.append(
-        # docbook.node_to_str(node).replace('&', '&amp;').replace('<', '&lt;'))
-        #self.body.append('</programlisting>\n')
-        #self.body.append('<!-- unknown visit: %s -->' % node)
-        raise docutils.nodes.SkipNode
-    def unknown_departure(self, node):
-        self.body.append('<!-- unknown depart: %s -->' % node)
-        pass
-
-######################################################################
 #{ LaTeX Output
 ######################################################################
 
@@ -2069,7 +1885,7 @@ class CustomizedLaTeXTranslator(LaTeXTranslator):
         text = textwrap.dedent(text)
         text = strip_doctest_directives(text)
         text = text.decode('latin1')
-        colorizer = LaTeXDoctestColorizer(self.encode, wrap=False,
+        colorizer = DummyColorizer(self.encode, wrap=False,
                                           callouts=node['callouts'])
         self.literal = True
         if node.get('is_codeblock'):
@@ -2092,7 +1908,7 @@ class CustomizedLaTeXTranslator(LaTeXTranslator):
     def visit_literal(self, node):
         self.literal = True
         wrap = (not self.node_is_inside_title(node))
-        colorizer = LaTeXDoctestColorizer(self.encode, wrap)
+        colorizer = DummyColorizer(self.encode, wrap)
         pysrc = colorizer.colorize_inline(('%s' % node[0]))
         #pysrc = colorize_doctestblock(('%s' % node[0]), markup_func, True)
         self.literal = False
@@ -2276,63 +2092,19 @@ class CustomizedLaTeXTranslator(LaTeXTranslator):
 #{ Source Code Highlighting
 ######################################################################
 
-# [xx] Note: requires the very latest svn version of epydoc!
-from epydoc.markup.doctest import DoctestColorizer
+class DummyColorizer(object):
 
-class HTMLDoctestColorizer(DoctestColorizer):
-    PREFIX = '<pre class="doctest">\n'
-    SUFFIX = '</pre>\n'
-    def __init__(self, encode_func, callouts=None):
-        self.encode = encode_func
-        self.callouts = callouts
-    def markup(self, s, tag):
-        if tag == 'output':
-            s = re.sub(r'(?m)^[ \t]*<BLANKLINE>[ \t]*$', '', s)
-        if tag == 'other':
-            return self.encode(s)
-        elif (tag == 'comment' and self.callouts is not None and
-              CALLOUT_RE.match(s)):
-            callout_id = CALLOUT_RE.match(s).group(1)
-            callout_num = self.callouts[callout_id]
-            img = CALLOUT_IMG % (callout_num, callout_num)
-            return ('<a name="%s" /><a href="#ref-%s">%s</a>' %
-                    (callout_id, callout_id, img))
-        else:
-            return ('<span class="pysrc-%s">%s</span>' %
-                    (tag, self.encode(s)))
+    def __init__(self, *args, **kwargs):
+        pass
 
-class LaTeXDoctestColorizer(DoctestColorizer):
-    PREFIX = '\\begin{alltt}\\setlength{\\parindent}{4ex}\\hspace{\\parindent}\\scriptsize\\textbf{'
-    SUFFIX = '}\\end{alltt}\n'
-    def __init__(self, encode_func, wrap=False, callouts=None):
-        self.encode = encode_func
-        self.wrap = wrap
-        self.callouts = callouts
-    def _callout(self, m):
-        callout_id = m.group(1)
-        callout_num = self.callouts[callout_id]
-        return self.encode(chr(0x2460+int(callout_num)-1))
-    def markup(self, s, tag):
-        if tag == 'output':
-            s = re.sub(r'(?m)^[ \t]*<BLANKLINE>[ \t]*$', '', s)
-        if (tag == 'comment' and self.callouts is not None and
-                CALLOUT_RE.match(s)):
-            return self._callout(CALLOUT_RE.match(s))
+    def colorize_codeblock(self, text):
+        return text
 
-        if tag == 'output':
-            s = CALLOUT_RE.sub(self._callout, s)
+    def colorize_doctest(self, text):
+        return text
 
-        if self.wrap and '\255' not in s:
-            s = re.sub(r'(\W|\w\b)(?=.)', '\\1\255', s)
-            s = self.encode(s).replace('\255', '{\linebreak[0]}')
-        else:
-            if self.wrap: warning('Literal contains char \\255')
-            s = self.encode(s)
-
-        if tag == 'other':
-            return s
-        else:
-            return '\\pysrc%s{%s}' % (tag, s)
+    def colorize_inline(self, text):
+        return text
 
 
 # # Regular expressions for colorize_doctestblock
@@ -2699,9 +2471,6 @@ def main():
     elif options.action == 'latex':
         writer = CustomizedLaTeXWriter()
         output_ext = '.tex'
-    elif options.action == 'docbook':
-        writer = CustomizedDocBookWriter()
-        output_ext = '.xml'
     elif options.action == 'ref':
         writer = None
         global supress_warnings
@@ -2742,10 +2511,10 @@ def main():
                                        settings_overrides=settings)
         logger.end_progress()
 
+
 if __name__ == '__main__':
     try:
         main()
     except docutils.utils.SystemMessage as e:
         print('Fatal error encountered!', e)
-        raise
         sys.exit(-1)
