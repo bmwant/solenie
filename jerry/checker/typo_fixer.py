@@ -1,24 +1,21 @@
 import os
-import re
 from pathlib import Path
-from collections import defaultdict, Counter
+from collections import defaultdict
 
 import click
 from bs4 import BeautifulSoup
 from nltk.corpus import wordnet as wn
-from nltk.corpus import names, stopwords, words
+from nltk.corpus import stopwords, words
 
 import settings
 from summer.tokenizer import tokenize
-from jerry.nltk_rst import process_file_to_html
+from jerry.checker import checks
+from jerry.checker.checks import DoNotCheck
+from jerry.checker.nltk_rst import process_file_to_html
 
 
 BOOK_PATH = Path('/home/user/.pr/nltk_book/book')
 OUT_DIRECTORY = settings.DATA_DIR / 'nltk_book_html'
-COMMENT_REGEX = re.compile(r'^<---.+--->$')
-TIME_REGEX = re.compile(r'\d{2}:\d{2}:\d{2}')
-VARIABLE_REGEX = re.compile(r'[a-zA-Z]{1,2}\d{1,2}')
-
 
 
 def _convert_file(filepath: Path):
@@ -61,21 +58,8 @@ def get_text_from_html(path) -> str:
     [x.extract() for x in soup.find_all('script')]
     text = soup.get_text().split('\n')
     lines = [line for line in text if line.strip()]
-    output = '\n'.join(filter(lambda l: not _ignore_line(l), lines))
+    output = '\n'.join(filter(lambda l: not checks._is_prompt(l), lines))
     return output
-
-
-def _ignore_line(line):
-    if line.startswith('>>>'):
-        return True
-
-    if line.startswith('...'):
-        return True
-
-    if COMMENT_REGEX.match(line):
-        return True
-
-    return False
 
 
 def _check_word_wrapper():
@@ -96,104 +80,20 @@ def _check_word_wrapper():
 _check_word = _check_word_wrapper()
 
 
-def _is_punct(token):
-    # single quotes might be removed at this time, just for a confidence
-    return token in ['', '``', "''", '...']
-
-
-def _is_name_wrapper():
-    all_names = [name.lower() for name in names.words('male.txt')] + \
-                [name.lower() for name in names.words('female.txt')]
-
-    def is_name(token):
-        return token in all_names
-
-    return is_name
-
-_is_name = _is_name_wrapper()
-
-
-def _is_uri(token):
-    return token.startswith('//')
-
-
-def _is_time(token):
-    return TIME_REGEX.match(token)
-
-
-def _is_variable(token):
-    return VARIABLE_REGEX.match(token)
-
-
-def _is_digit(token):
-    return False
-
-
-def _is_one_letter(token):
-    return len(token) == 1
-
-
-def _is_aux(token):
-    # et
-    # al
-    # etc
-    # n't
-    return False
-
-
-def _is_code(token):
-    code_chars = ('_', '=', '.', '/', '\\')
-    code_keywords = (
-        'nltk',
-        'def',
-        'keyword',
-        'elif',
-        'endswith',
-        'zipf',
-        'dir',
-        'api',
-        'xml',
-        'cfd',
-        'cfdist',
-        'freqdist',
-        'latin1',
-        'fileids',
-        'abspath',
-        'howto',
-        'utf8',
-        'dict',
-        'iso',
-        'traceback',
-        'keyerror',
-        'indexerror',
-        'toolkit',
-        'tokenize',
-        'fileid',
-        'misc',
-    )
-    for char in code_chars:
-        if char in token:
-            return True
-
-    return token in code_keywords
-
-
-class DoNotCheck(ValueError):
-    """No need to check the word further"""
-
-
-def check_text(text):
-    unknown = Counter()
+def check_text(text, verbose=True):
+    unknown = defaultdict(list)
     stats = defaultdict(int)
     tokens = tokenize(text, language='english')
     testers = (
-        ('one_letter', _is_one_letter),
-        ('punctuation', _is_punct),
-        ('uri', _is_uri),
-        ('time', _is_time),
-        ('code', _is_code),
-        ('name', _is_name),
-        ('variable', _is_variable),
+        ('one_letter', checks._is_one_letter),
+        ('punctuation', checks._is_punct),
+        ('uri', checks._is_uri),
+        ('time', checks._is_time),
+        ('code', checks._is_code),
+        ('name', checks._is_name),
+        ('variable', checks._is_variable),
+        ('number',checks._is_number),
+        ('aux', checks._is_aux),
     )
     for index, token in enumerate(tokens):
         # because of default nltk tokenization
@@ -214,7 +114,15 @@ def check_text(text):
         for word in token.split('-'):
             if not _check_word(word):
                 stats['unknown'] += 1
-                print_unknown_context(token, index, tokens)
+                unknown[token].append(index)
+
+    if verbose:
+        for elem, idx in unknown.items():
+            if len(idx) > 2:
+                continue
+            for index in idx:
+                print_unknown_context(elem, index, tokens)
+
     return stats
 
 
@@ -239,9 +147,26 @@ def print_unknown_context(token, index, tokens):
         token_nn,
     ))
 
+
+def _check_raw_file(filepath):
+    with open(filepath) as f:
+        text = f.read()
+        click.secho(f'Unknown words in file {filepath.name}:', fg='yellow')
+        stats = check_text(text)
+        for key, value in stats.items():
+            print(f'{key} = {value}')
+
+
+def check_raw_files(path):
+    for item in sorted(path.glob('*.txt')):
+        _check_raw_file(item)
+
+
 if __name__ == '__main__':
+    # Step 1.
     # convert_to_html(BOOK_PATH)
+    # Step 2.
     # convert_to_raw_text(OUT_DIRECTORY)
-    txt_file = '/home/user/.pr/solenie/data/nltk_book_html/ch02_raw.txt'
-    with open(txt_file) as f:
-        print(check_text(f.read()))
+    # Step 3.
+    # check_raw_files(OUT_DIRECTORY)
+    _check_raw_file(OUT_DIRECTORY / 'ch03_raw.txt')

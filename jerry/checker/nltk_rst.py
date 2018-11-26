@@ -55,7 +55,7 @@ try: import PIL.Image
 except: pass
 
 # my custom copied libs
-from jerry.tree2image import tree_to_image
+from jerry.checker.tree2image import tree_to_image
 
 LATEX_VALIGN_IS_BROKEN = True
 """Set to true to compensate for a bug in the latex writer.  I've
