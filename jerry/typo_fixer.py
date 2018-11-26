@@ -1,10 +1,12 @@
 import os
 import re
 from pathlib import Path
-from collections import defaultdict
+from collections import defaultdict, Counter
 
+import click
 from bs4 import BeautifulSoup
 from nltk.corpus import wordnet as wn
+from nltk.corpus import names, stopwords, words
 
 import settings
 from summer.tokenizer import tokenize
@@ -14,6 +16,8 @@ from jerry.nltk_rst import process_file_to_html
 BOOK_PATH = Path('/home/user/.pr/nltk_book/book')
 OUT_DIRECTORY = settings.DATA_DIR / 'nltk_book_html'
 COMMENT_REGEX = re.compile(r'^<---.+--->$')
+TIME_REGEX = re.compile(r'\d{2}:\d{2}:\d{2}')
+VARIABLE_REGEX = re.compile(r'[a-zA-Z]{1,2}\d{1,2}')
 
 
 
@@ -74,52 +78,166 @@ def _ignore_line(line):
     return False
 
 
-def _check_word(word, lang='eng'):
-    # ignore stopwords once again
-    if wn.synsets(word):
-        return True
-    return False
+def _check_word_wrapper():
+    vocab = set(w.lower() for w in words.words())
+
+    def check_word(word, lang='eng'):
+        # ignore stopwords once again
+        if word in stopwords.words('english'):
+            return True
+        if wn.synsets(word):
+            return True
+        if word in vocab:
+            return True
+        return False
+
+    return check_word
+
+_check_word = _check_word_wrapper()
 
 
 def _is_punct(token):
-    return token in ['``', "''", '...', '']
+    # single quotes might be removed at this time, just for a confidence
+    return token in ['', '``', "''", '...']
 
 
-def _is_name(token):
-    return False
+def _is_name_wrapper():
+    all_names = [name.lower() for name in names.words('male.txt')] + \
+                [name.lower() for name in names.words('female.txt')]
+
+    def is_name(token):
+        return token in all_names
+
+    return is_name
+
+_is_name = _is_name_wrapper()
 
 
 def _is_uri(token):
-    return False
+    return token.startswith('//')
 
 
 def _is_time(token):
+    return TIME_REGEX.match(token)
+
+
+def _is_variable(token):
+    return VARIABLE_REGEX.match(token)
+
+
+def _is_digit(token):
+    return False
+
+
+def _is_one_letter(token):
+    return len(token) == 1
+
+
+def _is_aux(token):
+    # et
+    # al
+    # etc
+    # n't
     return False
 
 
 def _is_code(token):
-    return False
+    code_chars = ('_', '=', '.', '/', '\\')
+    code_keywords = (
+        'nltk',
+        'def',
+        'keyword',
+        'elif',
+        'endswith',
+        'zipf',
+        'dir',
+        'api',
+        'xml',
+        'cfd',
+        'cfdist',
+        'freqdist',
+        'latin1',
+        'fileids',
+        'abspath',
+        'howto',
+        'utf8',
+        'dict',
+        'iso',
+        'traceback',
+        'keyerror',
+        'indexerror',
+        'toolkit',
+        'tokenize',
+        'fileid',
+        'misc',
+    )
+    for char in code_chars:
+        if char in token:
+            return True
+
+    return token in code_keywords
+
+
+class DoNotCheck(ValueError):
+    """No need to check the word further"""
 
 
 def check_text(text):
+    unknown = Counter()
     stats = defaultdict(int)
     tokens = tokenize(text, language='english')
+    testers = (
+        ('one_letter', _is_one_letter),
+        ('punctuation', _is_punct),
+        ('uri', _is_uri),
+        ('time', _is_time),
+        ('code', _is_code),
+        ('name', _is_name),
+        ('variable', _is_variable),
+    )
     for index, token in enumerate(tokens):
-        if len(token) == 1:
-            stats['one_letter'] += 1
-            continue
-        if _is_punct(token):
-            stats['punctuation'] += 1
-            continue
+        # because of default nltk tokenization
         if token.startswith("'"):
             token = token[1:]
             stats['quoted'] += 1
         if token.endswith("'"):
             token = token[:-1]
-        if not _check_word(token):
-            print(token)
+
+        try:
+            for key, tester in testers:
+                if tester(token):
+                    stats[key] += 1
+                    raise DoNotCheck('Test passed')
+        except DoNotCheck:
+            continue
+
+        for word in token.split('-'):
+            if not _check_word(word):
+                stats['unknown'] += 1
+                print_unknown_context(token, index, tokens)
     return stats
 
+
+def print_unknown_context(token, index, tokens):
+    token_p, token_pp = '', ''
+    token_n, token_nn = '', ''
+    if index - 2 >= 0:
+        token_pp = tokens[index-2]
+    if index - 1 >= 0:
+        token_p = tokens[index-1]
+
+    if index + 1 < len(tokens):
+        token_n = tokens[index+1]
+    if index + 2 < len(tokens):
+        token_nn = tokens[index+2]
+
+    click.echo('{} {} {} {} {}'.format(
+        token_pp,
+        token_p,
+        click.style(token, fg='red', bold=True),
+        token_n,
+        token_nn,
+    ))
 
 if __name__ == '__main__':
     # convert_to_html(BOOK_PATH)
