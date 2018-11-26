@@ -1,13 +1,13 @@
 import os
 import re
 from pathlib import Path
+from collections import defaultdict
 
 from bs4 import BeautifulSoup
-
-from jerry.parser.base import BaseParser
-
+from nltk.corpus import wordnet as wn
 
 import settings
+from summer.tokenizer import tokenize
 from jerry.nltk_rst import process_file_to_html
 
 
@@ -74,6 +74,56 @@ def _ignore_line(line):
     return False
 
 
+def _check_word(word, lang='eng'):
+    # ignore stopwords once again
+    if wn.synsets(word):
+        return True
+    return False
+
+
+def _is_punct(token):
+    return token in ['``', "''", '...', '']
+
+
+def _is_name(token):
+    return False
+
+
+def _is_uri(token):
+    return False
+
+
+def _is_time(token):
+    return False
+
+
+def _is_code(token):
+    return False
+
+
+def check_text(text):
+    stats = defaultdict(int)
+    tokens = tokenize(text, language='english')
+    for index, token in enumerate(tokens):
+        if len(token) == 1:
+            stats['one_letter'] += 1
+            continue
+        if _is_punct(token):
+            stats['punctuation'] += 1
+            continue
+        if token.startswith("'"):
+            token = token[1:]
+            stats['quoted'] += 1
+        if token.endswith("'"):
+            token = token[:-1]
+        if not _check_word(token):
+            print(token)
+    return stats
+
+
 if __name__ == '__main__':
     # convert_to_html(BOOK_PATH)
-    convert_to_raw_text(OUT_DIRECTORY)
+    # convert_to_raw_text(OUT_DIRECTORY)
+    txt_file = '/home/user/.pr/solenie/data/nltk_book_html/ch02_raw.txt'
+    with open(txt_file) as f:
+        print(check_text(f.read()))
