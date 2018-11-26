@@ -216,3 +216,5 @@ log/
 *.data-*
 *.index
 *.meta
+pylisting/
+tree_images/
