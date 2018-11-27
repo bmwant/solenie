@@ -67,4 +67,6 @@ with tf.Session() as sess:
 print('Percent of successful episodes: {}%'.format(sum(r_list)/num_episodes))
 
 plt.plot(r_list)
+plt.show()
 plt.plot(j_list)
+plt.show()
