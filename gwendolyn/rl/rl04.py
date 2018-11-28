@@ -19,3 +19,22 @@ class ContextualBandit(object):
     def get_bandit(self):
         self.state = np.random.randint(0, len(self.bandits))
         return self.state
+
+    def pull_arm(self, action):
+        bandit = self.bandits[self.state, action]
+        result = np.random.randn(1)
+        if result > bandit:
+            return 1
+        return -1
+
+
+class Agent(object):
+    def __init__(self, lr, s_size, a_size):
+        self.state_in = tf.placeholder(shape=[1], dtype=tf.int32)
+        state_in_OH = slim.one_hot_encoding(self.state_in, s_size)
+        output = slim.fully_connected(
+            state_in_OH, a_size, biases_initializer=None,
+            activation_fn=tf.sigmoid,
+            weights_initializer=tf.ones_initializer())
+        self.output = tf.reshape(output, [-1])
+        self.chosen_action = tf.argmax(self.output, 0)
