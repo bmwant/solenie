@@ -13,6 +13,7 @@ class SnakeGame(object):
         self.gui = gui
         self.food = None
         self.scr = None
+        self.win = None
 
     def start(self):
         self.snake_init()
@@ -44,13 +45,13 @@ class SnakeGame(object):
         # curses.start_color()
         win = curses.newwin(self.board["width"] + 2, self.board["height"] + 2, 0, 0)
         curses.curs_set(0)
-        win.nodelay(1)
+        win.nodelay(1)  # non-blocking key press reading
         win.timeout(200)
         self.win = win
         self.render()
 
     def render(self):
-        self.win.clear()
+        self.win.erase()
         self.win.border(0)
         self.win.addstr(0, 2, 'Score: {}'.format(self.score))
         # an apple
@@ -61,8 +62,7 @@ class SnakeGame(object):
         for point in self.snake[1:]:
             self.win.addch(point[0], point[1], 'o')
 
-        # self.win.refresh()
-        self.win.getch()
+        self.win.refresh()
 
     def step(self, key):
         # 0 - UP
@@ -88,7 +88,6 @@ class SnakeGame(object):
         return self.generate_observations()
 
     def play(self):
-        # 258, 259
         moves = {
             'w': 0,
             'd': 1,
@@ -96,10 +95,16 @@ class SnakeGame(object):
             'a': 3,
         }
         while True:
-            key = self.scr.getkey()
-            move = moves.get(key)
+            try:
+                key = self.win.getkey()
+                move = moves.get(key)
+            except curses.error as e:
+                continue
+
             if move is not None:
                 self.step(move)
+            self.render()
+
 
     def create_new_point(self, key):
         new_point = [self.snake[0][0], self.snake[0][1]]
@@ -111,17 +116,7 @@ class SnakeGame(object):
             new_point[0] += 1
         elif key == 3:
             new_point[1] -= 1
-        self.scr.addstr(
-            0, 22,
-            'New point {}, {}'.format(new_point, self.snake[1]),
-            curses.A_REVERSE
-        )
-        for i, point in enumerate(self.snake):
-            self.scr.addstr(
-                i+2, 22,
-                '{}'.format(point),
-                curses.A_REVERSE
-            )
+
         # Do not allow direct step back
         if new_point != self.snake[1]:
             self.snake.insert(0, new_point)
@@ -150,7 +145,6 @@ class SnakeGame(object):
 
     def render_destroy(self):
         self.win.clear()
-        self.win.refresh()
         curses.endwin()
 
     def end_game(self):
