@@ -1,5 +1,5 @@
 # https://github.com/korolvs/snake_nn
-import time
+# workon solenie3.5
 import curses
 from random import randint
 
@@ -8,8 +8,10 @@ class SnakeGame(object):
     def __init__(self, board_width=20, board_height=20, gui=False):
         self.score = 0
         self.done = False
+        self.snake = []
         self.board = {'width': board_width, 'height': board_height}
         self.gui = gui
+        self.food = None
         self.scr = None
 
     def start(self):
@@ -22,8 +24,8 @@ class SnakeGame(object):
     def snake_init(self):
         x = randint(5, self.board["width"] - 5)
         y = randint(5, self.board["height"] - 5)
-        self.snake = []
-        vertical = randint(0,1) == 0
+        vertical = randint(0, 1) == 0
+        # Initial length is 3
         for i in range(3):
             point = [x + i, y] if vertical else [x, y + i]
             self.snake.insert(0, point)
@@ -37,6 +39,9 @@ class SnakeGame(object):
 
     def render_init(self):
         self.scr = curses.initscr()
+        curses.cbreak()
+        curses.noecho()
+        # curses.start_color()
         win = curses.newwin(self.board["width"] + 2, self.board["height"] + 2, 0, 0)
         curses.curs_set(0)
         win.nodelay(1)
@@ -47,13 +52,16 @@ class SnakeGame(object):
     def render(self):
         self.win.clear()
         self.win.border(0)
-        self.win.addstr(0, 2, 'Score : ' + str(self.score) + ' ')
-        self.win.addch(self.food[0], self.food[1], '🍎')
-        for i, point in enumerate(self.snake):
-            if i == 0:
-                self.win.addch(point[0], point[1], '🔸')
-            else:
-                self.win.addch(point[0], point[1], '🔹')
+        self.win.addstr(0, 2, 'Score: {}'.format(self.score))
+        # an apple
+        self.win.addch(self.food[0], self.food[1], '@')
+
+        head = self.snake[0]
+        self.win.addch(head[0], head[1], 'O', curses.A_BOLD)
+        for point in self.snake[1:]:
+            self.win.addch(point[0], point[1], 'o')
+
+        # self.win.refresh()
         self.win.getch()
 
     def step(self, key):
@@ -61,27 +69,37 @@ class SnakeGame(object):
         # 1 - RIGHT
         # 2 - DOWN
         # 3 - LEFT
+
+        # Move to chosen location
+        moved = self.create_new_point(key)
+        # Check if the move is valid
+        self.check_collisions()
+        # End game otherwise
         if self.done is True:
             self.end_game()
-        self.create_new_point(key)
+
         if self.food_eaten():
             self.score += 1
             self.generate_food()
-        else:
+        elif moved:
             self.remove_last_point()
-        self.check_collisions()
+
         if self.gui: self.render()
         return self.generate_observations()
 
     def play(self):
         # 258, 259
+        moves = {
+            'w': 0,
+            'd': 1,
+            's': 2,
+            'a': 3,
+        }
         while True:
-            key = self.scr.getch()
-            print(key)
-            if key == curses.KEY_UP:
-                print('going up')
-            elif key == curses.KEY_DOWN:
-                print('Going down')
+            key = self.scr.getkey()
+            move = moves.get(key)
+            if move is not None:
+                self.step(move)
 
     def create_new_point(self, key):
         new_point = [self.snake[0][0], self.snake[0][1]]
@@ -93,7 +111,23 @@ class SnakeGame(object):
             new_point[0] += 1
         elif key == 3:
             new_point[1] -= 1
-        self.snake.insert(0, new_point)
+        self.scr.addstr(
+            0, 22,
+            'New point {}, {}'.format(new_point, self.snake[1]),
+            curses.A_REVERSE
+        )
+        for i, point in enumerate(self.snake):
+            self.scr.addstr(
+                i+2, 22,
+                '{}'.format(point),
+                curses.A_REVERSE
+            )
+        # Do not allow direct step back
+        if new_point != self.snake[1]:
+            self.snake.insert(0, new_point)
+            return True
+
+        return False
 
     def remove_last_point(self):
         self.snake.pop()
@@ -105,8 +139,10 @@ class SnakeGame(object):
         if (self.snake[0][0] == 0 or
                 self.snake[0][0] == self.board["width"] + 1 or
                 self.snake[0][1] == 0 or
-                self.snake[0][1] == self.board["height"] + 1 or
-                self.snake[0] in self.snake[1:-1]):
+                self.snake[0][1] == self.board["height"] + 1):
+            self.done = True
+
+        if self.snake[0] in self.snake[1:-1]:
             self.done = True
 
     def generate_observations(self):
@@ -127,7 +163,4 @@ if __name__ == '__main__':
     game = SnakeGame(gui=True)
     game.start()
     game.play()
-    # for _ in range(20):
-    #     game.step(randint(0, 3))
-    # time.sleep(3)
     game.end_game()
