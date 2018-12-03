@@ -1,14 +1,20 @@
 import math
+import time
 import numpy as np
 from random import randint
 from statistics import mean
 from collections import Counter
+from functools import partial
 
 import tflearn
 from tflearn.layers.core import input_data, fully_connected
 from tflearn.layers.estimator import regression
 
 from snake_game import SnakeGame
+
+
+uprint = partial(print, flush=True)
+STEP_DELAY = 0.1  # seconds between moves when visualizing
 
 
 class SnakeNN(object):
@@ -34,6 +40,8 @@ class SnakeNN(object):
 
     def initial_population(self):
         training_data = []
+        print('Creating initial population out of %s games...' %
+              self.initial_games)
         for _ in range(self.initial_games):
             game = SnakeGame()
             _, prev_score, snake, food = game.start()
@@ -53,6 +61,7 @@ class SnakeNN(object):
                         training_data.append([self.add_action_to_observation(prev_observation, action), 0])
                     prev_observation = self.generate_observation(snake, food)
                     prev_food_distance = food_distance
+        print('Training data size: %s' % len(training_data))
         return training_data
 
     def generate_action(self, snake):
@@ -114,20 +123,28 @@ class SnakeNN(object):
         network = input_data(shape=[None, 5, 1], name='input')
         network = fully_connected(network, 25, activation='relu')
         network = fully_connected(network, 1, activation='linear')
-        network = regression(network, optimizer='adam', learning_rate=self.lr, loss='mean_square', name='target')
+        network = regression(
+            network,
+            optimizer='adam',
+            learning_rate=self.lr,
+            loss='mean_square',
+            name='target',
+        )
         model = tflearn.DNN(network, tensorboard_dir='log')
         return model
 
     def train_model(self, training_data, model):
+        print('Training model...')
         X = np.array([i[0] for i in training_data]).reshape(-1, 5, 1)
         y = np.array([i[1] for i in training_data]).reshape(-1, 1)
-        model.fit(X,y, n_epoch = 3, shuffle = True, run_id = self.filename)
+        model.fit(X, y, n_epoch=3, shuffle=True, run_id=self.filename)
         model.save(self.filename)
         return model
 
     def test_model(self, model):
         steps_arr = []
         scores_arr = []
+        print('Testing model on %s test games' % self.test_games)
         for _ in range(self.test_games):
             steps = 0
             game_memory = []
@@ -143,19 +160,20 @@ class SnakeNN(object):
                 done, score, snake, food  = game.step(game_action)
                 game_memory.append([prev_observation, action])
                 if done:
-                    print('-----')
-                    print(steps)
-                    print(snake)
-                    print(food)
-                    print(prev_observation)
-                    print(predictions)
+                    # print('-----')
+                    # print(steps)
+                    # print(snake)
+                    # print(food)
+                    # print(prev_observation)
+                    # print(predictions)
+                    uprint('.', end='')
                     break
                 else:
                     prev_observation = self.generate_observation(snake, food)
                     steps += 1
             steps_arr.append(steps)
             scores_arr.append(score)
-        print('Average steps:', mean(steps_arr))
+        print('\nAverage steps:', mean(steps_arr))
         print(Counter(steps_arr))
         print('Average score:', mean(scores_arr))
         print(Counter(scores_arr))
@@ -164,7 +182,7 @@ class SnakeNN(object):
         game = SnakeGame(gui=True)
         _, _, snake, food = game.start()
         prev_observation = self.generate_observation(snake, food)
-        for _ in range(self.goal_steps):
+        for step in range(self.goal_steps):
             precictions = []
             for action in range(-1, 2):
                 precictions.append(model.predict(self.add_action_to_observation(prev_observation, action).reshape(-1, 5, 1)))
@@ -175,12 +193,14 @@ class SnakeNN(object):
                 break
             else:
                 prev_observation = self.generate_observation(snake, food)
+            time.sleep(STEP_DELAY)
+        print('Total steps %s' % step)
 
     def train(self):
         training_data = self.initial_population()
         nn_model = self.model()
         nn_model = self.train_model(training_data, nn_model)
-        self.test_model(nn_model)
+        return nn_model
 
     def visualise(self):
         nn_model = self.model()
@@ -194,5 +214,12 @@ class SnakeNN(object):
 
 
 if __name__ == '__main__':
-    network = SnakeNN()
-    network.train()
+    network = SnakeNN(
+        initial_games=10000,
+        test_games=1000,
+        goal_steps=2000,
+    )
+    model = network.train()
+    # test model
+    # network.test_model(model)
+    network.visualise_game(model)
