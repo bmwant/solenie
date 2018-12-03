@@ -8,6 +8,7 @@ pip install tflearn
 # https://towardsdatascience.com/today-im-going-to-talk-about-a-small-practical-example-of-using-neural-networks-training-one-to-6b2cbd6efdb3
 # https://raw.githubusercontent.com/korolvs/snake_nn/master/nn_1.py
 import math
+import time
 from collections import Counter
 from statistics import mean
 from random import randint
@@ -17,7 +18,6 @@ import tflearn
 from tflearn.layers.core import input_data, fully_connected
 from tflearn.layers.estimator import regression
 from snake_game import SnakeGame
-# from . import snake_game
 
 
 class SnakeNN(object):
@@ -44,6 +44,8 @@ class SnakeNN(object):
 
     def initial_population(self):
         training_data = []
+        print('Creating initial population out of %s games...' %
+              self.initial_games)
         for _ in range(self.initial_games):
             game = SnakeGame()
             _, _, snake, _ = game.start()
@@ -57,7 +59,7 @@ class SnakeNN(object):
                 else:
                     training_data.append([self.add_action_to_observation(prev_observation, action), 1])
                     prev_observation = self.generate_observation(snake)
-        print(len(training_data))
+        print('Training data size: %s' % len(training_data))
         return training_data
 
     def generate_action(self, snake):
@@ -139,7 +141,7 @@ class SnakeNN(object):
         print(Counter(steps_arr))
 
     def visualise_game(self, model):
-        game = SnakeGame(gui = True)
+        game = SnakeGame(gui=True)
         _, _, snake, _ = game.start()
         prev_observation = self.generate_observation(snake)
         for _ in range(self.goal_steps):
@@ -153,6 +155,8 @@ class SnakeNN(object):
                 break
             else:
                 prev_observation = self.generate_observation(snake)
+            # delay between steps for better perception
+            time.sleep(0.2)
 
     def train(self):
         training_data = self.initial_population()
@@ -173,6 +177,9 @@ class SnakeNN(object):
 
 
 if __name__ == '__main__':
+    """
+    This network just making circles avoiding death
+    """
     network = SnakeNN()
     model = network.train()
     network.visualise(model)

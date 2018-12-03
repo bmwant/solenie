@@ -77,6 +77,7 @@ class SnakeGame(object):
         # End game otherwise
         if self.done is True:
             self.end_game()
+            return self.generate_observations()
 
         if self.food_eaten():
             self.score += 1
@@ -131,14 +132,18 @@ class SnakeGame(object):
         return self.snake[0] == self.food
 
     def check_collisions(self):
+        done = False
         if (self.snake[0][0] == 0 or
                 self.snake[0][0] == self.board["width"] + 1 or
                 self.snake[0][1] == 0 or
                 self.snake[0][1] == self.board["height"] + 1):
-            self.done = True
+            done = True
 
         if self.snake[0] in self.snake[1:-1]:
-            self.done = True
+            done = True
+
+        self.done = done
+        return done
 
     def generate_observations(self):
         return self.done, self.score, self.snake, self.food
@@ -150,11 +155,11 @@ class SnakeGame(object):
     def end_game(self):
         if self.gui:
             self.render_destroy()
-        raise Exception("Game over")
+        # raise Exception("Game over")
 
 
 if __name__ == '__main__':
     game = SnakeGame(gui=True)
     game.start()
-    game.play()
-    game.end_game()
+    # Play manually
+    # game.play()
