@@ -14,7 +14,7 @@ from snake_game import SnakeGame
 
 
 uprint = partial(print, flush=True)
-STEP_DELAY = 0.1  # seconds between moves when visualizing
+STEP_DELAY = 0.05  # seconds between moves when visualizing
 
 
 class SnakeNN(object):
@@ -223,3 +223,6 @@ if __name__ == '__main__':
     # test model
     # network.test_model(model)
     network.visualise_game(model)
+    # 3 hidden neurons; loss ~ 0.1740; steps
+    # 16 hidden neurons; loss ~ 0.0534; steps 94
+    # 25 hidden neurons; loss ~ 0.0560; steps 256
