@@ -1,6 +1,7 @@
 """
 Play some DOOM here
 https://gist.github.com/simoninithomas/7611db5d8a6f3edde269e18b97fa4d0c#file-deep-q-learning-with-doom-ipynb
+$ workon solenie3.6
 """
 import time
 import random
@@ -179,9 +180,7 @@ def test_environment():
 
 def preprocess_frame(frame):
     cropped_frame = frame[30:-10,30:-30]
-
     normalized_frame = cropped_frame/255.0
-
     preprocessed_frame = transform.resize(normalized_frame, [84,84])
     return preprocessed_frame
 
@@ -202,25 +201,33 @@ def stack_frames(stacked_frames, state, is_new_episode):
 
 
 
-def predict_action(explore_start, explore_stop, decay_rate, decay_step,
-                   state, possible_actions):
+def predict_action(
+    sess,
+    explore_start,
+    explore_stop,
+    decay_rate,
+    decay_step,
+    state,
+    possible_actions
+):
     exp_exp_tradeoff = np.random.rand()
 
-    explore_probability = explore_stop + (explore_start - explore_stop) * np.exp(-decay_rate*decay_step)
+    explore_probability = explore_stop + (explore_start - explore_stop) * \
+                          np.exp(-decay_rate*decay_step)
 
     if explore_probability > exp_exp_tradeoff:
         # make random action
         action = random.choice(possible_actions)
     else:
-        Qs = sess.run(DQNetwork.output,
-                      feed_dict={
-                          DQNetwork.inputs_: state.reshape((1, *state.shape))
-                      })
+        Qs = sess.run(
+            DQNetwork.output,
+            feed_dict={
+                DQNetwork.inputs_: state.reshape((1, *state.shape))
+            })
         choice = np.argmax(Qs)
         action = possible_actions[int(choice)]
 
     return action, explore_probability
-
 
 
 def train():
@@ -430,4 +437,5 @@ def main():
 
 
 if __name__ == '__main__':
-    test_environment()
+    # test_environment()
+    main()
