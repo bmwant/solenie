@@ -5,8 +5,7 @@ $ workon solenie
 import random
 
 from gwendolyn.gym.utils import (
-    run_game,
-    test_policy,
+    run_game_mc,
     create_environment,
     create_random_policy,
     create_state_action_dictionary,
@@ -22,6 +21,16 @@ def test_env(env):
         observation, reward, done, info = env.step(action)
 
 
+def test_policy(policy, env):
+    wins = 0
+    r = 100
+    for i in range(r):
+        w = run_game_mc(env, policy, display=False)[-1][-1]
+        if w == 1:
+            wins += 1
+    return wins / r
+
+
 def monte_carlo_e_soft(env, episodes=100, policy=None, epsilon=0.01):
     if not policy:
         policy = create_random_policy(env)
@@ -31,7 +40,7 @@ def monte_carlo_e_soft(env, episodes=100, policy=None, epsilon=0.01):
 
     for _ in range(episodes):
         G = 0  # cumulative reward
-        episode = run_game(env=env, policy=policy, display=False)
+        episode = run_game_mc(env=env, policy=policy, display=False)
         for i in reversed(range(len(episode))):
             s_t, a_t, r_t = episode[i]
             state_action = (s_t, a_t)
@@ -61,13 +70,9 @@ def monte_carlo_e_soft(env, episodes=100, policy=None, epsilon=0.01):
 
 def main():
     env = create_environment()
-    pol = create_random_policy(env)
-    print(pol)
-    Q = create_state_action_dictionary(env, pol)
-    print(Q)
     # test_env(env)
-    # policy = monte_carlo_e_soft(env, episodes=200)
-    # print(test_policy(policy, env))
+    policy = monte_carlo_e_soft(env, episodes=200)
+    print(test_policy(policy, env))
     # run_game(env, policy)
 
 
