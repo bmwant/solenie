@@ -411,7 +411,8 @@ def train(
                 print('model saved', save_path)
 
 
-def play(saver, stacked_frames):
+def play(dqn, stacked_frames):
+    saver = tf.train.Saver()
     with tf.Session() as sess:
         game, possible_actions = create_environment()
 
@@ -425,19 +426,21 @@ def play(saver, stacked_frames):
             while not game.is_episode_finished():
                 frame = game.get_state().screen_buffer
                 # is new episode?
-                state = stack_frames(stacked_frames, frame, True)
+                state, _ = stack_frames(stacked_frames, frame, True)
                 Qs = sess.run(
-                    DQNetwork.output,
+                    dqn.output,
                     feed_dict={
-                        DQNetwork.inputs_: state.reshape((1, *state.shape))
+                        dqn.inputs_: state.reshape((1, *state.shape))
                     })
                 action = np.argmax(Qs)
                 action = possible_actions[int(action)]
                 game.make_action(action)
+                time.sleep(0.01)
                 score = game.get_total_reward()
             print('Score: ', score)
             total_score += score
         print('TOTAL_SCORE', total_score/100.0)
+        time.sleep(2)
         game.close()
 
 
@@ -474,29 +477,32 @@ def main():
     dqn.model()
     memory = Memory(max_size=memory_size)
 
-    _, stacked_frames = pretrain(
-        game=game,
-        memory=memory,
-        pretrain_length=pretrain_length,
-        possible_actions=possible_actions,
-        stacked_frames=stacked_frames,
-    )
+    if training:
+        _, stacked_frames = pretrain(
+            game=game,
+            memory=memory,
+            pretrain_length=pretrain_length,
+            possible_actions=possible_actions,
+            stacked_frames=stacked_frames,
+        )
 
-    train(
-        game=game,
-        possible_actions=possible_actions,
-        dqn=dqn,
-        memory=memory,
-        stacked_frames=stacked_frames,
-        batch_size=batch_size,
-        max_steps=max_steps,
-        total_episodes=total_episodes,
-        explore_start=explore_start,
-        explore_stop=explore_stop,
-        decay_rate=decay_rate,
-        gamma=gamma,
-        training=training,
-    )
+        train(
+            game=game,
+            possible_actions=possible_actions,
+            dqn=dqn,
+            memory=memory,
+            stacked_frames=stacked_frames,
+            batch_size=batch_size,
+            max_steps=max_steps,
+            total_episodes=total_episodes,
+            explore_start=explore_start,
+            explore_stop=explore_stop,
+            decay_rate=decay_rate,
+            gamma=gamma,
+            training=training,
+        )
+    else:
+        play(dqn, stacked_frames)
 
 
 if __name__ == '__main__':

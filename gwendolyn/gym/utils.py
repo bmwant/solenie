@@ -2,6 +2,7 @@ import time
 import random
 
 import gym
+import numpy as np
 from IPython.display import clear_output
 from gym.envs.registration import register
 
@@ -70,6 +71,7 @@ def run_game(env, policy, display=True):
 
         timestep = [s]
         action = policy[s]
+        print('Playing action', action)
         state, reward, finished, info = env.step(action)
         timestep.append(action)
         timestep.append(reward)
@@ -86,8 +88,10 @@ def run_game(env, policy, display=True):
 def test_policy(policy, env):
     wins = 0
     r = 100
+    r = 1
     for i in range(r):
-        w = run_game(env, policy, display=False)[-1][-1]
+        print('Playing game #{}'.format(i+1))
+        w = run_game(env, policy, display=True)[-1][-1]
         if w == 1:
             wins += 1
     return wins / r
@@ -97,6 +101,17 @@ def argmax_Q(Q, s):
     Q_list = list(map(lambda x: x[1], Q[s].items()))
     indices = [i for i, x in enumerate(Q_list) if x == max(Q_list)]
     return random.choice(indices)
+
+
+def optimal_policy(Q):
+    """
+    Derive an optimal policy from optimal values by selecting the highest-
+    valued action in each state
+    """
+    policy = {}
+    for state in Q.keys():
+        policy[state] = np.argmax(Q[state])
+    return policy
 
 
 def greedy_policy(Q):
