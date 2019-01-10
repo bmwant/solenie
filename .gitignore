@@ -210,6 +210,7 @@ typings/
 # FuseBox cache
 .fusebox/
 
+.idea/
 gwendolyn/other/data/animals
 *.pkl
 log/
