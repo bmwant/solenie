@@ -1,5 +1,5 @@
 """
-https://bmwlog.pp.ua/post/count-your-probabilities-using-python
+https://bmwlog.pp.ua/post/generating-events-to-count-probabilities-with-python
 """
 import random
 
@@ -53,8 +53,54 @@ def ex1():
     plot(trial, line=expected)
 
 
+def f(n):
+    """Factorial"""
+    if n == 0 or n == 1:
+        return 1
+    return n*f(n-1)
+
+
+def C(n, k):
+    """Combinations"""
+    return f(n) / (f(k) * f(n-k))
+
+
+def P(n, p):
+    result = 0
+    for i in range(n):
+        result += C(n-1+i, i) * p**n * (1-p)**i
+    return result
+
+
 def ex2():
-    pass
+    win_probability = 0.6
+
+    def wingame():
+        return random.random() < win_probability
+
+    win_score = 4
+
+    def trial():
+        ascore = 0
+        bscore = 0
+        while True:
+            if wingame() is True:
+                ascore += 1
+            else:
+                bscore += 1
+            if ascore == win_score:
+                return True
+            if bscore == win_score:
+                return False
+
+    trials = [10**6]
+    for n in trials:
+        success = 0
+        for event in range(n):
+            if trial() is True:
+                success += 1
+        print(n, success, success/n * 100)
+
 
 def ex3():
     def winroll():
@@ -98,6 +144,8 @@ def ex4():
 
 
 if __name__ == '__main__':
-    ex1()
+    # ex1()
     # ex3()
     # ex4()
+    ex2()
+    print(P(4, 0.6))
