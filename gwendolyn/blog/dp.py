@@ -37,6 +37,8 @@ class X(object):
 
 
 def fill_memory(n, p):
+    global _memory
+    _memory = dict()
     _memory[(-n, -n)] = (0, X(0))
     _memory[(n, n)] = (1, X(0))
 
@@ -79,10 +81,10 @@ def resolve(n):
 
 
 def main():
-    N = 4
+    N = 2
     fill_memory(N, 0.6)
     p = resolve(N)
-    print(f'Probability for N={N} steps is {p*100:.4}%')
+    print(f'Probability for N={N} steps is {p*100:.5}%')
     # for key, value in _memory.items():
     #     print(key, '->', value)
 
