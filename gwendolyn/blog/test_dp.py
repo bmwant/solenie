@@ -21,6 +21,6 @@ def test_correct_values():
     )
     p = 0.6
     for i, (lower, upper) in enumerate(bounds, start=1):
-        fill_memory(i, p)
-        pn = resolve(i)
+        fill_memory(i)
+        pn = resolve(i, p)
         assert lower < pn*100 < upper

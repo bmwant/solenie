@@ -1,7 +1,7 @@
 import numbers
 
 
-_memory = {}
+_memory = []
 
 
 class X(object):
@@ -36,57 +36,47 @@ class X(object):
         return str(self)
 
 
-def fill_memory(n, p):
+def fill_memory(n):
     global _memory
-    _memory = dict()
-    _memory[(-n, -n)] = (0, X(0))
-    _memory[(n, n)] = (1, X(0))
-
-    for i in range(1-n, n):
-        _memory[(i, i-1)] = 1-p
-        _memory[(i, i+1)] = p
+    _memory = [(0, X(1))]*(2*n+1)
+    _memory[-n] = (0, X(0))
+    _memory[n] = (1, X(0))
 
 
-def resolve(n):
+def resolve(n, p):
+    q = 1-p
     for i in reversed(range(n)):
-        # resolve right to center
-        prob_next = _memory.get((i+1, i+1), (0, X(1)))
-        prob_prev = _memory.get((i-1, i-1), (0, X(1)))
-
-        # these values are pre-filled
-        coef0 = _memory[(i, i-1)]  # it's just a 1-p
-        coef1 = _memory[(i, i+1)]  # it's just a p
-
-        _memory[(i, i)] = (
-            coef0*prob_prev[0] + coef1*prob_next[0],
-            coef0*prob_prev[1] + coef1*prob_next[1],
+        # resolve from right to center
+        prob_next = _memory[i+1]
+        prob_prev = _memory[i-i]
+        _memory[i] = (
+            q*prob_prev[0] + p*prob_next[0],
+            q*prob_prev[1] + p*prob_next[1],
         )
 
-        # resolve left to center
-        prob_prev = _memory.get((-i-1, -i-1), (0, X(1)))
-        prob_next = _memory.get((-i+1, -i+1), (0, X(1)))
-        # using pre-filled values
-        coef0 = _memory[(-i, -i-1)]
-        coef1 = _memory[(-i, -i+1)]
-        _memory[(-i, -i)] = (
-            coef0*prob_prev[0] + coef1*prob_next[0],
-            coef0*prob_prev[1] + coef1*prob_next[1],
+        # resolve from left to center
+        prob_prev = _memory[-i-1]
+        prob_next = _memory[-i+1]
+        _memory[-i] = (
+            q*prob_prev[0] + p*prob_next[0],
+            q*prob_prev[1] + p*prob_next[1],
         )
 
     # calculate base probability
-    solution = _memory[(0, 0)]
+    solution = _memory[0]
     coef = (X(value=1) - solution[1]).value
-    p = solution[0] / coef
-    return p
+    p0 = solution[0] / coef
+    return p0
 
 
 def main():
-    N = 2
-    fill_memory(N, 0.6)
-    p = resolve(N)
-    print(f'Probability for N={N} steps is {p*100:.5}%')
-    # for key, value in _memory.items():
-    #     print(key, '->', value)
+    N = 4
+    p = 0.6
+    fill_memory(N)
+    p0 = resolve(N, p)
+    print(f'Probability for N={N} steps is {p0*100:.4}%')
+    for i in range(2*N+1):
+        print(i-N, '->', _memory[i-N])
 
 
 if __name__ == '__main__':
