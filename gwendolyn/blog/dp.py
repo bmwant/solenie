@@ -70,8 +70,8 @@ def resolve(n, p):
 
 
 def main():
-    N = 4
-    p = 0.6
+    N = 10
+    p = 0.1
     fill_memory(N)
     p0 = resolve(N, p)
     print(f'Probability for N={N} steps is {p0*100:.4}%')
