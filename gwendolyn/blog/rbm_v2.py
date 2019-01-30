@@ -126,3 +126,100 @@ class RBM(object):
         dbv = tf.div(dbv, self.FLAGS.batch_size)
 
         return dW, dbh, dbv
+
+    def optimize(self, v):
+        with tf.name_scope('optimization'):
+            v0, vk, ph0, phk, _ = self._gibbs_sampling(v)
+            dW, db_h, db_v = self._compute_gradients(v0, vk, ph0, phk)
+            update_op = self._update_parameter(dW, db_h, db_v)
+
+        with tf.name_scope('accuracy'):
+            mask = tf.where(tf.less(v0, 0.0), x=tf.zeros_like(v0), y=tf.ones_like(v0))
+            bool_mask = tf.cast(
+                tf.where(tf.less(v0, 0.0), x=tf.zeros_like(v0), y=tf.ones_like(v0)),
+                dtype=tf.bool,
+            )
+            acc = tf.where(bool_mask, x=tf.abs(tf.subtract(v0, vk)), y=tf.zeros_like(v0))
+            n_values = tf.reduce_sum(mask)
+            acc = tf.subtract(1.0, tf.div(tf.reduce_sum(acc), n_values))
+
+        return update_op, acc
+
+    def _update_parameter(self, dW, db_h, db_v):
+        alpha = self.FLAGS.learning_rate
+
+        update_op = [
+            tf.assign(self.W, alpha*tf.add(self.W, dW)),
+            tf.assign(self.bh, alpha*tf.add(self.bh, db_h)),
+            tf.assign(self.bv, alpha*tf.add(self.bv, db_v)),
+        ]
+
+        return update_op
+
+    def inference(self, v):
+        p_h_v = tf.nn.sigmoid(tf.nn.bias_add(tf.matmul(v, self.W), self.bh))
+        h_ = self._bernouille_sampling(p_h_v, shape=[1, int(p_h_v.shape[-1])])
+
+        p_v_h = tf.nn.sigmoid(tf.nn.bias_add(tf.matmul(h_, tf.transpose(self.W, [1, 0])), self.bv))
+        v_ = self._bernouille_sampling(p_v_h, shape=[1, int(p_v_h.shape[-1])])
+
+        return v_
+
+
+def main(_):
+    num_batches = int(FLAGS.num_samples/FLAGS.batch_size)
+
+    with tf.Graph().as_default():
+        train_data, train_data_infer = _get_training_data(FLAGS)
+        test_data = _get_test_data(FLAGS)
+
+        iter_train = train_data.make_initializable_iterator()
+        iter_train_infer = train_data_infer.make_initializable_iterator()
+        iter_test = test_data.make_initializable_iterator()
+
+        x_train = iter_train.get_next()
+        x_train_infer = iter_train_infer.get_next()
+        x_test = iter_test.get_next()
+
+        model = RBM(FLAGS)
+        update_op, accuracy = model.optimize(x_train)
+        v_infer = model.inference(x_train_infer)
+
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+
+            for epoch in range(FLAGS.num_epoch):
+                acc_train = 0
+                acc_infer = 0
+
+                sess.run(iter_train.initializer)
+
+                # training
+                for batch_nr in range(num_batches):
+                    _, acc = sess.run((update_op, accuracy))
+                    acc_train += acc
+
+                    if batch_nr > 0 and batch_nr % FLAGS.eval_after == 0:
+                        sess.run(iter_train_infer.initializer)
+                        sess.run(iter_test.initializer)
+
+                        num_valid_batches = 0
+
+                        for i in range(FLAGS.num_samples):
+                            v_target = sess.run(x_test)[0]
+
+                            if len(v_target[v_target>=0]) > 0:
+                                v_ = sess.run(v_infer)[0]
+                                acc = 1.0 - np.mean(np.abs(v_[v_target>=0]-v_target[v_target>=0]))
+                                acc_infer += acc
+                                num_valid_batches += 1
+                        print('epoch_nr: %i, batch: %i/%i, acc_train: %.3f, acc_test: %.3f' %
+                              (epoch, batch_nr, num_batches,
+                               (acc_train/FLAGS.eval_after), (acc_infer/num_valid_batches)))
+
+                        acc_train = 0
+                        acc_infer = 0
+
+
+if __name__ == '__main__':
+    main()
