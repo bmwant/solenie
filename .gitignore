@@ -219,3 +219,4 @@ log/
 *.meta
 pylisting/
 tree_images/
+data/

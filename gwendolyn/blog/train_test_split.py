@@ -1,8 +1,8 @@
 
-ROOT_DIR = 'C:/Users/Admin/Desktop/deep_learning _local_datasets/colaborative filtering/ml-1m/ratings.dat'
+ROOT_DIR = './data/ml-1m/ratings.dat'
 
-OUTPUT_DIR_TRAIN = 'C:/Users/Admin/Desktop/deep_learning _local_datasets/colaborative filtering/ml-1m/train.dat'
-OUTPUT_DIR_TEST = 'C:/Users/Admin/Desktop/deep_learning _local_datasets/colaborative filtering/ml-1m/test.dat'
+OUTPUT_DIR_TRAIN = './data/ml-1m/train.dat'
+OUTPUT_DIR_TEST = './data/ml-1m/test.dat'
 
 
 NUM_USERS = 6040
@@ -15,10 +15,9 @@ def _count_rating_per_user():
     rating_counter = 0
 
     with open(ROOT_DIR) as f:
-        for line in f.read():
+        for line in f:
             line = line.split('::')
             user_nr = int(line[0])
-
             if user_nr == user_counter:
                 rating_counter += 1
             else:
@@ -30,7 +29,7 @@ def _count_rating_per_user():
 
 
 def _train_test_split():
-
+    print('Splitting data...')
     user_rating = _count_rating_per_user()
     temp_user = 0
     test_counter = 0
@@ -39,7 +38,7 @@ def _train_test_split():
     test_writer = open(OUTPUT_DIR_TEST, 'w')
 
     with open(ROOT_DIR) as f:
-        for line in f.read():
+        for line in f:
             splitted_line = line.split('::')
             user_nr = int(splitted_line[0])
             try:
@@ -63,3 +62,11 @@ def _train_test_split():
             except KeyError:
                 print('Key not found')
                 continue
+
+    train_writer.close()
+    test_writer.close()
+    print('Done!')
+
+
+if __name__ == '__main__':
+    _train_test_split()
