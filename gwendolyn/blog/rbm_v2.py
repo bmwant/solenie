@@ -1,8 +1,12 @@
 """
 https://www.cs.toronto.edu/~rsalakhu/papers/rbmcf.pdf
 https://towardsdatascience.com/deep-learning-meets-physics-restricted-boltzmann-machines-part-ii-4b159dce1ffb
+python 3.6.5
+tensorflow==1.12.0
 """
 import tensorflow as tf
+
+import model_helper
 
 
 class RBM(object):
