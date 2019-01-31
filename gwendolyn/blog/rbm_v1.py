@@ -69,3 +69,37 @@ class RBM(object):
         self.vbias = vbias
         self.theano_rng = theano_rng
         self.params = [self.W, self.hbias, self.vbias]
+
+    def propup(self, vis):
+        pre_sigmoid_activation = T.dot(vis, self.W) + self.hbias
+        return [pre_sigmoid_activation, T.nnet.sigmoid(pre_sigmoid_activation)]
+
+    def sample_h_given_v(self, v0_sample):
+        pre_sigmoid_h1, h1_mean = self.propup(v0_sample)
+        h1_sample = self.theano_rng.binomial(
+            size=h1_mean.shape,
+            n=1,
+            p=h1_mean,
+            dtype=theano.config.floatX,
+        )
+        return [pre_sigmoid_h1, h1_mean, h1_sample]
+
+    def propdown(self, hid):
+        pre_sigmoid_activation = T.dot(hid, self.W.T) + self.vbias
+        return [pre_sigmoid_activation, T.nnet.sigmoid(pre_sigmoid_activation)]
+
+    def sample_v_given_h(self, h0_sample):
+        pre_sigmoid_v1, v1_mean = self.propdown(h0_sample)
+        v1_sample = self.theano_rng.binomial(
+            size=v1_mean.shape,
+            n=1,
+            p=v1_mean,
+            dtype=theano.config.floatX,
+        )
+        return [pre_sigmoid_v1, v1_mean, v1_sample]
+
+    def gibbs_hvh(self, h0_sample):
+        pre_sigmoid_v1, v1_mean, v1_sample = self.sample_v_given_h(h0_sample)
+        pre_sigmoid_h1, h1_mean, h1_sample = self.sample_h_given_v(v1_sample)
+        return [pre_sigmoid_v1, v1_mean, v1_sample,
+                pre_sigmoid_h1, h1_mean, h1_mean]
