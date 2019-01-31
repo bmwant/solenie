@@ -1,9 +1,11 @@
 """
+Adapted from https://github.com/artem-oppermann/Restricted-Boltzmann-Machine
 https://www.cs.toronto.edu/~rsalakhu/papers/rbmcf.pdf
 https://towardsdatascience.com/deep-learning-meets-physics-restricted-boltzmann-machines-part-ii-4b159dce1ffb
 python 3.6.5
 tensorflow==1.12.0
 """
+import numpy as np
 import tensorflow as tf
 
 import model_helper
@@ -12,8 +14,8 @@ import model_helper
 class RBM(object):
     def __init__(self, FLAGS):
         self.FLAGS = FLAGS
-        self.weight_initializer = model_helper._get_weight_init()
-        self.bias_initializer = model_helper._get_bias_init()
+        self.weight_initializer = model_helper.get_weight_init()
+        self.bias_initializer = model_helper.get_bias_init()
         self.init_parameter()
 
     def init_parameter(self):
@@ -63,10 +65,12 @@ class RBM(object):
 
     def _gibbs_sampling(self, v):
         def condition(i, vk, hk, v):
+            # k is tf.constant
             r = tf.less(i, k)
             return r[0]
 
         def body(i, vk, hk, v):
+            # hk is immediately redefined?
             _, hk = self._sample_h(vk)
             _, vk = self._sample_v(hk)
 
@@ -89,6 +93,7 @@ class RBM(object):
 
     def _compute_gradients(self, v0, vk, ph0, phk):
         def condition(i, v0, vk, ph0, phk, dW, db_h, db_v):
+            # k is tf.constant for a batch size
             r = tf.less(i, k)
             return r[0]
 
@@ -170,12 +175,75 @@ class RBM(object):
         return v_
 
 
+tf.app.flags.DEFINE_string(
+    'tf_records_train_path',
+    './data/ml-1m/train/',
+    'Path to the training data.'
+)
+
+tf.app.flags.DEFINE_string(
+    'tf_records_test_path',
+    './data/ml-1m/test/',
+    'Path to the test data.'
+)
+
+tf.app.flags.DEFINE_integer(
+    'batch_size',
+    32,
+    'Size of the training batch.'
+)
+
+tf.app.flags.DEFINE_integer(
+    'num_epoch',
+    20,  # instead of 1000
+    'Number of training epochs.'
+)
+
+tf.app.flags.DEFINE_float(
+    'learning_rate',
+    1.0,
+    'Learning_Rate',
+)
+
+tf.app.flags.DEFINE_integer(
+    'num_v',
+    3952,
+    'Number of visible neurons (Number of movies users rated)',
+)
+
+tf.app.flags.DEFINE_integer(
+    'num_h',
+    200,
+    'Number of hidden neurons.',
+)
+
+tf.app.flags.DEFINE_integer(
+    'num_samples',
+    6039,
+    'Number of training samples (Number of users who gave a rating)'
+)
+
+tf.app.flags.DEFINE_integer(
+    'k',
+    10,
+    'Number of iterations during Gibbs sampling'
+)
+
+tf.app.flags.DEFINE_integer(
+    'eval_after',
+    50,
+    'Evaluate model after number of iterations'
+)
+
+FLAGS = tf.app.flags.FLAGS
+
+
 def main(_):
     num_batches = int(FLAGS.num_samples/FLAGS.batch_size)
 
     with tf.Graph().as_default():
-        train_data, train_data_infer = _get_training_data(FLAGS)
-        test_data = _get_test_data(FLAGS)
+        train_data, train_data_infer = model_helper.get_training_data(FLAGS)
+        test_data = model_helper.get_test_data(FLAGS)
 
         iter_train = train_data.make_initializable_iterator()
         iter_train_infer = train_data_infer.make_initializable_iterator()
@@ -226,4 +294,9 @@ def main(_):
 
 
 if __name__ == '__main__':
-    main()
+    """
+    $ python train_test_split.py
+    $ python tf_record_writer.py
+    $ python rbm_v2.py
+    """
+    tf.app.run()
