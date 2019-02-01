@@ -4,11 +4,19 @@ python 3.6.5
 http://deeplearning.net/software/theano/install_ubuntu.html
 """
 import os
+import timeit
+
+try:
+    import PIL.Image as Image
+except ImportError:
+    import Image
 
 import numpy as np
 import theano
 import theano.tensor as T
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
+
+from model_helpers import tile_raster_images, load_data
 
 
 class RBM(object):
@@ -105,6 +113,12 @@ class RBM(object):
         return [pre_sigmoid_v1, v1_mean, v1_sample,
                 pre_sigmoid_h1, h1_mean, h1_mean]
 
+    def gibbs_vhv(self, v0_sample):
+        pre_sigmoid_h1, h1_mean, h1_sample = self.sample_h_given_v(v0_sample)
+        pre_sigmoid_v1, v1_mean, v1_sample = self.sample_v_given_h(h1_sample)
+        return [pre_sigmoid_h1, h1_mean, h1_sample,
+                pre_sigmoid_v1, v1_mean, v1_sample]
+
     def free_energy(self, v_sample):
         wx_b = T.dot(v_sample, self.W) + self.hbias
         vbias_term = T.dot(v_sample, self.vbias)
@@ -171,8 +185,60 @@ class RBM(object):
         updates[bit_i_idx] = (bit_i_idx + 1) % self.n_visible
         return cost
 
+    def get_reconstruction_cost(self, updates, pre_sigmoid_nv):
+        cross_entropy = T.mean(
+            T.sum(
+                self.input_layer * T.log(T.nnet.sigmoid(pre_sigmoid_nv)) +
+                (1 - self.input_layer) * T.log(1 - T.nnet.sigmoid(pre_sigmoid_nv)),
+                axis=1,
+            )
+        )
+        return cross_entropy
 
-def train_rmb():
+
+def test_rbm(
+        learning_rate=0.1,
+        training_epochs=15,
+        dataset='mnist.pkl.gz',
+        batch_size=20,
+        n_chains=20,
+        n_samples=10,
+        output_folder='rbm_plots',
+        n_hidden=500,
+):
+    datasets = load_data(dataset)
+    train_set_x, train_set_y = datasets[0]
+    test_set_x, test_set_y = datasets[2]
+
+    n_train_batches = train_set_x.get(borrow=True).shape[0]
+
+    index = T.lscalar()
+    x = T.matrix('x')
+
+    rng = np.random.RandomState(123)
+    theano_rng = RandomStreams(rng.rangint(2**30))
+    persistent_chain = theano.shared(
+        np.zeros((batch_size, n_hidden), dtype=theano.config.floatX),
+        borrow=True
+    )
+
+    rbm = RBM(
+        input_layer=x,
+        n_visible=28*28,
+        n_hidden=n_hidden,
+        numpy_rng=rng,
+        theano_rng=theano_rng,
+    )
+    cost, updates = rbm.get_cost_updates(
+        lr=learning_rate,
+        persistent=persistent_chain,
+        k=15,
+    )
+
+    if not os.path.isdir(output_folder):
+        os.makedirs(output_folder)
+    os.chdir(output_folder)
+
     train_rbm = theano.function(
         [index],
         cost,
@@ -211,7 +277,7 @@ def train_rmb():
     pretraining_time = (end_time - start_time) - plotting_time
     print('Training took %f minutes' % (pretraining_time / 60.))
 
-
+    # Sampling from the RBM
     number_of_test_samples = test_set_x.get_value(borrow=True).shape[0]
 
     test_idx = rng.randint(number_of_test_samples - n_chains)
@@ -221,7 +287,6 @@ def train_rmb():
             dtype=theano.config.floatX,
         )
     )
-
 
     plot_every = 1000
     (
@@ -271,3 +336,5 @@ def train_rmb():
     image.save('samples.png')
 
 
+if __name__ == '__main__':
+    test_rbm()
