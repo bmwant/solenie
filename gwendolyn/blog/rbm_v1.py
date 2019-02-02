@@ -1,7 +1,9 @@
 """
 Adapted from http://deeplearning.net/tutorial/rbm.html
-python 3.6.5
 http://deeplearning.net/software/theano/install_ubuntu.html
+python 3.6.5
+Theano==1.0.4
+Pillow==5.4.1
 """
 import os
 import timeit
@@ -16,7 +18,12 @@ import theano
 import theano.tensor as T
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 
-from model_helpers import tile_raster_images, load_data
+from model_helper import tile_raster_images, load_data
+
+
+# For debug purposes
+theano.config.optimizer = 'None'
+theano.config.exception_verbosity = 'high'
 
 
 class RBM(object):
@@ -43,7 +50,9 @@ class RBM(object):
         if W is None:
             initial_W = np.asarray(
                 numpy_rng.uniform(
-
+                    low=-4 * np.sqrt(6. / (n_hidden + n_visible)),
+                    high=4 * np.sqrt(6. / (n_hidden + n_visible)),
+                    size=(n_visible, n_hidden),
                 ),
                 dtype=theano.config.floatX
             )
@@ -210,13 +219,13 @@ def test_rbm(
     train_set_x, train_set_y = datasets[0]
     test_set_x, test_set_y = datasets[2]
 
-    n_train_batches = train_set_x.get(borrow=True).shape[0]
+    n_train_batches = train_set_x.get_value(borrow=True).shape[0]
 
     index = T.lscalar()
     x = T.matrix('x')
 
     rng = np.random.RandomState(123)
-    theano_rng = RandomStreams(rng.rangint(2**30))
+    theano_rng = RandomStreams(rng.randint(2**30))
     persistent_chain = theano.shared(
         np.zeros((batch_size, n_hidden), dtype=theano.config.floatX),
         borrow=True

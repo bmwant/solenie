@@ -2,7 +2,10 @@ import os
 import gzip
 import pickle
 import numpy as np
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    print('Assuming Theano uses this module')
 
 
 def get_bias_init():
@@ -69,7 +72,6 @@ def load_data(dataset):
     if data_dir == '' and not os.path.isfile(dataset):
         new_path = os.path.join(
             os.path.split(__file__)[0],
-            '..',
             'data',
             dataset
         )
