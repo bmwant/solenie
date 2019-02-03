@@ -1,4 +1,5 @@
 """
+https://rubikscode.net/2018/10/01/introduction-to-restricted-boltzmann-machines/
 Adapted from https://rubikscode.net/2018/10/22/implementing-restricted-boltzmann-machine-with-python-and-tensorflow/
 python 3.5.6
 tensorflow==1.12.0
