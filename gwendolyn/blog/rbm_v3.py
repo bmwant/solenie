@@ -12,7 +12,7 @@ class RBM(object):
         self.weights = np.asarray(
             np_rng.uniform(
                 low=-0.1 * np.sqrt(6. / (num_hidden + num_visible)),
-                hight=0.1 * np.sqrt(6. / (num_hidden + num_visible)),
+                high=0.1 * np.sqrt(6. / (num_hidden + num_visible)),
                 size=(num_visible, num_hidden)
             )
         )
@@ -107,11 +107,16 @@ class RBM(object):
 
 if __name__ == '__main__':
     r = RBM(num_visible=6, num_hidden=2)
-    training_data = np.array(
+    training_data = np.array([
+        [1, 1, 1, 0, 0, 0],
+        [1, 0, 1, 0, 0, 0],
+        [1, 1, 1, 0, 0, 0],
+        [0, 0, 1, 1, 1, 0],
+        [0, 0, 1, 1, 0, 0],
+        [0, 0, 1, 1, 1, 0],
+    ])
 
-    )
-
-    r.train(training_data, max_epochs=500)
+    r.train(training_data, max_epochs=1000)
     print(r.weights)
-    user = np.array([0, 0, 0, 1, 1, 0])
+    user = np.array([[0, 0, 0, 1, 1, 0]])
     print(r.run_visible(user))
