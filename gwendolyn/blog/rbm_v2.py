@@ -2,7 +2,7 @@
 Adapted from https://github.com/artem-oppermann/Restricted-Boltzmann-Machine
 https://www.cs.toronto.edu/~rsalakhu/papers/rbmcf.pdf
 https://towardsdatascience.com/deep-learning-meets-physics-restricted-boltzmann-machines-part-ii-4b159dce1ffb
-python 3.6.5
+python 3.5.6
 tensorflow==1.12.0
 """
 import numpy as np
