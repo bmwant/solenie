@@ -13,7 +13,7 @@ yarl==1.2.6
 html5lib==1.0.1
 coloredlogs==10.0
 pytest==3.8.2
-PyYAML==3.13
+PyYAML==5.4
 matplotlib==3.0.0
 wordcloud==1.5.0
 nltk==3.3
