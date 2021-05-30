@@ -8,7 +8,7 @@ idna==2.7
 multidict==4.4.2
 requests==2.19.1
 tinydb==3.11.1
-urllib3==1.23
+urllib3==1.24.2
 yarl==1.2.6
 html5lib==1.0.1
 coloredlogs==10.0
