@@ -21,6 +21,8 @@ TOP_500_MOVIE_REVIEWS = DATA_DIR / 'top500moviesreviews.json'
 # DEVELOPING
 DEBUG = False
 
+# API
+KUNA_API_BASE = 'https://api.kuna.io'
 # API KEYS
 KUNA_API_KEY = ''
 KUNA_SECRET_KEY = ''

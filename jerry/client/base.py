@@ -3,8 +3,6 @@ import time
 import platform
 from abc import ABC, abstractmethod
 
-from trader.logger import logger
-
 
 class BaseClient(ABC):
     def __init__(self, name):

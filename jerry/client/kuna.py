@@ -7,14 +7,27 @@ from urllib.parse import urljoin
 
 import requests
 
-from trader import config
-from trader.logger import logger
-from trader.client.base import BaseClient
+import settings
+from buttworld.logger import get_logger
+from jerry.client.base import BaseClient
+
+
+logger = get_logger(__name__)
 
 
 class KunaClient(BaseClient):
-    def __init__(self):
+    def __init__(self, api_key: str, secret_key: str):
         super().__init__(name='KunaClient')
+        self._api_key = api_key
+        self._secret_key = secret_key
+
+    @property
+    def api_key(self):
+        return self._api_key
+
+    @property
+    def secret_key(self):
+        return self._secret_key
 
     def get_tickers(self, symbols):
         """
@@ -32,7 +45,7 @@ class KunaClient(BaseClient):
             1190000.0  # 24h min price
         ]]
         """
-        url = urljoin(config.KUNA_API_BASE, f'/v3/tickers?symbols={symbols}')
+        url = urljoin(settings.KUNA_API_BASE, f'/v3/tickers?symbols={symbols}')
         r = requests.get(url)
         return r.json()
 
@@ -40,14 +53,14 @@ class KunaClient(BaseClient):
         """
         [[1278215.0, -0.004554, 1], [1278225.0, -0.002557, 1], [1283674.0, -0.01281, 1]
         """
-        url = urljoin(config.KUNA_API_BASE, f'/v3/book/{symbol}')
+        url = urljoin(settings.KUNA_API_BASE, f'/v3/book/{symbol}')
         r = requests.get(url)
         data = r.json()
         ask = list(filter(lambda x: x[1] < 0, data))
         return ask
 
     def get_bid(self, symbol):
-        url = urljoin(config.KUNA_API_BASE, f'/v3/book/{symbol}')
+        url = urljoin(settings.KUNA_API_BASE, f'/v3/book/{symbol}')
         r = requests.get(url)
         data = r.json()
         bid = list(filter(lambda x: x[1] > 0, data))
@@ -92,17 +105,17 @@ class KunaClient(BaseClient):
         body = json.dumps(data, separators=(',', ':'))
         signature_string = f'{api_path}{nonce}{body}'
         signature = hmac.new(
-            config.KUNA_SECRET_KEY.encode(),
+            self.secret_key.encode(),
             signature_string.encode(),
             hashlib.sha384
         ).hexdigest()
         headers = {
             'accept': 'application/json',
             'kun-nonce': str(nonce),
-            'kun-apikey': config.KUNA_API_KEY,
+            'kun-apikey': self.api_key,
             'kun-signature': signature
         }
 
-        url = urljoin(config.KUNA_API_BASE, api_path)
+        url = urljoin(settings.KUNA_API_BASE, api_path)
         r = requests.post(url, headers=headers, data=body)
         return r.json()
