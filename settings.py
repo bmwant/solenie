@@ -21,6 +21,11 @@ TOP_500_MOVIE_REVIEWS = DATA_DIR / 'top500moviesreviews.json'
 # DEVELOPING
 DEBUG = False
 
+# API KEYS
+KUNA_API_KEY = ''
+KUNA_SECRET_KEY = ''
+
+
 # Override values from settings_local.py
 try:
     import settings_local
